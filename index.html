@@ -6,7 +6,9 @@
 <title>CJM Legacy Rabbitry — Barn Board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Public+Sans:wght@400;500;600&family=Jost:wght@500;600&family=JetBrains+Mono:wght@500&family=Pinyon+Script&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="pdf-lib.min.js"></script>
+<script src="pdf.min.js"></script>
 <style>
   :root{
     --navy:#142440; --navy-deep:#0c1830;
@@ -119,6 +121,11 @@
   .sheet-actions .btn{flex:1;}
   .close-x{ position:absolute; top:6px; right:6px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:none; border:none; font-size:22px; color:var(--ink); opacity:.5; cursor:pointer; line-height:1; }
   .toast{ position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--navy); color:var(--page); padding:10px 18px; border-radius:20px; font-size:13px; z-index:50; opacity:0; transition:opacity .25s; pointer-events:none; max-width:88%; text-align:center; font-family:'Jost',sans-serif; }
+  .save-error-banner{ display:none; position:fixed; top:0; left:0; right:0; z-index:70; background:var(--rust); color:#fff; padding:12px 16px; font-family:'Public Sans',sans-serif; font-size:13.5px; line-height:1.4; box-shadow:0 2px 10px rgba(0,0,0,.25); }
+  .save-error-banner.on{ display:flex; align-items:flex-start; gap:10px; }
+  .save-error-banner .seb-text{ flex:1; }
+  .save-error-banner .seb-text b{ display:block; margin-bottom:2px; }
+  .save-error-banner button{ flex:0 0 auto; background:rgba(255,255,255,.18); border:none; color:#fff; border-radius:6px; padding:6px 10px; font-family:'Jost',sans-serif; font-weight:600; font-size:12px; cursor:pointer; }
   [data-theme="dark"] .toast{background:var(--gold-deep); color:#0c1830;}
   .toast.on{opacity:1;}
 
@@ -184,7 +191,6 @@
   .pp-portrait.pp-simple .pp-simple-box-name{ font-size:11px; }
   .pp-portrait.pp-simple .pp-simple-box-color{ font-size:8.8px; }
   .pp-portrait.pp-simple .pp-pill{ font-size:7.6px; }
-
   @media print{
     /* display:none (not visibility:hidden) so the rest of the app
        contributes zero layout height during print — otherwise the
@@ -252,11 +258,35 @@
   .cal-row-text{ font-size:13.5px; color:var(--ink); line-height:1.4; }
   .cal-row-text b{color:var(--navy);}
 
+  /* Authentication */
+  body.auth-locked > *:not(#authScreen){ visibility:hidden !important; }
+  #authScreen{ position:fixed; inset:0; z-index:200; background:var(--page); display:flex; align-items:center; justify-content:center; padding:24px; overflow:auto; }
+  #authScreen.hidden{ display:none; }
+  .auth-card{ width:min(430px,100%); background:var(--card); border:1px solid var(--line); border-radius:18px; padding:28px 22px 24px; box-shadow:0 12px 40px rgba(12,24,48,.10); }
+  .auth-brand{ text-align:center; margin-bottom:24px; }
+  .auth-eyebrow{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em; color:var(--gold-deep); margin-bottom:5px; }
+  .auth-brand h2{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:34px; color:var(--navy); margin:0; }
+  .auth-brand p{ font-family:'Jost',sans-serif; font-size:12px; color:var(--ink-soft); margin:4px 0 0; }
+  .auth-tabs{ display:flex; gap:4px; margin-bottom:18px; padding:4px; background:var(--line); border-radius:9px; }
+  .auth-tab{ flex:1; border:0; background:transparent; color:var(--ink-soft); border-radius:7px; padding:10px; font-family:'Jost',sans-serif; font-weight:600; cursor:pointer; }
+  .auth-tab.on{ background:var(--card); color:var(--navy); box-shadow:0 1px 4px rgba(12,24,48,.08); }
+  .auth-field{ margin-bottom:12px; }
+  .auth-field label{ display:block; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; margin-bottom:5px; color:var(--ink); }
+  .auth-field input{ width:100%; padding:12px; border-radius:8px; border:1px solid var(--line-strong); font-size:16px; background:var(--card); color:var(--ink); font-family:'Public Sans',sans-serif; }
+  .auth-submit{ width:100%; margin-top:4px; }
+  .auth-message{ min-height:20px; margin:10px 0 0; font-size:12.5px; line-height:1.4; text-align:center; color:var(--rust); }
+  .auth-message.ok{ color:var(--marsh); }
+  .auth-forgot{ display:block; border:0; background:none; margin:12px auto 0; color:var(--ink-soft); text-decoration:underline; font-family:'Public Sans',sans-serif; font-size:12px; cursor:pointer; }
+  .auth-user{ font-size:11px; color:var(--navbar-dim); max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-right:8px; }
+
   /* ============================================================
      DESKTOP / IPAD-LANDSCAPE LAYOUT (900px and up)
      Placed last in the stylesheet so it reliably overrides every
      base rule above regardless of selector order. Phones and
      portrait iPad stay on the mobile layout defined earlier.
+     Scoped to "screen" so it never applies while printing (the
+     printed pedigree page is wider than 900px in CSS pixels and
+     would otherwise pick up these rules too).
      ============================================================ */
   @media screen and (min-width:900px){
     body{ padding-bottom:0; }
@@ -306,7 +336,38 @@
 </style>
 <style id="pp-page-size">@page{ size: landscape; margin: 0.15in; }</style>
 </head>
-<body>
+<body class="auth-locked">
+
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-eyebrow">CJM LEGACY RABBITRY</div>
+      <h2>Barn Board</h2>
+      <p>Rabbitry management, wherever you are.</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab on" id="authLoginTab" type="button">Sign in</button>
+      <button class="auth-tab" id="authSignupTab" type="button">Create account</button>
+    </div>
+    <form id="authForm">
+      <div class="auth-field">
+        <label for="authEmail">Email</label>
+        <input id="authEmail" type="email" autocomplete="email" required>
+      </div>
+      <div class="auth-field">
+        <label for="authPassword">Password</label>
+        <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required>
+      </div>
+      <div class="auth-field" id="authConfirmWrap" style="display:none;">
+        <label for="authConfirm">Confirm password</label>
+        <input id="authConfirm" type="password" autocomplete="new-password" minlength="6">
+      </div>
+      <button class="btn btn-primary auth-submit" id="authSubmit" type="submit">Sign in</button>
+      <button class="auth-forgot" id="authForgot" type="button">Forgot password?</button>
+      <div class="auth-message" id="authMessage"></div>
+    </form>
+  </div>
+</div>
 
 <header class="top">
   <div>
@@ -333,19 +394,66 @@
 
 <div class="sheet-backdrop" id="sheetBackdrop"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
+<div class="save-error-banner" id="saveErrorBanner"></div>
 <div id="printPedigree"></div>
 <div class="profile-view" id="profileView"></div>
 <div class="photo-viewer" id="photoViewer"></div>
 <input type="file" id="photoFileInput" accept="image/*" style="display:none;">
 <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none;">
+<input type="file" id="pedigreePdfFileInput" accept=".pdf,application/pdf" style="display:none;">
 
 <script>
-if(!window.storage){
+if (window.pdfjsLib) { pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js'; }
+const SUPABASE_URL = 'https://xzsclktdryieozfvtqkv.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_pSzehmsrfUstMmwI4zjX-w_4SsNkvdI';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+let currentUser = null;
+let cloudDataCache = {};
+let cloudDataReady = false;
+
+// Keep a read-only path to the old browser storage so the first login can
+// migrate an existing Barn Board from this device into the cloud.
+const legacyStorage = {
+  get: async (key)=>{ const v=localStorage.getItem('cjm_'+key); if(v===null) throw new Error('not found'); return {value:v}; },
+  set: async (key,val)=>{ localStorage.setItem('cjm_'+key,val); return {ok:true}; }
+};
+
+async function initCloudStorage(user){
+  currentUser = user;
+  const {data:row,error} = await sb.from('barn_data').select('data').eq('user_id',user.id).maybeSingle();
+  if(error) throw error;
+  if(row && row.data){
+    cloudDataCache = row.data || {};
+  } else {
+    cloudDataCache = {};
+    // Migrate existing local data on this device when available.
+    const legacyKeys = [RABBITS_KEY, PLANNED_KEY, EVENTS_KEY, THEME_KEY];
+    for(const key of legacyKeys){
+      try{ cloudDataCache[key] = JSON.parse((await legacyStorage.get(key)).value); }catch(e){
+        try{ cloudDataCache[key] = (await legacyStorage.get(key)).value; }catch(ignore){}
+      }
+    }
+  }
+  cloudDataReady = true;
   window.storage = {
-    get: async (key)=>{ const v=localStorage.getItem('cjm_'+key); if(v===null) throw new Error('not found'); return {value:v}; },
-    set: async (key,val)=>{ localStorage.setItem('cjm_'+key, val); return {ok:true}; }
+    get: async (key)=>{
+      if(!cloudDataReady) throw new Error('Cloud storage is not ready');
+      if(!(key in cloudDataCache)) throw new Error('not found');
+      const v=cloudDataCache[key];
+      return {value:typeof v==='string'?v:JSON.stringify(v)};
+    },
+    set: async (key,val)=>{
+      if(!cloudDataReady || !currentUser) throw new Error('Not signed in');
+      let parsed;
+      try{ parsed=JSON.parse(val); }catch(e){ parsed=val; }
+      cloudDataCache[key]=parsed;
+      const {error}=await sb.from('barn_data').upsert({user_id:currentUser.id,data:cloudDataCache},{onConflict:'user_id'});
+      if(error) throw error;
+      return {ok:true};
+    }
   };
 }
+
 const RABBITS_KEY = 'rabbits_v2';
 const PLANNED_KEY = 'planned_v1';
 const EVENTS_KEY = 'events_v1';
@@ -544,7 +652,26 @@ async function loadData(){
   try{ const t=(await window.storage.get(THEME_KEY,false)).value; if(t==='dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){}
   render();
 }
-async function saveData(){ try{ await window.storage.set(RABBITS_KEY, JSON.stringify(rabbits), false); }catch(e){ console.error(e); showToast("Couldn't save — device storage may be full. Try removing some photos."); } }
+async function saveData(){
+  try{
+    await window.storage.set(RABBITS_KEY, JSON.stringify(rabbits), false);
+    hideSaveError();
+    return true;
+  }catch(e){
+    console.error(e);
+    showSaveError("Your last change didn't save. This usually means a connection hiccup or a temporary issue reaching your Barn Board account — check your internet connection and try again. Nothing new will save until this is resolved.");
+    return false;
+  }
+}
+function showSaveError(message){
+  const el = document.getElementById('saveErrorBanner');
+  el.innerHTML = `<div class="seb-text"><b>Not saved</b>${esc(message)}</div><button id="sebDismiss">Dismiss</button>`;
+  el.classList.add('on');
+  document.getElementById('sebDismiss').onclick = hideSaveError;
+}
+function hideSaveError(){
+  document.getElementById('saveErrorBanner').classList.remove('on');
+}
 async function savePlanned(){ try{ await window.storage.set(PLANNED_KEY, JSON.stringify(planned), false); }catch(e){ console.error(e); } }
 async function saveEvents(){ try{ await window.storage.set(EVENTS_KEY, JSON.stringify(customEvents), false); }catch(e){ console.error(e); } }
 function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),2000); }
@@ -2105,16 +2232,27 @@ function openAddPlannedSheet(presetDoeId){
 }
 
 function openMoreSheet(){
-  const items=[['add','Add rabbit'],['import','Import from CSV'],['planned','Planned breedings'],['forsale','For sale'],['ancestors','Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['backup','Backup and restore']];
+  const items=[['add','Add rabbit'],['import','Import from CSV'],['importpdf','Import from Pedigree PDF'],['planned','Planned breedings'],['forsale','For sale'],['ancestors','Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['backup','Backup and restore']];
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>More</h2>
-    ${items.map(([k,l])=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" data-more="${k}">${l}</button>`).join('')}`);
+    <div style="background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:12px;">
+      <div class="section-label" style="margin:0 0 3px;">SIGNED IN AS</div>
+      <div style="font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(currentUser?.email||'')}</div>
+    </div>
+    ${items.map(([k,l])=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" data-more="${k}">${l}</button>`).join('')}
+    <button class="btn btn-danger" style="width:100%; margin-top:4px;" id="signOutBtn">Sign out</button>`);
   document.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.more;
     if(k==='add') openAddSheet();
     else if(k==='merge') openMergeSheet();
     else if(k==='import') openImportCsvSheet();
+    else if(k==='importpdf') openImportPedigreePdfSheet();
     else { currentTab=k; closeSheet(); render(); window.scrollTo(0,0); }
   });
+  document.getElementById('signOutBtn').onclick = async ()=>{
+    closeSheet();
+    const {error}=await sb.auth.signOut();
+    if(error) showToast(error.message);
+  };
 }
 
 function renderForSale(main){
@@ -2733,8 +2871,14 @@ function renderCsvPreview(){
   if(updateAll) updateAll.onclick = ()=>{ csvImportRows.forEach(r=>{ if(r.existing) r.action='update'; }); renderCsvPreview(); };
   document.getElementById('csvImportBtn').onclick = commitCsvImport;
 }
-function commitCsvImport(){
+async function commitCsvImport(){
   let imported=0, updated=0, skipped=0;
+  // Two passes, deliberately: if pass 1 also linked sire/dam as it went,
+  // an ancestor listed by name in one row (e.g. as a Sire) but given its
+  // own full row later in the same file would get created twice — once
+  // as an empty stub when first referenced, once as its real row. Doing
+  // every row's own create/update first, then linking ancestry only
+  // after all rows exist, makes the row order in the CSV irrelevant.
   csvImportRows.forEach(row=>{
     if(row.existing && row.action==='skip'){ skipped++; return; }
     if(row.existing && row.action==='update'){
@@ -2745,17 +2889,286 @@ function commitCsvImport(){
       rabbits.push(blankRabbit(row.data));
       imported++;
     }
+  });
+  csvImportRows.forEach(row=>{
+    if(row.existing && row.action==='skip') return;
     if(row.data.sireName) ensureAncestor(row.data.sireName,'buck');
     if(row.data.damName) ensureAncestor(row.data.damName,'doe');
   });
-  saveData(); closeSheet(); render();
-  const parts=[]; if(imported) parts.push(imported+' imported'); if(updated) parts.push(updated+' updated'); if(skipped) parts.push(skipped+' skipped');
-  showToast(parts.join(', ')||'Nothing to import');
+  const saved = await saveData();
+  closeSheet(); render();
+  if(saved){
+    const parts=[]; if(imported) parts.push(imported+' imported'); if(updated) parts.push(updated+' updated'); if(skipped) parts.push(skipped+' skipped');
+    showToast(parts.join(', ')||'Nothing to import');
+  } else {
+    showSaveError(`The import ran, but ${imported+updated} record${imported+updated===1?'':'s'} couldn't be saved to your account. Check your internet connection and try the import again.`);
+  }
   csvImportRows = [];
 }
 
-loadData();
+/* ============================================================
+   PEDIGREE PDF IMPORT — reads a 4-generation pedigree exported
+   from "Rabbit Register" (Evans Software), matches the rabbit,
+   its parents, grandparents, and great-grandparents by their
+   fixed positions on the page, and feeds the results into the
+   exact same review-and-commit flow as the CSV importer above
+   (csvImportRows / renderCsvPreview / commitCsvImport) — so
+   duplicate handling, the two-pass ancestor linking, and the
+   review UI are all identical and already tested.
+   ============================================================ */
+// Box positions are fixed for this template on landscape Letter
+// (792x612pt) — verified against the software's own drawn borders.
+const PEDIGREE_PDF_BOXES = [
+  ['SELF', 30, 271, 202, 353],
+  ['SIRE', 216, 138, 387, 209],
+  ['DAM', 216, 414, 387, 485],
+  ['PGS', 402, 70, 573, 140],
+  ['PGD', 402, 207, 573, 278],
+  ['MGS', 402, 346, 573, 416],
+  ['MGD', 402, 483, 573, 554],
+  ['GGSIRE1', 588, 39, 760, 102],
+  ['GGDAM1', 588, 108, 760, 171],
+  ['GGSIRE2', 588, 177, 760, 240],
+  ['GGDAM2', 588, 246, 760, 309],
+  ['GGSIRE3', 588, 315, 760, 378],
+  ['GGDAM3', 588, 384, 760, 447],
+  ['GGSIRE4', 588, 453, 760, 516],
+  ['GGDAM4', 588, 521, 760, 585],
+];
+const PEDIGREE_MALE_ROLES = new Set(['SIRE','PGS','MGS','GGSIRE1','GGSIRE2','GGSIRE3','GGSIRE4']);
+const PEDIGREE_PARENT_OF = {
+  SELF: ['SIRE','DAM'], SIRE: ['PGS','PGD'], DAM: ['MGS','MGD'],
+  PGS: ['GGSIRE1','GGDAM1'], PGD: ['GGSIRE2','GGDAM2'],
+  MGS: ['GGSIRE3','GGDAM3'], MGD: ['GGSIRE4','GGDAM4'],
+};
+function pdfLinesFromItems(items){
+  const lines = [];
+  const sorted = items.slice().sort((a,b)=>a.top-b.top||a.x-b.x);
+  for(const it of sorted){
+    if(!it.str.trim()) continue;
+    let line = lines.find(l=>Math.abs(l.top-it.top)<3);
+    if(!line){ line={top:it.top, parts:[]}; lines.push(line); }
+    line.parts.push(it);
+  }
+  lines.sort((a,b)=>a.top-b.top);
+  return lines.map(l=>l.parts.sort((a,b)=>a.x-b.x).map(p=>p.str).join(' ').replace(/\s+/g,' ').trim());
+}
+function pdfParseWeight(s){
+  if(!s) return '';
+  const m = s.match(/(\d+)\s*#(?:\s*(\d+)\s*oz)?/);
+  if(!m) return '';
+  const lbs = parseInt(m[1],10) + (m[2]?parseInt(m[2],10)/16:0);
+  return (Math.round(lbs*100)/100).toString();
+}
+function pdfParseDob(s){
+  if(!s) return null;
+  const m = s.match(/([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})/);
+  if(!m) return null;
+  const d = new Date(`${m[1]} ${m[2]}, ${m[3]}`);
+  if(isNaN(d)) return null;
+  return d.toISOString().slice(0,10);
+}
+function pdfParseBoxLines(lines, role){
+  if(!lines.length) return null;
+  const data = { name: lines[0], color:'', earNumber:'', registrationNumber:'', weight:'', legsWins:'', dob:null, gc:'', sex:null };
+  for(const line of lines.slice(1)){
+    let m;
+    if((m=line.match(/Ear\s*#:\s*(\S*)\s*Reg\s*#:\s*(\S*)/i))){ data.earNumber=m[1]||''; data.registrationNumber=m[2]||''; continue; }
+    if((m=line.match(/Weight:\s*(.+)/i))){ data.weight=pdfParseWeight(m[1]); continue; }
+    if((m=line.match(/GC\s*#:\s*(\S*)\s*Legs:\s*(\d*)/i))){ data.gc=m[1]||''; data.legsWins=m[2]||''; continue; }
+    if((m=line.match(/DOB:\s*(.+)/i))){ data.dob=pdfParseDob(m[1]); continue; }
+    if((m=line.match(/Sex:\s*(Buck|Doe)/i))){ data.sex = m[1].toLowerCase()==='buck'?'buck':'doe'; continue; }
+    if(!data.color && !/^(BOS|BOB|BOV|BIS|Placed|\d)/.test(line)){ data.color=line; continue; }
+    // otherwise: a show-win line — not imported
+  }
+  if(role!=='SELF') data.sex = PEDIGREE_MALE_ROLES.has(role) ? 'buck' : 'doe';
+  return data;
+}
+async function parsePedigreePdf(arrayBuffer){
+  if(!window.pdfjsLib) return { ok:false, error:"The PDF reader didn't load — refresh the page and try again." };
+  const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+  const page = await pdf.getPage(1);
+  const viewport = page.getViewport({ scale: 1 });
+  const textContent = await page.getTextContent();
+  const items = textContent.items
+    .map(it => ({ str: it.str, x: it.transform[4], top: viewport.height - it.transform[5] }))
+    .filter(it => it.str.trim());
+
+  const fullText = items.map(i=>i.str).join(' ');
+  if(!/Rabbit Register/i.test(fullText)){
+    return { ok:false, error:"This doesn't look like a Rabbit Register pedigree PDF — this importer currently only understands that specific layout." };
+  }
+  if(Math.abs(viewport.width-792)>15 || Math.abs(viewport.height-612)>15){
+    return { ok:false, error:"This PDF's page size doesn't match the expected Rabbit Register layout, so the positions couldn't be read reliably." };
+  }
+
+  const headerItems = items.filter(it => it.top<65 && it.x<580);
+  const headerLines = pdfLinesFromItems(headerItems);
+  const breedLine = headerLines.find(l=>/Pedigree\s*$/i.test(l));
+  const breed = breedLine ? breedLine.replace(/\s*Pedigree\s*$/i,'').trim() : '';
+
+  const slots = {};
+  for(const [role,x0,top,x1,bottom] of PEDIGREE_PDF_BOXES){
+    const boxItems = items.filter(it=>it.x>=x0-2 && it.x<=x1+2 && it.top>=top-2 && it.top<=bottom+2);
+    slots[role] = pdfParseBoxLines(pdfLinesFromItems(boxItems), role);
+  }
+  if(!slots.SELF || !slots.SELF.name){
+    return { ok:false, error:"Couldn't find the main rabbit's details on this pedigree — the file may not match the expected layout." };
+  }
+
+  // Collapse duplicate individuals — the same real ancestor can
+  // legitimately occupy more than one tree position (line-breeding) —
+  // down to exactly one row each, keeping every role's sire/dam link
+  // pointed at the correct (already-collapsed) name.
+  const rows = [];
+  const seen = new Set();
+  for(const [role] of PEDIGREE_PDF_BOXES){
+    const data = slots[role];
+    if(!data || !data.name) continue;
+    const key = data.name.trim().toLowerCase();
+    if(seen.has(key)) continue;
+    seen.add(key);
+    const [sireRole, damRole] = PEDIGREE_PARENT_OF[role] || [];
+    const sireData = sireRole ? slots[sireRole] : null;
+    const damData = damRole ? slots[damRole] : null;
+    const rowData = {
+      name: data.name, sex: data.sex, breed, color: data.color,
+      earNumber: data.earNumber, dob: data.dob, weight: data.weight,
+      legsWins: data.legsWins, registrationNumber: data.registrationNumber,
+      sireName: sireData ? sireData.name : '', damName: damData ? damData.name : '',
+      notes: data.gc ? `GC #: ${data.gc}` : '',
+      status: data.sex==='doe' ? 'open' : 'available',
+    };
+    const existing = findByName(rowData.name);
+    rows.push({ data: rowData, existing, action: existing ? 'skip' : 'new' });
+  }
+  return { ok:true, rows, breed };
+}
+function openImportPedigreePdfSheet(){
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Import from Pedigree PDF</h2>
+    <div class="card-sub" style="margin-bottom:12px;">Upload a 4-generation pedigree PDF exported from Rabbit Register (Evans Software) — the format many breeders share when a rabbit changes hands. The rabbit, its parents, grandparents, and great-grandparents are all read automatically and matched up by name, with everything shown to you for review before anything is added.</div>
+    <button class="btn btn-primary" style="width:100%;" id="pdfPickBtn">Choose pedigree PDF</button>
+    <div id="csvPreviewArea"></div>`);
+  document.getElementById('pdfPickBtn').onclick = ()=>document.getElementById('pedigreePdfFileInput').click();
+  document.getElementById('pedigreePdfFileInput').onchange = async (e)=>{
+    const file = e.target.files[0]; e.target.value='';
+    if(!file) return;
+    const area = document.getElementById('csvPreviewArea');
+    area.innerHTML = `<div class="empty">Reading PDF…</div>`;
+    try{
+      const buf = await file.arrayBuffer();
+      const result = await parsePedigreePdf(buf);
+      if(!result.ok){ area.innerHTML = `<div class="dupe-box">${esc(result.error)}</div>`; return; }
+      csvImportRows = result.rows;
+      renderCsvPreview();
+    }catch(err){
+      console.error(err);
+      area.innerHTML = `<div class="dupe-box">Couldn't read that PDF — make sure it's a Rabbit Register pedigree export.</div>`;
+    }
+  };
+}
+
+// Authentication UI
+let authMode = 'login';
+const authScreen = document.getElementById('authScreen');
+const authForm = document.getElementById('authForm');
+const authEmail = document.getElementById('authEmail');
+const authPassword = document.getElementById('authPassword');
+const authConfirm = document.getElementById('authConfirm');
+const authConfirmWrap = document.getElementById('authConfirmWrap');
+const authSubmit = document.getElementById('authSubmit');
+const authMessage = document.getElementById('authMessage');
+const authLoginTab = document.getElementById('authLoginTab');
+const authSignupTab = document.getElementById('authSignupTab');
+const authForgot = document.getElementById('authForgot');
+
+function setAuthMessage(text,ok=false){ authMessage.textContent=text||''; authMessage.className='auth-message'+(ok?' ok':''); }
+function setAuthMode(mode){
+  authMode=mode;
+  const signup=mode==='signup';
+  authLoginTab.classList.toggle('on',!signup);
+  authSignupTab.classList.toggle('on',signup);
+  authConfirmWrap.style.display=signup?'block':'none';
+  authConfirm.required=signup;
+  authSubmit.textContent=signup?'Create account':'Sign in';
+  authForgot.style.display=signup?'none':'block';
+  authPassword.autocomplete=signup?'new-password':'current-password';
+  setAuthMessage('');
+}
+
+authLoginTab.onclick=()=>setAuthMode('login');
+authSignupTab.onclick=()=>setAuthMode('signup');
+
+authForm.onsubmit=async (e)=>{
+  e.preventDefault();
+  const email=authEmail.value.trim();
+  const password=authPassword.value;
+  if(authMode==='signup' && password!==authConfirm.value){ setAuthMessage('Passwords do not match.'); return; }
+  authSubmit.disabled=true;
+  setAuthMessage(authMode==='signup'?'Creating your Barn Board account…':'Signing you in…',true);
+  try{
+    if(authMode==='signup'){
+      const {data,error}=await sb.auth.signUp({email,password});
+      if(error) throw error;
+      if(data.session){
+        setAuthMessage('Account created. Loading Barn Board…',true);
+      } else {
+        setAuthMessage('Account created. Check your email to confirm your account, then sign in.',true);
+        authPassword.value=''; authConfirm.value='';
+        setAuthMode('login'); authEmail.value=email;
+      }
+    } else {
+      const {error}=await sb.auth.signInWithPassword({email,password});
+      if(error) throw error;
+    }
+  }catch(err){ setAuthMessage(err.message||'Something went wrong.'); }
+  finally{ authSubmit.disabled=false; }
+};
+
+authForgot.onclick=async ()=>{
+  const email=authEmail.value.trim();
+  if(!email){ setAuthMessage('Enter your email address first.'); authEmail.focus(); return; }
+  authForgot.disabled=true;
+  try{
+    const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+window.location.pathname});
+    if(error) throw error;
+    setAuthMessage('Password reset instructions sent to your email.',true);
+  }catch(err){ setAuthMessage(err.message||'Could not send reset email.'); }
+  finally{ authForgot.disabled=false; }
+};
+
+async function enterApp(user){
+  try{
+    document.body.classList.add('auth-locked');
+    await initCloudStorage(user);
+    authScreen.classList.add('hidden');
+    document.body.classList.remove('auth-locked');
+    await loadData();
+  }catch(err){
+    console.error(err);
+    authScreen.classList.remove('hidden');
+    document.body.classList.add('auth-locked');
+    setAuthMessage('Could not connect to Barn Board data. '+(err.message||''));
+  }
+}
+
+sb.auth.onAuthStateChange((event,session)=>{
+  if(session?.user){
+    if(event==='INITIAL_SESSION' || event==='SIGNED_IN' || event==='USER_UPDATED') enterApp(session.user);
+  } else {
+    currentUser=null; cloudDataReady=false; cloudDataCache={};
+    authScreen.classList.remove('hidden');
+    document.body.classList.add('auth-locked');
+    setAuthMode('login');
+    authPassword.value=''; authConfirm.value='';
+  }
+});
+
+// Ask Supabase for the current session so a returning user goes straight in.
+sb.auth.getSession().then(({data})=>{
+  if(data.session) enterApp(data.session.user);
+});
 </script>
 </body>
 </html>
-7
