@@ -1,0 +1,2705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CJM Legacy Rabbitry — Barn Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Public+Sans:wght@400;500;600&family=Jost:wght@500;600&family=JetBrains+Mono:wght@500&family=Pinyon+Script&display=swap" rel="stylesheet">
+<script src="pdf-lib.min.js"></script>
+<style>
+  :root{
+    --navy:#142440; --navy-deep:#0c1830;
+    --gold:#c6a15b; --gold-light:#e5cd97; --gold-deep:#b08535;
+    --cream:#f7f2e6; --ivory:#fffdf8;
+    --marsh:#4e6146; --marsh-deep:#37452f;
+    --rust:#a34632; --rust-light:#f3ded9;
+    --page:#f7f2e6; --card:#fffdf8; --ink:#0c1830; --ink-soft:#142440;
+    --line:#e7ddc6; --line-strong:#cabb95;
+    --navbar:#142440; --navbar-dim:#9aa6bb;
+  }
+  [data-theme="dark"]{
+    --page:#0e141f; --card:#18202e; --ink:#e8e4d8; --ink-soft:#c9c4b4;
+    --line:#2a3446; --line-strong:#3c4759;
+    --cream:#0e141f; --ivory:#18202e; --navy:#e8e4d8; --navy-deep:#f2efe6;
+    --rust-light:#3a2320; --navbar:#080d16;
+  }
+  *{box-sizing:border-box;}
+  button, .card, .stat, [data-openprofile]{ touch-action:manipulation; }
+  body{
+    margin:0; background:var(--page); color:var(--ink);
+    font-family:'Public Sans',sans-serif; -webkit-tap-highlight-color:transparent;
+    padding-bottom:92px;
+  }
+  header.top{ background:var(--navbar); color:#fffdf8; padding:16px 16px 14px; display:flex; justify-content:space-between; align-items:flex-start; }
+  header.top .eyebrow{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.06em; color:var(--gold-light); margin-bottom:3px; }
+  header.top h1{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:22px; margin:0; color:#fffdf8; }
+  .theme-btn{ background:none; border:1px solid rgba(255,255,255,.3); border-radius:8px; color:#fffdf8; padding:6px 9px; cursor:pointer; display:flex; align-items:center; }
+
+  .toolbar{ padding:10px 14px 4px; }
+  .searchwrap{ position:relative; margin-bottom:8px; }
+  .searchwrap input{ width:100%; padding:12px 34px 12px 34px; border-radius:9px; border:1px solid var(--line-strong); font-size:16px; background:var(--card); color:var(--ink); font-family:'Public Sans',sans-serif; }
+  .searchwrap svg{ position:absolute; left:10px; top:13px; width:16px; height:16px; stroke:var(--ink-soft); opacity:.6; }
+  #searchClear{ position:absolute; right:6px; top:4px; width:32px; height:32px; border:none; background:var(--line); color:var(--ink); border-radius:50%; font-size:18px; line-height:1; cursor:pointer; }
+  .quickbred{ width:100%; }
+
+  .stats{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; padding:6px 14px 0; }
+  .stat{ background:var(--card); border-radius:10px; padding:11px 5px; min-height:56px; text-align:center; border:1px solid var(--line); cursor:pointer; }
+  .stat.active{outline:2px solid var(--gold-deep);}
+  .stat .n{font-family:'Cormorant Garamond',serif; font-size:21px; font-weight:600; color:var(--navy);}
+  .stat .l{font-family:'Jost',sans-serif; font-size:9.5px; color:var(--ink-soft); line-height:1.2; margin-top:2px;}
+  .stat.urgent .n{color:var(--rust);}
+
+  main{padding:8px 14px 20px;}
+  .empty{ text-align:center; padding:36px 20px; color:var(--ink-soft); opacity:.7; font-size:14px; }
+  .section-label{ font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.05em; color:var(--ink-soft); opacity:.7; margin:16px 2px 7px; }
+
+  .card{ background:var(--card); border-radius:12px; padding:14px 14px 12px; margin-bottom:10px; border:1px solid var(--line); cursor:pointer; }
+  .card.urgent{border-left:4px solid var(--rust);}
+  .card.no-tap{cursor:default;}
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .card-name{font-family:'Cormorant Garamond',serif; font-weight:600; font-size:19px; color:var(--navy); line-height:1.2;}
+  .card-sub{font-size:12px; color:var(--ink-soft); opacity:.85; margin-top:2px;}
+  .badge{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.03em; padding:3px 8px; border-radius:20px; white-space:nowrap; flex:0 0 auto; }
+  .b-preg{background:var(--gold-light); color:#0c1830;}
+  .b-nurse{background:#dfe8dc; color:#37452f;}
+  .b-open{background:var(--line); color:var(--ink);}
+  .b-rest{background:var(--line); color:var(--ink-soft);}
+  .b-urgent{background:var(--rust); color:#fff;}
+  .b-grow{background:#e3e9f3; color:#142440;}
+  .b-reserved{background:var(--gold-deep); color:#fff;}
+  .b-sold{background:#4e6146; color:#fff;}
+  .b-gone{background:#8a8a8a; color:#fff;}
+
+  .card-detail{ font-size:13.5px; color:var(--ink); margin-top:8px; line-height:1.5; }
+  .card-detail b{color:var(--navy);}
+  .flag{ margin-top:8px; font-size:12px; color:var(--rust); background:var(--rust-light); padding:6px 8px; border-radius:6px; }
+  .card-actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;}
+  .btn{ font-family:'Jost',sans-serif; font-weight:600; font-size:13.5px; padding:11px 16px; min-height:44px; border-radius:8px; border:none; cursor:pointer; }
+  .btn-primary{background:var(--navy); color:var(--page);}
+  [data-theme="dark"] .btn-primary{background:var(--gold-deep); color:#0c1830;}
+  .btn-secondary{background:transparent; color:var(--ink); border:1px solid var(--line-strong);}
+  .btn-danger{background:transparent; color:var(--rust); border:1px solid var(--rust);}
+  .btn-sm{padding:9px 13px; min-height:38px; font-size:12.5px;}
+
+  nav.bottom{ position:fixed; bottom:0; left:0; right:0; background:var(--navbar); display:grid; grid-template-columns:repeat(5,1fr); padding:7px 1px 9px; z-index:25; }
+  nav.bottom button{ background:none; border:none; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; padding:2px 0; }
+  nav.bottom svg{ width:19px; height:19px; stroke:var(--navbar-dim); fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+  nav.bottom svg text{ fill:var(--navbar-dim); }
+  nav.bottom button.on svg text{ fill:var(--gold-light); }
+  nav.bottom span{ font-family:'Jost',sans-serif; font-size:9.5px; color:var(--navbar-dim); }
+  nav.bottom button.on svg{ stroke:var(--gold-light); }
+  nav.bottom button.on span{ color:var(--gold-light); font-weight:600; }
+
+  .sheet-backdrop{ position:fixed; inset:0; background:rgba(12,24,48,.55); z-index:45; display:none; align-items:flex-end; }
+  .sheet-backdrop.on{display:flex;}
+  .sheet{ background:var(--page); width:100%; border-radius:18px 18px 0 0; padding:18px 18px 26px; max-height:88vh; overflow-y:auto; -webkit-overflow-scrolling:touch; position:relative; }
+  .sheet h2{ font-family:'Cormorant Garamond',serif; font-size:21px; color:var(--navy); margin:0 0 14px; padding-right:44px; }
+  .field{margin-bottom:12px;}
+  .field label{ display:block; font-family:'Jost',sans-serif; font-size:12px; font-weight:600; color:var(--ink); margin-bottom:5px; }
+  .field input, .field select, .field textarea{ width:100%; padding:12px 12px; border-radius:8px; border:1px solid var(--line-strong); font-size:16px; background:var(--card); color:var(--ink); font-family:'Public Sans',sans-serif; }
+  .field textarea{resize:vertical; min-height:50px;}
+  .row2{display:flex; gap:10px;} .row2 .field{flex:1; min-width:0;}
+  .row3{display:flex; gap:8px;} .row3 .field{flex:1; min-width:0;}
+  .field input[type="date"]{ min-width:0; }
+  .suggest-box{ display:none; border:1px solid var(--line-strong); border-top:none; border-radius:0 0 8px 8px; background:var(--card); max-height:180px; overflow-y:auto; margin-top:-12px; margin-bottom:12px; position:relative; z-index:5; }
+  .suggest-item{ display:block; width:100%; text-align:left; padding:12px 12px; min-height:44px; background:none; border:none; border-top:1px solid var(--line); font-size:15px; color:var(--ink); cursor:pointer; font-family:'Public Sans',sans-serif; }
+  .suggest-item:first-child{border-top:none;}
+  .history-entry{ border-left:3px solid var(--line-strong); padding:6px 0 6px 10px; margin-bottom:10px; }
+  .todo-row{ display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--card); border:1px solid var(--gold); border-left:5px solid var(--gold-deep); border-radius:10px; padding:13px 14px; margin-bottom:9px; box-shadow:0 1px 4px rgba(12,24,48,.08); }
+  .todo-row .todo-text{ font-size:14.5px; color:var(--ink); flex:1; font-weight:500; line-height:1.4; }
+  .history-entry.took{border-left-color:var(--marsh);}
+  .history-entry.lost{border-left-color:var(--rust);}
+  .history-entry.pending{border-left-color:var(--gold-deep);}
+  .seg{display:flex; gap:6px;}
+  .seg button{ flex:1; padding:12px 9px; min-height:44px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer; }
+  .seg button.on{background:var(--navy); color:var(--page); border-color:var(--navy);}
+  [data-theme="dark"] .seg button.on{background:var(--gold-deep); color:#0c1830;}
+  .sheet-actions{display:flex; gap:10px; margin-top:16px;}
+  .sheet-actions .btn{flex:1;}
+  .close-x{ position:absolute; top:6px; right:6px; width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:none; border:none; font-size:22px; color:var(--ink); opacity:.5; cursor:pointer; line-height:1; }
+  .toast{ position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:var(--navy); color:var(--page); padding:10px 18px; border-radius:20px; font-size:13px; z-index:50; opacity:0; transition:opacity .25s; pointer-events:none; max-width:88%; text-align:center; font-family:'Jost',sans-serif; }
+  [data-theme="dark"] .toast{background:var(--gold-deep); color:#0c1830;}
+  .toast.on{opacity:1;}
+
+  .relate-box{ background:#fbf7ec; border:1px solid var(--gold); border-radius:8px; padding:10px 12px; font-size:13px; margin-top:6px; line-height:1.5; color:#0c1830; }
+  .relate-box.close{border-color:var(--rust); background:var(--rust-light); color:var(--ink);}
+  [data-theme="dark"] .relate-box{background:#2a2416; color:var(--ink);}
+  .dupe-box{ background:var(--rust-light); border:1px solid var(--rust); border-radius:8px; padding:10px 12px; font-size:13px; margin-top:8px; line-height:1.5; color:var(--ink); }
+
+  .ped-gen{ margin-bottom:14px; }
+  .ped-gen-label{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.05em; color:var(--gold-deep); margin-bottom:6px; }
+  .ped-side-label{ font-family:'Jost',sans-serif; font-size:10px; font-weight:600; letter-spacing:.03em; color:var(--ink-soft); opacity:.75; margin:8px 0 5px; padding-left:6px; border-left:3px solid var(--line-strong); }
+  .ped-subgroup-label{ font-family:'Public Sans',sans-serif; font-size:11px; font-style:italic; color:var(--ink-soft); opacity:.7; margin:6px 0 4px 12px; }
+  .ped-row{ display:flex; gap:8px; margin-bottom:6px; flex-wrap:wrap; }
+  .ped-box{ flex:1; min-width:130px; background:var(--card); border:1px solid var(--line); border-radius:8px; padding:8px 10px; cursor:pointer; }
+  .ped-box .pn{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:14.5px; color:var(--navy); }
+  .ped-box .pc{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
+  .ped-box.unknown{opacity:.55;}
+
+  #printPedigree{display:none;}
+  #printPedigree.active{display:block;}
+  .pp-page{ background:#f6efe0; color:#0c1830; font-family:'Public Sans',sans-serif; position:relative; box-sizing:border-box; overflow:hidden; display:flex; flex-direction:column; border:3px solid #0c1830; border-radius:18px; }
+  .pp-page::before{ content:''; position:absolute; inset:7px; border:1px solid #c6a15b; border-radius:13px; pointer-events:none; }
+  .pp-page.pp-landscape{ width:1020px; height:774px; padding:20px 26px 16px; }
+  .pp-page.pp-portrait{ width:774px; height:1014px; padding:20px 22px 16px; }
+  .pp-header{ display:flex; justify-content:space-between; align-items:flex-start; flex:0 0 auto; margin-bottom:10px; }
+  .pp-brand{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:32px; color:#142440; line-height:1; }
+  .pp-brand2{ font-family:'Jost',sans-serif; font-size:12px; letter-spacing:.25em; color:#b08535; margin-top:2px; }
+  .pp-rope{ width:110px; border-top:1px solid #b08535; margin:7px 0 5px; }
+  .pp-tag1{ font-family:'Jost',sans-serif; font-size:8px; letter-spacing:.2em; color:#142440; }
+  .pp-script{ font-family:'Pinyon Script',cursive; font-size:17px; color:#142440; margin-top:4px; }
+  .pp-meta-table{ display:grid; grid-template-columns:auto minmax(120px,auto); column-gap:10px; row-gap:7px; align-content:start; margin-top:2px; }
+  .pp-meta-label{ font-family:'Jost',sans-serif; font-size:10px; font-weight:700; letter-spacing:.03em; color:#142440; text-align:left; white-space:nowrap; align-self:end; padding-bottom:2px; }
+  .pp-meta-value{ font-size:11px; color:#142440; border-bottom:1px solid #142440; padding-bottom:2px; min-height:14px; }
+  .pp-simple-title{ text-align:right; }
+  .pp-simple-title .pp-simple-name{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:22px; color:#142440; }
+  .pp-simple-title .pp-simple-color{ font-family:'Jost',sans-serif; font-size:11px; color:#7a6a44; margin-top:2px; }
+  .pp-simple-title .pp-simple-dob{ font-family:'Jost',sans-serif; font-size:10px; color:#142440; margin-top:3px; }
+  .pp-gen-labels{ display:grid; flex:0 0 auto; margin-bottom:6px; }
+  .pp-gen-label{ font-family:'Jost',sans-serif; font-weight:600; letter-spacing:.1em; color:#142440; text-align:center; }
+  .pp-grid{ display:grid; gap:7px; flex:1 1 auto; min-height:0; }
+  .pp-box{ border:1px solid #b08535; border-radius:5px; background:#fbf6ea; padding:4px 7px 5px; display:flex; flex-direction:column; justify-content:flex-start; overflow:hidden; min-height:0; }
+  .pp-pill{ background:#142440; color:#e5cd97; font-family:'Jost',sans-serif; letter-spacing:.06em; text-align:center; padding:2px 4px; border-radius:3px; margin:-4px -7px 4px; flex:0 0 auto; }
+  .pp-line{ color:#0c1830; border-bottom:1px solid #cabb95; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pp-line-compact{ color:#0c1830; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pp-box-simple{ align-items:center; justify-content:center; text-align:center; }
+  .pp-simple-box-name{ font-family:'Cormorant Garamond',serif; font-weight:600; color:#142440; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .pp-simple-box-color{ font-family:'Jost',sans-serif; color:#7a6a44; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+  .pp-footer{ display:flex; justify-content:space-between; align-items:flex-end; flex:0 0 auto; margin-top:10px; }
+  .pp-anchor{ width:28px; height:28px; border-radius:50% 50% 0 0; background:#142440; display:flex; align-items:center; justify-content:center; color:#c6a15b; font-size:15px; }
+  /* Full-detail sizing */
+  .pp-landscape.pp-full .pp-line{ font-size:9px; line-height:1.65; }
+  .pp-landscape.pp-full .pp-line-compact{ font-size:7.6px; line-height:1.45; }
+  .pp-landscape.pp-full .pp-pill{ font-size:8.5px; }
+  .pp-portrait.pp-full .pp-line{ font-size:7.6px; line-height:1.5; }
+  .pp-portrait.pp-full .pp-line-compact{ font-size:6.6px; line-height:1.3; }
+  .pp-portrait.pp-full .pp-pill{ font-size:7.4px; }
+  /* Simplified sizing */
+  .pp-full .pp-gen-label{ font-size:9.5px; }
+  .pp-simple .pp-gen-label{ font-size:10.5px; }
+  .pp-landscape.pp-simple .pp-simple-box-name{ font-size:13px; }
+  .pp-landscape.pp-simple .pp-simple-box-color{ font-size:10px; }
+  .pp-landscape.pp-simple .pp-pill{ font-size:8.5px; }
+  .pp-portrait.pp-simple .pp-simple-box-name{ font-size:11px; }
+  .pp-portrait.pp-simple .pp-simple-box-color{ font-size:8.8px; }
+  .pp-portrait.pp-simple .pp-pill{ font-size:7.6px; }
+  @media print{
+    /* display:none (not visibility:hidden) so the rest of the app
+       contributes zero layout height during print — otherwise the
+       normal screen content, though invisible, still occupies its
+       full height and can push pagination to a spurious near-blank
+       second page once it's taller than the printable page area. */
+    body > *:not(#printPedigree){ display:none !important; }
+    body{ padding-bottom:0 !important; margin:0 !important; }
+    #printPedigree{ position:static; }
+  }
+
+  /* Rabbits sub-nav + profile screen + photos + notes + calendar */
+  .subnav-wrap{ padding:2px 0 10px; }
+  .profile-view{ position:fixed; inset:0; background:var(--page); z-index:40; display:none; flex-direction:column; }
+  .profile-view.on{ display:flex; }
+  .profile-head{ background:var(--navbar); color:#fffdf8; padding:14px 16px 12px; flex:0 0 auto; }
+  .profile-head-top{ display:flex; align-items:center; gap:10px; }
+  .profile-back{ background:none; border:1px solid rgba(255,255,255,.3); border-radius:8px; color:#fffdf8; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; flex:0 0 auto; }
+  .profile-head-name{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:20px; color:#fffdf8; line-height:1.2; }
+  .profile-head-sub{ font-family:'Jost',sans-serif; font-size:11px; color:var(--gold-light); margin-top:2px; }
+  .profile-tabs{ display:flex; gap:4px; overflow-x:auto; padding:12px 16px 0; background:var(--navbar); flex:0 0 auto; -webkit-overflow-scrolling:touch; }
+  .profile-tabs::-webkit-scrollbar{display:none;}
+  .profile-tab-btn{ background:none; border:none; color:var(--navbar-dim); font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; padding:8px 4px 10px; white-space:nowrap; cursor:pointer; border-bottom:2px solid transparent; }
+  .profile-tab-btn.on{ color:#fffdf8; border-bottom-color:var(--gold-light); }
+  .profile-body{ flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; -webkit-transform:translateZ(0); transform:translateZ(0); padding:14px 14px calc(70px + env(safe-area-inset-bottom)); }
+  .overview-grid{ display:grid; grid-template-columns:1fr 1fr; gap:0; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-bottom:14px; }
+  .ov-cell{ padding:11px 12px; border-bottom:1px solid var(--line); }
+  .ov-cell:nth-child(odd){border-right:1px solid var(--line);}
+  .ov-label{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.04em; color:var(--ink-soft); opacity:.7; margin-bottom:3px; }
+  .ov-val{ font-size:14px; color:var(--ink); font-weight:500; }
+  .qa-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+  .primary-photo{ width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:12px; border:1px solid var(--line); margin-bottom:14px; display:block; background:var(--line); }
+  .photo-chips{ display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:12px; }
+  .photo-chip{ flex:0 0 auto; padding:8px 12px; border-radius:20px; border:1px solid var(--line-strong); background:var(--card); font-family:'Jost',sans-serif; font-size:12px; font-weight:600; color:var(--ink); cursor:pointer; white-space:nowrap; }
+  .photo-chip.on{ background:var(--navy); color:var(--page); border-color:var(--navy); }
+  [data-theme="dark"] .photo-chip.on{background:var(--gold-deep); color:#0c1830;}
+  .photo-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+  .photo-thumb-wrap{ position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; border:1px solid var(--line); cursor:pointer; }
+  .photo-thumb-wrap img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .photo-del{ position:absolute; top:3px; right:3px; width:22px; height:22px; border-radius:50%; background:rgba(12,24,48,.65); color:#fff; border:none; font-size:14px; line-height:1; cursor:pointer; z-index:2; }
+  .photo-viewer{ position:fixed; inset:0; background:#0c1830; z-index:60; display:none; flex-direction:column; touch-action:none; }
+  .photo-viewer.on{ display:flex; }
+  .pv-topbar{ flex:0 0 auto; display:flex; align-items:center; justify-content:space-between; padding:10px 6px; background:rgba(0,0,0,.35); z-index:2; }
+  .pv-icon-btn{ width:44px; height:44px; border-radius:50%; background:none; border:none; color:#fffdf8; font-size:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .pv-title{ font-family:'Jost',sans-serif; font-size:13px; color:#e5cd97; font-weight:600; }
+  .pv-stage{ flex:1 1 auto; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .pv-stage img{ max-width:100%; max-height:100%; -webkit-user-select:none; user-select:none; will-change:transform; }
+  .pv-crop-mask{ position:absolute; inset:0; background:rgba(0,0,0,.55); pointer-events:none; }
+  .pv-crop-box{ position:absolute; border:2px solid #e5cd97; box-shadow:0 0 0 999px rgba(0,0,0,.55); cursor:move; touch-action:none; }
+  .pv-crop-handle{ position:absolute; width:26px; height:26px; margin:-13px; background:#e5cd97; border-radius:50%; border:2px solid #0c1830; touch-action:none; }
+  .pv-crop-handle[data-h="nw"]{ top:0; left:0; cursor:nwse-resize; }
+  .pv-crop-handle[data-h="ne"]{ top:0; right:0; margin-right:-13px; cursor:nesw-resize; }
+  .pv-crop-handle[data-h="sw"]{ bottom:0; left:0; margin-bottom:-13px; cursor:nesw-resize; }
+  .pv-crop-handle[data-h="se"]{ bottom:0; right:0; margin-right:-13px; margin-bottom:-13px; cursor:nwse-resize; }
+  .pv-bottombar{ flex:0 0 auto; display:flex; gap:10px; padding:12px 14px calc(14px + env(safe-area-inset-bottom)); background:rgba(0,0,0,.35); }
+  .pv-bottombar .btn{ flex:1; }
+  .pv-hint{ position:absolute; bottom:10px; left:0; right:0; text-align:center; color:rgba(255,253,248,.6); font-family:'Jost',sans-serif; font-size:11px; pointer-events:none; }
+  .note-entry{ border-left:3px solid var(--gold-deep); padding:6px 0 8px 10px; margin-bottom:10px; }
+  .note-date{ font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--ink-soft); opacity:.75; margin-bottom:3px; }
+  .note-text{ font-size:13.5px; color:var(--ink); line-height:1.5; white-space:pre-wrap; }
+  .cal-date-label{ font-family:'Jost',sans-serif; font-size:11.5px; font-weight:700; color:var(--navy); margin:16px 2px 8px; }
+  .cal-row{ display:flex; align-items:flex-start; gap:10px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:11px 12px; margin-bottom:8px; cursor:pointer; }
+  .cal-row.overdue{border-left:4px solid var(--rust);}
+  .cal-dot{ width:8px; height:8px; border-radius:50%; margin-top:5px; flex:0 0 auto; }
+  .cal-row-text{ font-size:13.5px; color:var(--ink); line-height:1.4; }
+  .cal-row-text b{color:var(--navy);}
+</style>
+<style id="pp-page-size">@page{ size: landscape; margin: 0.15in; }</style>
+</head>
+<body>
+
+<header class="top">
+  <div>
+    <div class="eyebrow">CJM LEGACY RABBITRY</div>
+    <h1>Barn Board</h1>
+  </div>
+  <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+  </button>
+</header>
+
+<div class="toolbar">
+  <div class="searchwrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <input type="search" id="searchInput" placeholder="Search by name, ear #, color, or breed">
+    <button id="searchClear" aria-label="Clear search" style="display:none;">&times;</button>
+  </div>
+  <button class="btn btn-secondary quickbred" id="quickBredBtn">+ Mark a doe bred</button>
+</div>
+
+<main id="main"></main>
+
+<nav class="bottom" id="nav"></nav>
+
+<div class="sheet-backdrop" id="sheetBackdrop"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<div id="printPedigree"></div>
+<div class="profile-view" id="profileView"></div>
+<div class="photo-viewer" id="photoViewer"></div>
+<input type="file" id="photoFileInput" accept="image/*" style="display:none;">
+<input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none;">
+
+<script>
+if(!window.storage){
+  window.storage = {
+    get: async (key)=>{ const v=localStorage.getItem('cjm_'+key); if(v===null) throw new Error('not found'); return {value:v}; },
+    set: async (key,val)=>{ localStorage.setItem('cjm_'+key, val); return {ok:true}; }
+  };
+}
+const RABBITS_KEY = 'rabbits_v2';
+const PLANNED_KEY = 'planned_v1';
+const EVENTS_KEY = 'events_v1';
+const THEME_KEY = 'theme_v1';
+let rabbits = [], planned = [], customEvents = [], currentTab = 'home', searchQuery = '', doesFilter = 'all', rabbitsGroup = 'does';
+let profileRabbitId = null, profileTab = 'overview', photoActiveCategory = 'Primary';
+let expandedLitters = new Set();
+let calWeekStart = null, calSelectedDate = null;
+
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function addDays(d,n){ const x=new Date(d+'T00:00:00'); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10); }
+function daysBetween(a,b){ return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000); }
+function fmtDate(d){ if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function startOfWeek(d){ const x=new Date(d+'T00:00:00'); x.setDate(x.getDate()-x.getDay()); return x.toISOString().slice(0,10); }
+function uid(){ return 'r'+Math.random().toString(36).slice(2,10); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+const NICK_MAP = { 'og':'HLH OG','flower':'CJM Flower','tulip':'CJM Tulip','cjm1':'CJM CJM1','chili':'HLH Chili Dog',
+  'scottie':'HLH Scottie','🍅':'CJM Tomato','cs':"Lund's Charlie Sheen",'frank':'HLH Frankie Dog','joy':'HLH Joy',
+  'thor':'HLH Thor','abu':'HLH Abu','raymond':'HLH Raymond','kevin':"Hare Hotel's Kevin",'vw':"On Fleek's VW Rabbit",
+  'thelma':"Hare Hotel's Thelma" };
+
+const ROSTER = [
+  {name:'CJM Flower',sex:'doe',breed:'Holland Lop',color:'Broken Black Tort',sireName:'HLH OG',damName:'HLH Joy'},
+  {name:'CJM May',sex:'doe',breed:'Holland Lop',color:'Broken Orange',sireName:'HLH OG',damName:'HLH Joy'},
+  {name:'HLH Chili Dog',sex:'doe',breed:'Holland Lop',color:'Solid Black Tort',sireName:'HLH Hot Dog',damName:'Henrys Mittens'},
+  {name:'HLH Chonky',sex:'doe',breed:'Holland Lop',color:'Solid Black Tort',sireName:"Gra-booski's Clover",damName:"Fletcher Farm's Bronco"},
+  {name:'HLH OG',sex:'doe',breed:'Holland Lop',color:'Broken Black Tort',sireName:"Gra-booski's Clover",damName:"Fletcher Farm's Bronco"},
+  {name:'HLH Waffle',sex:'doe',breed:'Holland Lop',color:'Solid Black Tort',sireName:"Bunnies in Bow's Owl",damName:'ANR Daveena'},
+  {name:'HLH Dew Drop',sex:'doe',breed:'Holland Lop',color:'Solid Orange',sireName:"Bunnies in Bow's Owl",damName:"Gra-booski's Clover"},
+  {name:'HLH Ketchup',sex:'doe',breed:'Holland Lop',color:'Solid Black Tort',sireName:'HLH Frankie',damName:'HLH Mittens'},
+  {name:'CJM Tomato',sex:'doe',breed:'Holland Lop',color:'Solid Blue Tort',sireName:'HLH Thor',damName:'HLH Ketchup'},
+  {name:'CJM CJM1',sex:'doe',breed:'Holland Lop',color:'Solid Sable Point',sireName:'HLH Raymond',damName:'HLH Rain'},
+  {name:'CJM Tansy',sex:'doe',breed:'Holland Lop',color:'Solid Black Tort',sireName:'HLH Thor',damName:'Henrys Mittens'},
+  {name:'CJM Tulip',sex:'doe',breed:'Holland Lop',color:'Solid Blue Tort',sireName:'HLH Thor',damName:'Henrys Mittens'},
+  {name:'HLH French Toast',sex:'doe',breed:'Holland Lop',color:'Solid Orange',sireName:"Bunnies in Bow's Owl",damName:'Eggo'},
+  {name:'HLH Scottie',sex:'doe',breed:'Holland Lop',color:'Broken Frosty',sireName:'HLH Joy',damName:'Henrys Fancy Lady'},
+  {name:'HLH Rolo',sex:'doe',breed:'Holland Lop',color:'Solid Cream',sireName:"Bunnies in Bow's",damName:"TBB's Carol"},
+  {name:'Henrys Hot Dog',sex:'buck',breed:'Holland Lop',color:'Solid Black Tort',sireName:'Henrys Tajin',damName:'Henrys Mittens'},
+  {name:'HLH Relish',sex:'buck',breed:'Holland Lop',color:'Solid Black Tort',sireName:'Henrys Hot Dog',damName:'Henrys Mittens'},
+  {name:'HLH Abu',sex:'buck',breed:'Holland Lop',color:'Solid Orange',sireName:"Bunnies in Bow's Owl",damName:"Blue Sapphire's Destiny"},
+  {name:'HLH Joy',sex:'buck',breed:'Holland Lop',color:'Solid Black Tort',sireName:'NGF Carson',damName:'NGF Cutie'},
+  {name:"Bunnies in Bow's Owl",sex:'buck',breed:'Holland Lop',color:'Solid Chestnut'},
+  {name:'HLH Thor',sex:'buck',breed:'Holland Lop',color:'Solid Black Tort',sireName:'HLH Abu',damName:'ANR Daveena'},
+  {name:'DTL Iceman',sex:'buck',breed:'Holland Lop',color:'Solid Blue Eyed White'},
+  {name:'HLH Raymond',sex:'buck',breed:'Holland Lop',color:'Solid Ruby Eyed White',sireName:'HLH Frankie',damName:"Cammack's Blanche"},
+  {name:'HLH Frankie Dog',sex:'buck',breed:'Holland Lop',color:'Solid Black Tort',sireName:'Henrys Hot Dog',damName:'Henrys Mittens'},
+  {name:"Lund's Charlie Sheen",sex:'buck',breed:'Holland Lop',color:'Solid Black Tort'},
+  {name:'CJM Payton Manning',sex:'buck',breed:'Holland Lop',color:'Solid Black Tort',sireName:'HLH Thor',damName:'HLH Chonky'},
+  {name:"Bastet's Scorpion",sex:'buck',breed:'Holland Lop',color:'Broken Black Tort',sireName:"Bastet's Spider",damName:"Bastet's Muffin"},
+  {name:"Hare Hotel's Kevin",sex:'buck',breed:'Dwarf Hotot',color:'Black Banded',sireName:"Lake Effect's B431 (Pete)",damName:'Hare Hotel G13'},
+  {name:"Hare Hotel's G33",sex:'doe',breed:'Dwarf Hotot',color:'Black Banded',sireName:"Lake Effect's B431 (Pete)",damName:"Hare Hotel's Betsy"},
+  {name:"Hare Hotel's Thelma",sex:'doe',breed:'Dwarf Hotot',color:'Black Banded',sireName:"Hummingbird's Frosted (Charles)",damName:'MG Pandora (Eloise)'},
+  {name:"On Fleek's VW Rabbit",sex:'buck',breed:'Dwarf Hotot',color:'Black Banded',sireName:"On Fleek's Darth Vader",damName:"Country Hare's Xena"},
+  {name:"On Fleek's Vet",sex:'doe',breed:'Dwarf Hotot',color:'Black Banded',sireName:"On Fleek's Darth Vader",damName:"Lake Effect's S298"},
+  {name:'Three Hundred Crossing Whoopsie (OZ)',sex:'doe',breed:'Dwarf Hotot',color:'Black Banded',sireName:"Dick's Boxcar",damName:'300xing Oops'},
+  {name:'CJM Chicago',sex:'buck',breed:'Holland Lop',color:'Solid Blue Tort',sireName:'HLH Relish',damName:'HLH Scottie',junior:true},
+  {name:'CJM Ink',sex:'buck',breed:'Holland Lop',color:'Solid Black',sireName:'HLH Waffle',damName:"Iris Field's Lucifer",junior:true},
+];
+
+function blankRabbit(over){
+  return Object.assign({
+    id:uid(), name:'', sex:'doe', breed:'', color:'', earNumber:'', dob:null, weight:'', legsWins:'', registrationNumber:'',
+    sireName:'', damName:'', status:'open', partner:null, bredDate:null, dueDate:null,
+    litterBornDate:null, litterKits:null, litterDead:null, weanDate:null, sellDate:null,
+    rebreedWeeks:3, lastLitterSummary:'', notes:'', notesLog:[], photos:[], flag:'', alias:'', external:false, weightLog:[],
+    sale:null, prevStatus:null, breedingHistory:[], activeBreedingId:null, presaleFlag:false,
+    nestBoxAckDate:null, litterConvertAckDate:null, forSale:false, graduatedDate:null, juniorAckDone:false
+  }, over);
+}
+function ensureAncestor(name, sexHint){
+  let r = findByName(name);
+  if(!r){ r = blankRabbit({name, sex:sexHint||'doe', status:'external', external:true}); rabbits.push(r); saveData(); }
+  return r;
+}
+function enrichFromRoster(){
+  ROSTER.forEach(entry=>{
+    let existing = rabbits.find(r=>r.name.trim().toLowerCase()===entry.name.trim().toLowerCase());
+    if(!existing){
+      const nickKey = Object.keys(NICK_MAP).find(k=>NICK_MAP[k]===entry.name);
+      if(nickKey){
+        const m = rabbits.find(r=>r.name.trim().toLowerCase()===nickKey);
+        if(m){ m.alias = m.alias || m.name; m.name = entry.name; existing = m; }
+      }
+    }
+    if(existing){
+      if(!existing.color) existing.color = entry.color||'';
+      if(!existing.breed) existing.breed = entry.breed||'';
+      if(!existing.sireName && entry.sireName) existing.sireName = entry.sireName;
+      if(!existing.damName && entry.damName) existing.damName = entry.damName;
+    } else {
+      rabbits.push(blankRabbit({
+        name:entry.name, sex:entry.sex, breed:entry.breed||'', color:entry.color||'',
+        sireName:entry.sireName||'', damName:entry.damName||'',
+        status: entry.junior ? 'growing' : (entry.sex==='doe' ? 'open':'available'),
+        flag: entry.junior ? 'No birthdate on file yet — add one so I can flag when ready to breed.' : ''
+      }));
+    }
+  });
+  rabbits.forEach(r=>{
+    if(r.sex==='unknown') r.sex = 'doe';
+    if(!r.weightLog) r.weightLog=[];
+    if(!r.breedingHistory) r.breedingHistory=[];
+    if(r.presaleFlag===undefined) r.presaleFlag=false;
+    if(r.activeBreedingId===undefined) r.activeBreedingId=null;
+    if(!r.notesLog){ r.notesLog = r.notes ? [{id:uid(), date:r.createdAt?r.createdAt.slice(0,10):todayStr(), text:r.notes}] : []; }
+    if(!r.photos) r.photos=[];
+    r.photos.forEach(p=>{ if(p.category==='Show / Stack') p.category='Front'; });
+    if(r.registrationNumber===undefined) r.registrationNumber='';
+    if(r.graduatedDate===undefined) r.graduatedDate=null;
+    if(r.juniorAckDone===undefined) r.juniorAckDone=false;
+  });
+}
+
+function seedActiveBreedings(){
+  const raw = [
+    ['Thelma','Kevin','2026-08-17','2026-09-17'],['Lilith','🥶','2026-08-18','2026-09-18'],
+    ['May','Abu','2026-08-23','2026-09-23'],['Chili','Lucifer','2026-08-23','2026-09-23'],
+    ['Lena','🥶','2026-08-23','2026-09-23'],['Flower','🥵','2026-08-23','2026-09-23'],
+    ['🚩','Kevin','2026-08-23','2026-09-23'],['OG','Thor','2026-08-23','2026-09-23'],
+    ['Tulip','CS','2026-08-23','2026-09-23'],['🍅','Ray','2026-08-23','2026-09-23'],
+    ['CJM1','B✅','2026-08-23','2026-09-23'],['Rain','Joy','2026-08-23','2026-09-23'],
+    ['Clover','Scor','2026-08-23','2026-09-23'],['Chonk','Frank','2026-08-23','2026-09-23'],
+    ['Elsa','VW','2026-08-23','2026-09-23'],['Relish','Lon','2026-08-23','2026-09-23'],
+    ['👂❌','🦉','2026-08-23','2026-09-23'],['GNM','CS','2026-08-25','2026-09-25'],
+    ['Bad1','🖤','2026-08-25','2026-09-25'],['🖊️','🥵','2026-08-25','2026-09-25'],
+    ['👸','Thor','2026-08-25','2026-09-25'],['Scottie','🍆','2026-08-25','2026-09-25'],
+    ['Thelma','Kevin','2026-09-04',null],['Scottie','🦂','2026-09-04',null],
+    ['CJM1','🥵','2026-09-04',null],['DT2','Abu','2026-09-04',null],
+    ['Bonnie','Joy','2026-09-04',null],['☔️','🖤','2026-09-05',null],
+    ['Onyx','🦉','2026-09-08',null],['Kumquat','Raymond','2026-09-09',null],
+    ['Amarya','B✅','2026-09-09',null],['Kim K','67HO','2026-09-10',null],
+  ];
+  const counts = {}; raw.forEach(r=>{ counts[r[0]]=(counts[r[0]]||0)+1; });
+  const list = raw.map(([name,buck,bred,due])=>blankRabbit({
+    name, sex:'doe', status:'pregnant', partner:buck, bredDate:bred, dueDate: due||addDays(bred,31),
+    flag: counts[name]>1 ? name+' appears more than once in the imported log — use Merge in More to combine, or delete the stale one.' : ''
+  }));
+  [...new Set(raw.map(r=>r[1]))].forEach(b=>list.push(blankRabbit({name:b,sex:'buck',status:'available'})));
+  return list;
+}
+
+function seedDemoExtras(){
+  if(rabbits.some(r=>r.name.startsWith('DEMO '))) return;
+  const t = todayStr();
+  const ranger = blankRabbit({name:'DEMO Ranger', sex:'buck', breed:'Holland Lop', color:'Solid Black Tort', status:'available'});
+  const lostBred = addDays(t,-60), litterBorn = addDays(t,-10), litterBred = addDays(litterBorn,-31);
+  const willowLitterKits = [{sex:'buck',color:'Broken Orange'},{sex:'doe',color:'Solid Black Tort'}];
+  const willowDead = {DOA:1,peanut:0,passed:0};
+  const willow = blankRabbit({
+    name:'DEMO Willow', sex:'doe', breed:'Holland Lop', color:'Solid Blue Tort', status:'nursing',
+    partner:'DEMO Ranger', litterBornDate:litterBorn, litterKits:willowLitterKits, litterDead:willowDead,
+    weanDate:addDays(litterBorn,42), sellDate:addDays(litterBorn,56), rebreedWeeks:3,
+    lastLitterSummary:'1 buck, 1 doe, 1 dead (1 DOA, 0 peanut, 0 passed) — '+fmtDate(litterBorn),
+    earNumber:'D15', notesLog:[{id:uid(), date:addDays(t,-2), text:'Excellent type developing — watching her for the next show string.'},{id:uid(), date:addDays(t,-40), text:'Paired with DEMO Ranger.'}]
+  });
+  const lostEntry = {id:uid(), bredDate:lostBred, partner:'DEMO Ranger', dueDate:addDays(lostBred,31), outcome:'lost', litterBornDate:null, litterKits:null, litterDead:null, weanDate:null, sellDate:null};
+  const litterEntry = {id:uid(), bredDate:litterBred, partner:'DEMO Ranger', dueDate:addDays(litterBred,31), outcome:'litter', litterBornDate:litterBorn, litterKits:willowLitterKits, litterDead:willowDead, weanDate:willow.weanDate, sellDate:willow.sellDate};
+  willow.breedingHistory = [lostEntry, litterEntry]; willow.activeBreedingId = litterEntry.id;
+
+  const kit1 = blankRabbit({ name:'DEMO Willow x DEMO Ranger — Buck 1', sex:'buck', breed:'Holland Lop', color:'Broken Orange',
+    dob:litterBorn, sireName:'DEMO Ranger', damName:'DEMO Willow', status:'growing', presaleFlag:true, notes:'Demo kit — marked available early to show the presale flag.' });
+  const kit2 = blankRabbit({ name:'DEMO Willow x DEMO Ranger — Doe 1', sex:'doe', breed:'Holland Lop', color:'Solid Black Tort',
+    dob:litterBorn, sireName:'DEMO Ranger', damName:'DEMO Willow', status:'growing', notes:'Demo kit.' });
+
+  const marigoldBred = addDays(t,-28);
+  const marigold = blankRabbit({ name:'DEMO Marigold', sex:'doe', breed:'Holland Lop', color:'Broken Black Tort', status:'pregnant',
+    partner:'DEMO Ranger', bredDate:marigoldBred, dueDate:addDays(marigoldBred,31), earNumber:'D21' });
+  const margEntry = {id:uid(), bredDate:marigoldBred, partner:'DEMO Ranger', dueDate:marigold.dueDate, outcome:'pending', litterBornDate:null, litterKits:null, litterDead:null, weanDate:null, sellDate:null};
+  marigold.breedingHistory=[margEntry]; marigold.activeBreedingId=margEntry.id;
+
+  const clementine = blankRabbit({ name:'DEMO Clementine', sex:'doe', breed:'Holland Lop', color:'Solid Orange', status:'open', sireName:'DEMO Ranger', earNumber:'D18' });
+  const sky = blankRabbit({ name:'DEMO Sky', sex:'buck', breed:'Holland Lop', color:'Solid Black Tort', status:'available', sireName:'DEMO Ranger' });
+
+  const comet = blankRabbit({ name:'DEMO Comet', sex:'buck', breed:'Holland Lop', color:'Solid Cream', status:'sold',
+    sale:{ soldDate:addDays(t,-5), buyer:'Demo Buyer', price:'150', deposit:'', depositDate:'', pickupDate:addDays(t,-3), notes:'Example sold record — safe to delete.' } });
+  const oldDoe = blankRabbit({ name:'DEMO Old Doe', sex:'doe', breed:'Holland Lop', color:'Solid Cream', status:'retired', notes:'Example retired record — try Return to roster.' });
+
+  const dupeA = blankRabbit({ name:'DEMO Test Rabbit', sex:'doe', breed:'Holland Lop', color:'Solid Chestnut', status:'open' });
+  const dupeB = blankRabbit({ name:'DEMO Test Rabitt', sex:'doe', breed:'Holland Lop', status:'open', notes:'Typo twin of DEMO Test Rabbit — try Merge in More.' });
+
+  rabbits.push(ranger, willow, kit1, kit2, marigold, clementine, sky, comet, oldDoe, dupeA, dupeB);
+
+  planned.push({ id:uid(), doeId:clementine.id, buckId:sky.id, doeName:clementine.name, buckName:sky.name,
+    targetDate:addDays(t,5), notes:'Demo pairing — both share DEMO Ranger as sire, so this shows the relatedness warning.' });
+}
+
+async function loadData(){
+  try{ rabbits = JSON.parse((await window.storage.get(RABBITS_KEY,false)).value); }
+  catch(e){ rabbits = seedActiveBreedings(); }
+  enrichFromRoster();
+  try{ planned = JSON.parse((await window.storage.get(PLANNED_KEY,false)).value); }catch(e){ planned=[]; }
+  try{ customEvents = JSON.parse((await window.storage.get(EVENTS_KEY,false)).value); }catch(e){ customEvents=[]; }
+  seedDemoExtras();
+  await saveData(); await savePlanned(); await saveEvents();
+  try{ const t=(await window.storage.get(THEME_KEY,false)).value; if(t==='dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){}
+  render();
+}
+async function saveData(){ try{ await window.storage.set(RABBITS_KEY, JSON.stringify(rabbits), false); }catch(e){ console.error(e); showToast("Couldn't save — device storage may be full. Try removing some photos."); } }
+async function savePlanned(){ try{ await window.storage.set(PLANNED_KEY, JSON.stringify(planned), false); }catch(e){ console.error(e); } }
+async function saveEvents(){ try{ await window.storage.set(EVENTS_KEY, JSON.stringify(customEvents), false); }catch(e){ console.error(e); } }
+function showToast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('on'); setTimeout(()=>t.classList.remove('on'),2000); }
+
+document.getElementById('themeBtn').onclick = async ()=>{
+  const dark = document.documentElement.getAttribute('data-theme')==='dark';
+  if(dark) document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme','dark');
+  try{ await window.storage.set(THEME_KEY, dark?'light':'dark', false); }catch(e){}
+};
+
+const ARCHIVED = ['deceased','retired','sold'];
+function isArchived(r){ return ARCHIVED.includes(r.status); }
+function isActive(r){ return !isArchived(r) && r.status!=='external'; }
+function findByName(name){ if(!name) return null; const k=name.trim().toLowerCase(); return rabbits.find(r=>r.name.trim().toLowerCase()===k || (r.alias&&r.alias.trim().toLowerCase()===k)); }
+function litterAgeDays(r){ return daysBetween(r.litterBornDate, todayStr()); }
+function isRebreedReady(r){ return r.status==='nursing' && litterAgeDays(r) >= r.rebreedWeeks*7; }
+function canRebred(r){ return r.status==='nursing' && (isRebreedReady(r) || !r.litterKits || r.litterKits.length===0); }
+function daysToDue(r){ return r.dueDate ? daysBetween(todayStr(), r.dueDate) : null; }
+function needsNestBox(r){ const d=daysToDue(r); return r.status==='pregnant' && d!==null && d<=3; }
+function isOverdue(r){ const d=daysToDue(r); return r.status==='pregnant' && d!==null && d<0; }
+function ageDays(r){ return r.dob ? daysBetween(r.dob, todayStr()) : null; }
+function isJuniorReady(r){ return r.status==='growing' && r.dob && ageDays(r)>=182; }
+function bucksCoverage(n){ return rabbits.filter(r=>r.sex==='doe' && r.partner===n && ['pregnant','nursing'].includes(r.status)); }
+
+function levenshtein(a,b){
+  a=a.toLowerCase().trim(); b=b.toLowerCase().trim();
+  if(a===b) return 0;
+  const m=[]; for(let i=0;i<=b.length;i++) m[i]=[i];
+  for(let j=0;j<=a.length;j++) m[0][j]=j;
+  for(let i=1;i<=b.length;i++) for(let j=1;j<=a.length;j++)
+    m[i][j] = b[i-1]===a[j-1] ? m[i-1][j-1] : Math.min(m[i-1][j-1]+1, m[i][j-1]+1, m[i-1][j]+1);
+  return m[b.length][a.length];
+}
+function fuzzyMatches(name, excludeId){
+  const q = name.trim().toLowerCase();
+  if(!q) return [];
+  return rabbits.filter(r=>{
+    if(r.id===excludeId) return false;
+    const n = r.name.trim().toLowerCase();
+    if(n===q) return true;
+    const tol = q.length<=4 ? 1 : q.length<=8 ? 2 : 3;
+    if(levenshtein(n,q)<=tol) return true;
+    if(n.includes(q)||q.includes(n)) return Math.abs(n.length-q.length)<=4;
+    return false;
+  }).slice(0,4);
+}
+
+function ancestorByPath(startName, path){
+  let cur = findByName(startName);
+  for(const ch of path){
+    if(!cur) return null;
+    const nx = ch==='s' ? cur.sireName : cur.damName;
+    if(!nx) return null;
+    cur = findByName(nx) || {name:nx, external:true};
+  }
+  return cur;
+}
+function getAncestorMap(name, maxD){
+  const map = new Map();
+  (function walk(n,d){
+    if(!n||d>maxD) return;
+    const k=n.trim().toLowerCase();
+    if(!map.has(k)||map.get(k).depth>d) map.set(k,{depth:d,name:n});
+    const r=findByName(n); if(r){ walk(r.sireName,d+1); walk(r.damName,d+1); }
+  })(name,0);
+  return map;
+}
+function relatednessSummary(doeName, buckName){
+  if(!doeName||!buckName) return {close:false, any:false, closeness:'', lines:[], text:'Select both a doe and a buck to check relatedness.'};
+  const dm=getAncestorMap(doeName,4), bm=getAncestorMap(buckName,4);
+  dm.delete(doeName.trim().toLowerCase()); bm.delete(buckName.trim().toLowerCase());
+  const shared=[];
+  dm.forEach((info,k)=>{ if(bm.has(k)) shared.push({name:info.name, dd:info.depth, bd:bm.get(k).depth}); });
+  if(!shared.length) return {close:false, any:false, closeness:'', lines:[], text:'No common ancestors found within 4 generations on file. (Pedigree data may be incomplete.)'};
+  const min = Math.min(...shared.map(s=>s.dd+s.bd));
+  const closeness = min<=2?'Closely related':min===3?'Moderately related':'Distantly related';
+  const lines = shared.map(s=>`${s.name} — ${s.dd} gen from doe, ${s.bd} gen from buck`);
+  return {close:min<=2, any:true, closeness, lines, text:closeness+' — shared ancestor(s): '+lines.join('; ')};
+}
+function relateBoxHTML(rel){
+  if(!rel.any) return esc(rel.text);
+  return `<b>${esc(rel.closeness)}</b> — shared ancestor${rel.lines.length===1?'':'s'}:<br>`+rel.lines.map(l=>`&bull; ${esc(l)}`).join('<br>');
+}
+
+const ICONS = {
+  home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/>',
+  rabbits:'<path d="M9 11C7 8 6.3 3.5 7.3 1C8.6 2 9.8 6 10.3 10.5"/><path d="M15 11C17 8 17.7 3.5 16.7 1C15.4 2 14.2 6 13.7 10.5"/><path d="M7 13a5 5 0 0 1 10 0c0 4-2.2 7-5 7s-5-3-5-7z"/>',
+  litters:'<circle cx="6.5" cy="19" r="1.8"/><circle cx="16.5" cy="19" r="1.8"/><path d="M6.5 17 C4 12 5 6 11 6 C14.5 6 14.5 8 14.5 10 L14.5 17"/><path d="M14.5 10.5 L19.5 6"/><path d="M6.5 17 L14.5 17"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M12 14v4M10 16h4"/>',
+  does:'<circle cx="12" cy="9" r="5"/><path d="M12 14v7M9 18h6"/>',
+  bucks:'<circle cx="10" cy="14" r="5"/><path d="M14 10l6-6M15 4h5v5"/>',
+  juniors:'<path d="M12 20v-8"/><path d="M12 12C12 8 9 5 5 5c0 4 3 7 7 7z"/><path d="M12 14c0-3 2.5-6 6-6 0 3-2.5 6-6 6z"/>',
+  planned:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M12 14v4M10 16h4"/>',
+  forsale:'<text x="12" y="17" text-anchor="middle" font-size="15" font-weight="700" font-family="sans-serif" stroke="none">$</text>',
+  more:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>'
+};
+const NAV = [['home','Home'],['rabbits','Herd'],['litters','Nursery'],['calendar','Calendar'],['more','More']];
+
+function renderNav(){
+  const activeMap = {does:'rabbits', bucks:'rabbits', juniors:'rabbits', ancestors:'more', archive:'more', backup:'more', merge:'more', search:'more', planned:'more', forsale:'more'};
+  const active = activeMap[currentTab]||currentTab;
+  document.getElementById('nav').innerHTML = NAV.map(([k,l])=>
+    `<button data-nav="${k}" class="${active===k?'on':''}"><svg viewBox="0 0 24 24">${ICONS[k]}</svg><span>${l}</span></button>`).join('');
+  document.querySelectorAll('[data-nav]').forEach(b=>{
+    b.onclick = ()=>{ if(b.dataset.nav==='more') openMoreSheet(); else { currentTab=b.dataset.nav; render(); window.scrollTo(0,0); } };
+  });
+}
+
+function autoGraduateJuniors(){
+  let changed=false;
+  rabbits.forEach(r=>{ if(isJuniorReady(r)){ r.status = r.sex==='doe'?'open':'available'; if(!r.graduatedDate) r.graduatedDate = todayStr(); changed=true; } });
+  if(changed) saveData();
+}
+function render(){
+  autoGraduateJuniors();
+  document.getElementById('quickBredBtn').style.display = (currentTab==='home'||(currentTab==='rabbits'&&rabbitsGroup==='does')) ? '' : 'none';
+  renderNav(); renderMain();
+}
+
+function statusBadge(r){
+  const s=r.status;
+  if(s==='pregnant') return isOverdue(r)?`<span class="badge b-urgent">OVERDUE</span>`:needsNestBox(r)?`<span class="badge b-urgent">NEST BOX &middot; ${daysToDue(r)===0?'TODAY':daysToDue(r)+'D'}</span>`:`<span class="badge b-preg">BRED</span>`;
+  if(s==='nursing') return isRebreedReady(r)?`<span class="badge b-urgent">READY TO REBREED</span>`:`<span class="badge b-nurse">ON A LITTER</span>`;
+  if(s==='reserved') return `<span class="badge b-reserved">RESERVED</span>`;
+  if(s==='sold') return `<span class="badge b-sold">SOLD</span>`;
+  if(s==='deceased') return `<span class="badge b-gone">DECEASED</span>`;
+  if(s==='retired') return `<span class="badge b-gone">RETIRED</span>`;
+  if(s==='resting') return `<span class="badge b-rest">RESTING</span>`;
+  if(s==='growing') return `<span class="badge b-grow">GROWING</span>`;
+  return `<span class="badge b-open">${r.sex==='doe'?'OPEN':'AVAILABLE'}</span>`;
+}
+function subLine(r){
+  const b=[r.sex==='doe'?'Doe':'Buck'];
+  if(r.earNumber) b.push('Ear# '+r.earNumber);
+  if(r.breed) b.push(r.breed); if(r.color) b.push(r.color); if(r.alias) b.push('aka '+r.alias);
+  return esc(b.join(' · '));
+}
+
+function cardHTML(r, forceUrgent, origin){
+  const urgent = forceUrgent || isRebreedReady(r) || needsNestBox(r);
+  let detail='';
+  if(r.status==='pregnant'){
+    const d=daysToDue(r);
+    const t = d===0?'due today':d>0?`due in ${d} day${d===1?'':'s'}`:`${-d} day${-d===1?'':'s'} overdue`;
+    detail = `Bred to <b>${esc(r.partner||'?')}</b> ${fmtDate(r.bredDate)} &middot; <b>${t}</b> (${fmtDate(r.dueDate)})`;
+    if(needsNestBox(r)) detail += `<br><b>Give her a nest box</b> — due in 3 days.`;
+  } else if(r.status==='nursing'){
+    const age=litterAgeDays(r), rem=r.rebreedWeeks*7-age;
+    detail = `${r.litterKits?r.litterKits.length:0} kits, born ${fmtDate(r.litterBornDate)} (${age}d) &middot; wean ${fmtDate(r.weanDate)} &middot; sell ${fmtDate(r.sellDate)}<br>rebreed target ${r.rebreedWeeks}wk — ${rem<=0?'<b>ready now</b>':'ready in '+rem+' day'+(rem===1?'':'s')}`;
+  } else if(r.sale){
+    detail = saleLine(r);
+  } else {
+    detail = r.lastLitterSummary ? 'Last litter: '+esc(r.lastLitterSummary) : ((r.sireName||r.damName)?`Sire: ${esc(r.sireName||'?')} &middot; Dam: ${esc(r.damName||'?')}`:'No breeding history yet');
+  }
+  const flag = r.flag?`<div class="flag">${esc(r.flag)}</div>`:'';
+  let a='';
+  if(r.status==='pregnant') a=`<button class="btn btn-primary" data-act="kindled" data-id="${r.id}">Kindled</button><button class="btn btn-danger" data-act="lost" data-id="${r.id}">Litter lost</button>`;
+  else if(r.status==='nursing') a=`${canRebred(r)?`<button class="btn btn-primary" data-act="rebred" data-id="${r.id}">Rebred</button>`:`<button class="btn btn-secondary btn-sm" disabled style="opacity:.5;">Rebreed available ${fmtDate(addDays(r.litterBornDate,r.rebreedWeeks*7))}</button>`}<button class="btn btn-secondary" data-act="wean" data-id="${r.id}">Weaned</button>`;
+  else if(isArchived(r)) a=`<button class="btn btn-primary" data-act="unarchive" data-id="${r.id}">Return to roster</button>`;
+  else if(r.sex==='doe') a=`<button class="btn btn-primary" data-act="bred" data-id="${r.id}">Mark bred</button><button class="btn btn-secondary btn-sm" data-act="plan" data-id="${r.id}">Plan a breeding</button>`;
+  else a='';
+  a+=`<button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button><button class="btn btn-secondary btn-sm" data-act="history" data-id="${r.id}">History</button><button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">Edit</button>`;
+  return `<div class="card ${urgent?'urgent':''}" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${statusBadge(r)}</div>
+    <div class="card-detail">${detail}</div>${flag}<div class="card-actions">${a}</div></div>`;
+}
+function saleLine(r){
+  const s=r.sale; if(!s) return '';
+  const bits=[];
+  if(s.buyer) bits.push('Buyer: '+esc(s.buyer));
+  if(s.price) bits.push('$'+esc(s.price));
+  if(s.deposit) bits.push('deposit $'+esc(s.deposit)+(s.depositDate?' on '+fmtDate(s.depositDate):''));
+  if(s.soldDate) bits.push('sold '+fmtDate(s.soldDate));
+  if(s.pickupDate) bits.push('pickup '+fmtDate(s.pickupDate));
+  if(s.notes) bits.push(esc(s.notes));
+  return bits.join(' &middot; ') || 'Sale started';
+}
+function buckCardHTML(r){
+  const cov=bucksCoverage(r.name);
+  const txt = cov.length?'Currently paired with: '+cov.map(d=>esc(d.name)).join(', ') : (r.sale?saleLine(r):((r.sireName||r.damName)?`Sire: ${esc(r.sireName||'?')} &middot; Dam: ${esc(r.damName||'?')}`:'Not currently paired with anyone'));
+  return `<div class="card" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div></div>
+    <div class="card-detail">${txt}</div>
+    <div class="card-actions">
+      <button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button>
+      <button class="btn btn-secondary btn-sm" data-act="history" data-id="${r.id}">History</button>
+      <button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">Edit</button>
+    </div></div>`;
+}
+function juniorCardHTML(r){
+  const ready=isJuniorReady(r), age=ageDays(r);
+  let d;
+  if(r.sale && r.status==='reserved') d = saleLine(r);
+  else if(!r.dob) d='No birthdate on file — add one to track breeding readiness.';
+  else if(ready) d=`${age} days old &middot; moving to the main roster automatically`;
+  else d=`${age} days old &middot; ready to breed in ${182-age} day${182-age===1?'':'s'} (${fmtDate(addDays(r.dob,182))})`;
+  return `<div class="card ${ready?'urgent':''}" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${statusBadge(r)}</div>
+    <div class="card-detail">${d}</div>${r.flag?`<div class="flag">${esc(r.flag)}</div>`:''}
+    <div class="card-actions">
+      <button class="btn btn-secondary btn-sm" data-act="graduate" data-id="${r.id}">Move to roster</button>
+      <button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button>
+      <button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">Edit</button>
+    </div></div>`;
+}
+function kitRowHTML(dam,k,i){
+  if(k.individualId){
+    const linked=rabbits.find(x=>x.id===k.individualId);
+    return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+      <span class="badge ${k.sex==='buck'?'b-preg':'b-nurse'}">${k.sex==='buck'?'Buck':'Doe'} · ${esc(k.color||'color?')}</span>
+      <button class="btn btn-secondary btn-sm" data-openkit="${linked?linked.id:''}">${linked?esc(linked.name):'(removed)'} &rarr;</button>
+    </div>`;
+  }
+  return `<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+    <span class="badge ${k.sex==='buck'?'b-preg':'b-nurse'}">${k.sex==='buck'?'Buck':'Doe'} · ${esc(k.color||'color?')}</span>
+    <button class="btn btn-secondary btn-sm" data-keepkit="${dam.id}:${i}">Create a profile</button>
+    <button class="btn btn-secondary btn-sm" data-salekit="${dam.id}:${i}">${k.forSale?'For sale &#10003;':'Not for sale yet'}</button>
+  </div>`;
+}
+function kitSummaryHTML(r, kits){
+  if(!kits.length) return '<span style="opacity:.6;">No kit detail logged</span>';
+  const bucks=kits.filter(k=>k.sex==='buck').length, does=kits.filter(k=>k.sex==='doe').length;
+  const forSale=kits.filter(k=>k.forSale&&!k.individualId).length;
+  const linked=kits.filter(k=>k.individualId).length;
+  const colors=[...new Set(kits.map(k=>k.color).filter(Boolean))];
+  let line=`${kits.length} kit${kits.length===1?'':'s'} &middot; ${bucks} buck, ${does} doe`;
+  const extras=[]; if(forSale) extras.push(forSale+' for sale'); if(linked) extras.push(linked+' with a profile page');
+  if(extras.length) line += ' &middot; '+extras.join(' &middot; ');
+  return `<div>${line}</div>${colors.length?`<div style="opacity:.65; font-size:12px; margin-top:2px;">${esc(colors.join(', '))}</div>`:''}`;
+}
+function nurseryCardHTML(r){
+  const age=litterAgeDays(r), kits=r.litterKits||[];
+  const expanded = expandedLitters.has(r.id);
+  const list = expanded
+    ? (kits.length?kits.map((k,i)=>kitRowHTML(r,k,i)).join(''):'<span style="opacity:.6;">No kit detail logged</span>')
+    : kitSummaryHTML(r, kits);
+  const dead=r.litterDead?`${(r.litterDead.DOA||0)+(r.litterDead.peanut||0)+(r.litterDead.passed||0)} lost (${r.litterDead.DOA||0} DOA, ${r.litterDead.peanut||0} peanut, ${r.litterDead.passed||0} passed)`:'';
+  return `<div class="card no-tap ${isRebreedReady(r)?'urgent':''}"><div class="card-top"><div><div class="card-name">${esc(r.name)}'s litter</div><div class="card-sub">Sired by ${esc(r.partner||'?')} &middot; born ${fmtDate(r.litterBornDate)} (${age}d)</div></div>${statusBadge(r)}</div>
+    <div class="card-detail" style="margin-top:10px;">${list}</div>
+    ${kits.length?`<button class="btn btn-secondary btn-sm" style="margin-top:8px;" data-togglekits="${r.id}">${expanded?'Hide kits':'Manage kits'}</button>`:''}
+    <div class="card-detail">Wean ${fmtDate(r.weanDate)} &middot; 8 weeks ${fmtDate(r.sellDate)}${dead?' &middot; '+dead:''}</div>
+    <div class="card-actions">
+      ${canRebred(r)?`<button class="btn btn-primary" data-act="rebred" data-id="${r.id}">Rebred</button>`:`<button class="btn btn-secondary btn-sm" disabled style="opacity:.5;">Rebreed available ${fmtDate(addDays(r.litterBornDate,r.rebreedWeeks*7))}</button>`}
+      <button class="btn btn-secondary" data-act="wean" data-id="${r.id}">Weaned</button>
+      <button class="btn btn-secondary btn-sm" data-act="litterpedigree" data-id="${r.id}">Pedigree</button>
+      <button class="btn btn-secondary btn-sm" data-act="editlitter" data-id="${r.id}">Edit litter</button>
+      <button class="btn btn-secondary btn-sm" data-openprofile="${r.id}">Open doe's profile</button>
+    </div></div>`;
+}
+function ancestorCardHTML(r){
+  const b=[]; if(r.breed)b.push(r.breed); if(r.color)b.push(r.color); if(r.earNumber)b.push('Ear# '+r.earNumber); if(r.weight)b.push(r.weight+' lbs'); if(r.legsWins)b.push(r.legsWins);
+  return `<div class="card"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${esc(b.join(' · '))||'No details yet'}</div></div></div>
+    ${(r.sireName||r.damName)?`<div class="card-detail">Sire: ${esc(r.sireName||'?')} &middot; Dam: ${esc(r.damName||'?')}</div>`:''}
+    <div class="card-actions"><button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button><button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">Edit details</button></div></div>`;
+}
+function plannedCardHTML(p){
+  const doe=rabbits.find(r=>r.id===p.doeId), buck=rabbits.find(r=>r.id===p.buckId);
+  const dn=doe?doe.name:p.doeName, bn=buck?buck.name:p.buckName;
+  const rel=relatednessSummary(dn,bn);
+  return `<div class="card no-tap"><div class="card-top"><div><div class="card-name">${esc(dn)} &times; ${esc(bn)}</div><div class="card-sub">Target: ${fmtDate(p.targetDate)}${doe?' · doe is '+doe.status:''}</div></div></div>
+    <div class="relate-box ${rel.close?'close':''}">${relateBoxHTML(rel)}</div>
+    ${p.notes?`<div class="card-detail">${esc(p.notes)}</div>`:''}
+    <div class="card-actions"><button class="btn btn-primary" data-act="executePlanned" data-id="${p.id}">Execute now</button><button class="btn btn-danger btn-sm" data-act="deletePlanned" data-id="${p.id}">Delete</button></div></div>`;
+}
+
+function checklistRow(text, buttons){
+  return `<div class="todo-row">
+    <div class="todo-text">${text}</div>
+    <div style="display:flex; gap:6px; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end;">${buttons}</div>
+  </div>`;
+}
+function convertLitterToIndividuals(damId){
+  const dam=rabbits.find(x=>x.id===damId); if(!dam||!dam.litterKits) return;
+  let count=0;
+  dam.litterKits.forEach((k,i)=>{
+    if(k.individualId) return;
+    const kit=blankRabbit({ name:`${dam.name} x ${dam.partner||'?'} — ${k.sex==='buck'?'Buck':'Doe'} ${i+1}`,
+      sex:k.sex, breed:dam.breed, color:k.color||'', dob:dam.litterBornDate, sireName:dam.partner||'', damName:dam.name, status:'growing' });
+    rabbits.push(kit); k.individualId=kit.id; count++;
+  });
+  saveData(); render(); showToast(count+' individual page'+(count===1?'':'s')+' created');
+}
+
+/* ---------- main render dispatcher ---------- */
+function renderMain(){
+  const main=document.getElementById('main');
+  if(searchQuery.trim()){ renderSearch(main); return; }
+  if(currentTab==='home'){ renderHome(main); }
+  else if(currentTab==='rabbits'){ renderRabbits(main); }
+  else if(currentTab==='litters'){
+    const it=rabbits.filter(r=>r.sex==='doe'&&r.status==='nursing').sort((a,b)=>(a.litterBornDate||'').localeCompare(b.litterBornDate||''));
+    main.innerHTML=`<div class="section-label">${it.length} CURRENT LITTER${it.length===1?'':'S'}</div>`+(it.length?it.map(nurseryCardHTML).join(''):`<div class="empty">No litters in the nursery right now.</div>`);
+  } else if(currentTab==='calendar'){ renderCalendar(main); return; }
+  else if(currentTab==='does'||currentTab==='bucks'||currentTab==='juniors'){ currentTab='rabbits'; rabbitsGroup = currentTab; renderRabbits(main); }
+  else if(currentTab==='planned'){
+    main.innerHTML=`<div class="section-label">PLANNED BREEDINGS</div><button class="btn btn-secondary" style="width:100%; margin-bottom:12px;" id="planTopBtn">+ Plan a breeding</button>`+
+      (planned.length?planned.map(plannedCardHTML).join(''):`<div class="empty">No breedings planned yet.</div>`);
+    document.getElementById('planTopBtn').onclick=openAddPlannedSheet;
+  } else if(currentTab==='ancestors'){
+    const it=rabbits.filter(r=>r.status==='external').sort((a,b)=>a.name.localeCompare(b.name));
+    main.innerHTML=`<div class="section-label">PEDIGREE-ONLY RABBITS</div>`+(it.length?it.map(ancestorCardHTML).join(''):`<div class="empty">No standalone ancestor records yet. They're created automatically when you enter a sire or dam who isn't one of your own rabbits.</div>`);
+  } else if(currentTab==='archive'){
+    const it=rabbits.filter(isArchived).sort((a,b)=>a.name.localeCompare(b.name));
+    main.innerHTML=`<button class="btn btn-secondary" style="width:100%; margin-bottom:12px;" id="archiveAddBtn">+ Add rabbit</button>
+      <div class="section-label">SOLD, RETIRED, AND DECEASED</div>`+(it.length?it.map(r=>cardHTML(r)).join(''):`<div class="empty">Nothing archived yet. Rabbits you mark sold, retired, or deceased land here — and can be returned to the roster any time.</div>`);
+    document.getElementById('archiveAddBtn').onclick=openAddSheet;
+  } else if(currentTab==='backup'){ renderBackup(main); return; }
+  else if(currentTab==='forsale'){ renderForSale(main); return; }
+  attachCardEvents();
+}
+
+function renderHome(main){
+  const t = todayStr();
+  const activeRabbits = rabbits.filter(r=>isActive(r)&&r.status!=='external');
+  const allDoesH = activeRabbits.filter(r=>r.sex==='doe'&&r.status!=='growing');
+  const doesCount = allDoesH.length;
+  const bucksCount = activeRabbits.filter(r=>r.sex==='buck'&&r.status!=='growing').length;
+  const juniorsCount = activeRabbits.filter(r=>r.status==='growing').length;
+  const nest = rabbits.filter(r=>r.sex==='doe'&&needsNestBox(r)&&r.nestBoxAckDate!==t).sort((a,b)=>daysToDue(a)-daysToDue(b));
+  const overdueDoes = rabbits.filter(r=>r.sex==='doe'&&isOverdue(r)).sort((a,b)=>daysToDue(a)-daysToDue(b));
+  const convert = rabbits.filter(r=>r.sex==='doe'&&r.status==='nursing'&&r.sellDate&&r.sellDate<=t&&r.litterConvertAckDate!==t&&(r.litterKits||[]).some(k=>!k.individualId));
+  const reb = rabbits.filter(r=>r.sex==='doe'&&isRebreedReady(r));
+  const recentGraduates = rabbits.filter(r=>r.graduatedDate && !r.juniorAckDone && daysBetween(r.graduatedDate,t)<=14).sort((a,b)=>a.graduatedDate.localeCompare(b.graduatedDate));
+  const nursingDoes = rabbits.filter(r=>r.sex==='doe'&&r.status==='nursing');
+  const allKits = nursingDoes.flatMap(d=>d.litterKits||[]);
+  const liveKits = allKits.length, liveBucks = allKits.filter(k=>k.sex==='buck').length, liveDoes = allKits.filter(k=>k.sex==='doe').length;
+  const approachingLitters = nursingDoes.filter(d=>{ const dLeft=daysBetween(t,d.sellDate); return dLeft>=0 && dLeft<=14; })
+    .sort((a,b)=>daysBetween(t,a.sellDate)-daysBetween(t,b.sellDate));
+  const forSaleRabbits = rabbits.filter(r=>r.forSale && r.status!=='sold' && !isArchived(r) && r.status!=='external').length;
+  const forSaleKits = allKits.filter(k=>k.forSale && !k.individualId).length;
+  const archiveCount = rabbits.filter(isArchived).length;
+
+  const attnTotal = nest.length + overdueDoes.length + convert.length + reb.length + recentGraduates.length;
+
+  let h = `<div class="section-label" style="display:flex; align-items:center; justify-content:space-between; margin-top:0;">
+    <span>NEEDS ATTENTION</span>
+    ${attnTotal ? `<span style="font-size:11px; font-weight:600; color:#fffdf8; background:var(--rust); padding:2px 9px; border-radius:10px;">${attnTotal}</span>` : ''}
+  </div>`;
+
+  if(!attnTotal){
+    h += `<div class="card no-tap"><div class="card-detail">Nothing needs attention right now.</div></div>`;
+  } else {
+    overdueDoes.forEach(r=>{
+      const d=daysToDue(r);
+      h += checklistRow(`<b>${esc(r.name)}</b> is overdue — ${-d} day${-d===1?'':'s'} past due`,
+        `<button class="btn btn-primary btn-sm" data-act="kindled" data-id="${r.id}">Kindled</button>`);
+    });
+    nest.forEach(r=>{
+      const d=daysToDue(r);
+      const when = d===0 ? 'due today' : `due in ${d} day${d===1?'':'s'}`;
+      h += checklistRow(`<b>${esc(r.name)}</b> needs a nest box — ${when}`, `<button class="btn btn-primary btn-sm" data-nestdone="${r.id}">Done</button>`);
+    });
+    convert.forEach(r=>{
+      h += checklistRow(`<b>${esc(r.name)}'s litter</b> is 8 weeks old — make individual pages?`,
+        `<button class="btn btn-primary btn-sm" data-convertyes="${r.id}">Yes</button><button class="btn btn-secondary btn-sm" data-convertno="${r.id}">Not yet</button>`);
+    });
+    reb.forEach(r=>{
+      h += checklistRow(`<b>${esc(r.name)}</b> is ready to rebreed`, `<button class="btn btn-primary btn-sm" data-act="rebred" data-id="${r.id}">Rebred</button>`);
+    });
+    recentGraduates.forEach(r=>{
+      h += checklistRow(`<b>${esc(r.name)}</b> turned 6 months — moved to the main roster`, `<button class="btn btn-secondary btn-sm" data-graduateack="${r.id}">Got it</button>`);
+    });
+  }
+
+  h += `<div style="height:1px; background:var(--line); margin:14px 0 12px;"></div>`;
+
+  h += `<div class="stats" style="padding:0; margin-bottom:16px;">
+    <div class="stat" data-goprog="does"><div class="n">${doesCount}</div><div class="l">Does</div></div>
+    <div class="stat" data-goprog="bucks"><div class="n">${bucksCount}</div><div class="l">Bucks</div></div>
+    <div class="stat" data-goprog="juniors"><div class="n">${juniorsCount}</div><div class="l">Juniors</div></div>
+  </div>`;
+
+  h += `<button class="btn btn-secondary" style="width:100%; margin-bottom:16px;" id="homeAddRabbitBtn">+ Add a rabbit</button>`;
+
+  h += `<div class="section-label">LITTERS AND UPCOMING</div>
+  <div class="card no-tap">
+    <div class="card-detail">${nursingDoes.length} active litter${nursingDoes.length===1?'':'s'} &middot; ${liveKits} live kit${liveKits===1?'':'s'} (${liveBucks} buck${liveBucks===1?'':'s'}, ${liveDoes} doe${liveDoes===1?'':'s'})</div>
+    ${approachingLitters.length ? approachingLitters.map(d=>{
+      const daysLeft=daysBetween(t,d.sellDate);
+      const sale=(d.litterKits||[]).filter(k=>k.forSale&&!k.individualId).length;
+      return `<div class="card-detail" style="margin-top:6px;">${esc(d.name)}'s litter — 8 weeks ${daysLeft===0?'today':'in '+daysLeft+'d'}${sale?` &middot; ${sale} marked for sale`:''}</div>`;
+    }).join('') : `<div class="card-detail" style="margin-top:6px; opacity:.7;">Nothing coming up in the next 2 weeks.</div>`}
+    <div class="card-actions"><button class="btn btn-secondary btn-sm" data-goprog="litters">View Litters</button></div>
+  </div>`;
+
+  h += `<div class="section-label">MORE</div>
+  <div class="stats" style="padding:0;">
+    <div class="stat" data-goprog="planned"><div class="n">${planned.length}</div><div class="l">Planned</div></div>
+    <div class="stat" data-goprog="forsale"><div class="n">${forSaleRabbits+forSaleKits}</div><div class="l">For sale</div></div>
+    <div class="stat" data-goprog="archive"><div class="n">${archiveCount}</div><div class="l">Archive</div></div>
+  </div>`;
+
+  main.innerHTML = h;
+  document.getElementById('homeAddRabbitBtn').onclick = openAddSheet;
+  document.querySelectorAll('[data-nestdone]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.nestdone); if(r){ r.nestBoxAckDate=todayStr(); saveData(); render(); } });
+  document.querySelectorAll('[data-convertyes]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.convertyes); if(r) convertLitterToIndividuals(r.id); });
+  document.querySelectorAll('[data-convertno]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.convertno); if(r){ r.litterConvertAckDate=todayStr(); saveData(); render(); } });
+  document.querySelectorAll('[data-graduateack]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.graduateack); if(r){ r.juniorAckDone=true; saveData(); render(); } });
+  document.querySelectorAll('[data-goprog]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.goprog;
+    if(k==='does'||k==='bucks'||k==='juniors'){ currentTab='rabbits'; rabbitsGroup=k; }
+    else currentTab=k;
+    render(); window.scrollTo(0,0);
+  });
+  attachCardEvents();
+}
+
+function renderRabbits(main){
+  const groupTabs = `<div class="subnav-wrap"><div class="seg">
+    <button data-rgroup="does" class="${rabbitsGroup==='does'?'on':''}">Does</button>
+    <button data-rgroup="bucks" class="${rabbitsGroup==='bucks'?'on':''}">Bucks</button>
+    <button data-rgroup="juniors" class="${rabbitsGroup==='juniors'?'on':''}">Juniors</button>
+  </div></div>`;
+  let body='';
+  if(rabbitsGroup==='does'){
+    const rank = {pregnant:0, nursing:1, open:2, reserved:3};
+    const labels = {pregnant:'BRED', nursing:'ON A LITTER', open:'OPEN', reserved:'RESERVED'};
+    const allDoes = rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing');
+    const totalsRow = `<div class="stats" style="padding:0; margin-bottom:12px;">${
+      [['all','All'],['pregnant','Bred'],['nursing','On a litter'],['open','Open']].map(([k,l])=>
+        `<div class="stat ${doesFilter===k?'active':''}" data-doesfilter="${k}"><div class="n">${k==='all'?allDoes.length:allDoes.filter(r=>r.status===k).length}</div><div class="l">${l}</div></div>`).join('')
+    }</div>`;
+    let it=allDoes.sort((a,b)=>{
+      const ra=rank[a.status]!=null?rank[a.status]:2, rb=rank[b.status]!=null?rank[b.status]:2;
+      if(ra!==rb) return ra-rb;
+      if(a.status==='pregnant') return daysToDue(a)-daysToDue(b);
+      if(a.status==='nursing') return (a.rebreedWeeks*7-litterAgeDays(a))-(b.rebreedWeeks*7-litterAgeDays(b));
+      return a.name.localeCompare(b.name);
+    });
+    if(doesFilter!=='all') it = it.filter(r=>r.status===doesFilter);
+    if(!it.length){ body=totalsRow+`<div class="empty">No does match this filter.</div>`; }
+    else{
+      let h='', lastGroup=null;
+      it.forEach(r=>{
+        const g = rank[r.status]!=null?r.status:'open';
+        if(g!==lastGroup && doesFilter==='all'){ h+=`<div class="section-label">${labels[g]||g.toUpperCase()}</div>`; lastGroup=g; }
+        h+=cardHTML(r);
+      });
+      body=totalsRow+h;
+    }
+  } else if(rabbitsGroup==='bucks'){
+    const it=rabbits.filter(r=>r.sex==='buck'&&isActive(r)&&r.status!=='growing').sort((a,b)=>a.name.localeCompare(b.name));
+    body=`<div class="section-label">${it.length} TOTAL BUCK${it.length===1?'':'S'}</div>`+
+      (it.length?it.map(buckCardHTML).join(''):`<div class="empty">No bucks yet. Tap Add rabbit in More.</div>`);
+  } else if(rabbitsGroup==='juniors'){
+    const it=rabbits.filter(r=>r.status==='growing'||(r.status==='reserved'&&r.dob&&ageDays(r)<182)).sort((a,b)=>(a.dob||'9').localeCompare(b.dob||'9'));
+    body=it.length?it.map(juniorCardHTML).join(''):`<div class="empty">No juniors on file. They appear automatically after you log a litter.</div>`;
+  }
+  main.innerHTML = groupTabs + body;
+  document.querySelectorAll('[data-rgroup]').forEach(b=>b.onclick=()=>{ rabbitsGroup=b.dataset.rgroup; render(); window.scrollTo(0,0); });
+  document.querySelectorAll('[data-doesfilter]').forEach(b=>b.onclick=()=>{ doesFilter=b.dataset.doesfilter; render(); });
+}
+
+/* ---------- calendar ---------- */
+function renderCalendar(main){
+  const t = todayStr();
+  if(!calSelectedDate) calSelectedDate = t;
+  if(!calWeekStart) calWeekStart = startOfWeek(calSelectedDate);
+
+  const events = [];
+  rabbits.forEach(r=>{
+    if(!isActive(r)) return;
+    if(r.status==='pregnant' && r.dueDate){
+      events.push({date:r.dueDate, label:`${r.name} — estimated kindling`, sub:`Bred to ${r.partner||'?'} · check for a nest box a few days before`, id:r.id, type:'due', overdue:isOverdue(r)});
+    }
+    if(r.status==='nursing'){
+      const rebreedDate = addDays(r.litterBornDate, r.rebreedWeeks*7);
+      events.push({date:rebreedDate, label:`${r.name} — rebreed target`, sub:`${r.rebreedWeeks} week target from litter born ${fmtDate(r.litterBornDate)}`, id:r.id, type:'rebreed'});
+      if(r.weanDate) events.push({date:r.weanDate, label:`${r.name}'s litter — wean`, sub:'Kits weaned at 6 weeks', id:r.id, type:'wean'});
+      if(r.sellDate) events.push({date:r.sellDate, label:`${r.name}'s litter — ready to go`, sub:'8 weeks old, ready for new homes', id:r.id, type:'sell'});
+    }
+  });
+  planned.forEach(p=>{
+    const doe=rabbits.find(r=>r.id===p.doeId);
+    events.push({date:p.targetDate, label:`Planned: ${p.doeName||(doe?doe.name:'?')} × ${p.buckName}`, sub:p.notes||'Planned breeding', id:doe?doe.id:null, type:'planned'});
+  });
+  customEvents.forEach(e=>{ events.push({date:e.date, label:e.title, sub:'Custom event', id:null, customId:e.id, type:'custom'}); });
+
+  const DOT = {due:'var(--rust)', rebreed:'var(--gold-deep)', wean:'var(--marsh)', sell:'var(--marsh)', planned:'var(--gold-deep)', custom:'var(--ink-soft)'};
+
+  const days=[]; for(let i=0;i<7;i++){ days.push(addDays(calWeekStart,i)); }
+  const dayLabels=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const weekEnd = days[6];
+  const rangeLabel = fmtDate(calWeekStart).replace(/, \d{4}$/,'') + ' - ' + fmtDate(weekEnd);
+
+  let strip = `<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+    <button id="calPrevWeek" aria-label="Previous week" style="width:32px; height:32px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); color:var(--navy); font-size:16px;">&lsaquo;</button>
+    <span style="font-size:12px; font-weight:500; color:var(--navy); letter-spacing:.03em; font-family:'Jost',sans-serif;">${rangeLabel}</span>
+    <button id="calNextWeek" aria-label="Next week" style="width:32px; height:32px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); color:var(--navy); font-size:16px;">&rsaquo;</button>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:16px;">`;
+
+  days.forEach((d,i)=>{
+    const dayEvents = events.filter(e=>e.date===d);
+    const isSel = d===calSelectedDate;
+    const isToday = d===t;
+    const dnum = new Date(d+'T00:00:00').getDate();
+    const dotColors = [...new Set(dayEvents.map(e=> e.overdue ? 'var(--rust)' : (DOT[e.type]||'var(--ink-soft)')))].slice(0,3);
+    strip += `<button data-calday="${d}" style="text-align:center; background:none; border:none; padding:0; cursor:pointer;">
+      <div style="font-size:10px; color:var(--ink-soft); opacity:${isSel?'1':'.6'}; font-weight:${isSel?'600':'400'}; margin-bottom:4px; font-family:'Jost',sans-serif;">${dayLabels[i]}</div>
+      <div style="border-radius:10px; padding:7px 0 6px; background:${isSel?'var(--navbar)':'var(--card)'}; border:1px solid ${isSel?'var(--navbar)':(isToday?'var(--gold-deep)':'var(--line)')};">
+        <div style="font-size:14px; font-weight:500; color:${isSel?'#fffdf8':'var(--navy)'}; font-family:'Jost',sans-serif;">${dnum}</div>
+        <div style="display:flex; justify-content:center; gap:2px; margin-top:3px; height:4px;">
+          ${dotColors.map(c=>`<span style="width:4px; height:4px; border-radius:50%; background:${c};"></span>`).join('')}
+        </div>
+      </div>
+    </button>`;
+  });
+  strip += `</div>`;
+
+  const selDate = new Date(calSelectedDate+'T00:00:00');
+  const weekdayFull = selDate.toLocaleDateString('en-US',{weekday:'long'});
+  const dateFull = selDate.toLocaleDateString('en-US',{month:'long', day:'numeric', year:'numeric'});
+  const dayEvents = events.filter(e=>e.date===calSelectedDate).sort((a,b)=>(a.overdue?0:1)-(b.overdue?0:1));
+
+  let agenda = `<button class="btn btn-secondary" style="width:100%; margin-bottom:12px;" id="calAddBtn">+ Add an event</button>
+    <div style="font-family:'Cormorant Garamond',serif; font-weight:600; font-size:17px; color:var(--navy); margin-bottom:10px;">${weekdayFull}, ${dateFull}${calSelectedDate===t?' — Today':''}</div>`;
+
+  if(!dayEvents.length){
+    agenda += `<div class="empty">Nothing on the calendar for this day.</div>`;
+  } else {
+    dayEvents.forEach(e=>{ agenda += calRowHTML(e, e.overdue); });
+  }
+
+  main.innerHTML = strip + agenda;
+
+  document.getElementById('calPrevWeek').onclick=()=>{ calWeekStart=addDays(calWeekStart,-7); render(); };
+  document.getElementById('calNextWeek').onclick=()=>{ calWeekStart=addDays(calWeekStart,7); render(); };
+  document.querySelectorAll('[data-calday]').forEach(b=>b.onclick=()=>{ calSelectedDate=b.dataset.calday; render(); });
+  document.getElementById('calAddBtn').onclick=()=>openAddEventSheet(calSelectedDate);
+  document.querySelectorAll('[data-calopen]').forEach(b=>b.onclick=()=>{
+    const r=rabbits.find(x=>x.id===b.dataset.calopen); if(r) openRabbitProfile(r);
+  });
+  document.querySelectorAll('[data-caldel]').forEach(b=>b.onclick=(ev)=>{
+    ev.stopPropagation();
+    customEvents = customEvents.filter(x=>x.id!==b.dataset.caldel); saveEvents(); render();
+  });
+}
+function calRowHTML(e, overdue){
+  return `<div class="cal-row ${overdue?'overdue':''}" ${e.id?`data-calopen="${e.id}"`:''}>
+    <div class="cal-dot" style="background:${overdue?'var(--rust)':'var(--gold-deep)'};"></div>
+    <div style="flex:1;">
+      <div class="cal-row-text"><b>${esc(e.label)}</b></div>
+      <div class="cal-row-text" style="opacity:.75; font-size:12px; margin-top:2px;">${esc(e.sub||'')}</div>
+    </div>
+    ${e.customId?`<button class="btn btn-danger btn-sm" data-caldel="${e.customId}">Remove</button>`:''}
+  </div>`;
+}
+function openAddEventSheet(defaultDate){
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Add an event</h2>
+    <div class="field"><label>Title</label><input id="f-evtitle" placeholder="e.g. Vet visit, show entry deadline"></div>
+    <div class="field"><label>Date</label><input type="date" id="f-evdate" value="${defaultDate||todayStr()}"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>`);
+  document.getElementById('f-save').onclick=()=>{
+    const title=document.getElementById('f-evtitle').value.trim();
+    if(!title){ showToast('Enter a title'); return; }
+    const d = document.getElementById('f-evdate').value||todayStr();
+    customEvents.push({id:uid(), title, date:d});
+    calSelectedDate = d;
+    saveEvents(); closeSheet(); render(); showToast('Event added');
+  };
+}
+
+function renderSearch(main){
+  const q=searchQuery.trim().toLowerCase();
+  const scored = rabbits.map(r=>{
+    const n=r.name.toLowerCase();
+    let s=99;
+    if(n===q) s=0; else if(n.startsWith(q)) s=1; else if(n.includes(q)) s=2;
+    else if(r.earNumber && r.earNumber.toLowerCase()===q) s=1;
+    else if(r.earNumber && r.earNumber.toLowerCase().includes(q)) s=2.5;
+    else if(r.color && r.color.toLowerCase().includes(q)) s=4;
+    else if(r.breed && r.breed.toLowerCase().includes(q)) s=4.5;
+    else { const d=levenshtein(n,q); if(d<=3) s=3+d; }
+    return {r,s};
+  }).filter(x=>x.s<99).sort((a,b)=>a.s-b.s||a.r.name.localeCompare(b.r.name)).slice(0,25);
+  if(!scored.length){ main.innerHTML=`<div class="empty">No rabbit matches "${esc(searchQuery)}".</div>`; return; }
+  main.innerHTML=`<div class="section-label">${scored.length} MATCH${scored.length===1?'':'ES'}</div>`+scored.map(({r})=>
+    `<div class="card" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${statusBadge(r)}</div></div>`).join('');
+  attachCardEvents();
+}
+document.getElementById('searchInput').addEventListener('input', e=>{
+  searchQuery=e.target.value;
+  document.getElementById('searchClear').style.display = searchQuery ? 'block' : 'none';
+  renderMain();
+});
+document.getElementById('searchClear').onclick=()=>{
+  searchQuery=''; const inp=document.getElementById('searchInput'); inp.value=''; inp.focus();
+  document.getElementById('searchClear').style.display='none';
+  renderMain();
+};
+
+function attachSuggest(input, getOptions){
+  const box = document.createElement('div');
+  box.className = 'suggest-box';
+  input.insertAdjacentElement('afterend', box);
+  function render(){
+    const q = input.value.trim().toLowerCase();
+    const seen = new Set();
+    const opts = getOptions().filter(Boolean).filter(o=>{
+      const k=o.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true;
+    }).filter(o=>!q || o.toLowerCase().includes(q)).slice(0,6);
+    if(!opts.length){ box.style.display='none'; box.innerHTML=''; return; }
+    box.style.display='block';
+    box.innerHTML = opts.map(o=>`<button type="button" class="suggest-item">${esc(o)}</button>`).join('');
+    box.querySelectorAll('.suggest-item').forEach(btn=>{
+      btn.addEventListener('mousedown', e=>e.preventDefault());
+      btn.addEventListener('click', ()=>{
+        input.value = btn.textContent; box.style.display='none'; box.innerHTML='';
+        input.dispatchEvent(new Event('input', {bubbles:true}));
+        input.dispatchEvent(new Event('change', {bubbles:true}));
+      });
+    });
+  }
+  input.addEventListener('input', render);
+  input.addEventListener('focus', render);
+  input.addEventListener('blur', ()=>setTimeout(()=>{ box.style.display='none'; },150));
+}
+function allRabbitNames(excludeId){ return rabbits.filter(r=>r.id!==excludeId).map(r=>r.name); }
+function allKnownColors(){ return [...new Set(rabbits.map(r=>r.color).filter(Boolean))].sort(); }
+
+function markLitterLost(r){
+  if(r.activeBreedingId && r.breedingHistory){
+    const e = r.breedingHistory.find(x=>x.id===r.activeBreedingId);
+    if(e) e.outcome='lost';
+  }
+  r.activeBreedingId=null; r.status='open'; r.bredDate=r.dueDate=r.partner=null;
+}
+function armConfirm(btn, confirmText, onConfirm){
+  if(btn.dataset.armed==='1'){ onConfirm(); return; }
+  btn.dataset.armed='1'; btn.dataset.origText=btn.textContent;
+  btn.textContent=confirmText;
+  setTimeout(()=>{ if(btn.dataset.armed==='1'){ btn.dataset.armed='0'; btn.textContent=btn.dataset.origText; } }, 4000);
+}
+function attachCardEvents(){
+  document.querySelectorAll('[data-openprofile]').forEach(el=>{
+    el.addEventListener('click', (ev)=>{
+      if(ev.target.closest('button')) return; // let action buttons handle their own clicks
+      const r=rabbits.find(x=>x.id===el.dataset.openprofile); if(r) openRabbitProfile(r);
+    });
+  });
+  document.querySelectorAll('[data-act]').forEach(btn=>{
+    btn.onclick=(ev)=>{
+      ev.stopPropagation();
+      const id=btn.dataset.id, act=btn.dataset.act;
+      if(act==='executePlanned'||act==='deletePlanned'){
+        const p=planned.find(x=>x.id===id); if(!p) return;
+        if(act==='deletePlanned'){ planned=planned.filter(x=>x.id!==id); savePlanned(); render(); showToast('Planned breeding removed'); return; }
+        const doe=rabbits.find(r=>r.id===p.doeId);
+        if(doe) openBreedSheet(doe, p.buckName||(rabbits.find(r=>r.id===p.buckId)||{}).name, ()=>{ planned=planned.filter(x=>x.id!==id); savePlanned(); render(); });
+        return;
+      }
+      const r=rabbits.find(x=>x.id===id); if(!r) return;
+      if(act==='kindled') openKindledSheet(r);
+      else if(act==='editlitter') openKindledSheet(r,true);
+      else if(act==='litterpedigree') openLitterPedigreeSheet(r);
+      else if(act==='lost'){ armConfirm(btn, 'Tap again to confirm', ()=>{ markLitterLost(r); saveData(); render(); showToast(r.name+' marked open'); }); }
+      else if(act==='rebred'||act==='bred') openBreedSheet(r);
+      else if(act==='plan') openAddPlannedSheet(r.id);
+      else if(act==='wean'){ r.status='open'; saveData(); render(); showToast(r.name+' weaned'); }
+      else if(act==='graduate'){ r.status = r.sex==='doe'?'open':'available'; saveData(); render(); showToast(r.name+' moved to the main roster'); }
+      else if(act==='unarchive') openUnarchive(r);
+      else if(act==='edit') openEditSheet(r);
+      else if(act==='pedigree') openPedigreeSheet(r);
+      else if(act==='history') openHistorySheet(r);
+    };
+  });
+  document.querySelectorAll('[data-keepkit]').forEach(btn=>{
+    btn.onclick=(ev)=>{ ev.stopPropagation(); const [damId,idx]=btn.dataset.keepkit.split(':'); keepKitForBreeding(damId,+idx); };
+  });
+  document.querySelectorAll('[data-salekit]').forEach(btn=>{
+    btn.onclick=(ev)=>{ ev.stopPropagation(); const [damId,idx]=btn.dataset.salekit.split(':'); toggleKitForSale(damId,+idx); };
+  });
+  document.querySelectorAll('[data-openkit]').forEach(btn=>{
+    btn.onclick=(ev)=>{ ev.stopPropagation(); const kr=rabbits.find(x=>x.id===btn.dataset.openkit); if(kr) openRabbitProfile(kr); };
+  });
+  document.querySelectorAll('[data-togglekits]').forEach(btn=>{
+    btn.onclick=(ev)=>{
+      ev.stopPropagation();
+      const id=btn.dataset.togglekits;
+      if(expandedLitters.has(id)) expandedLitters.delete(id); else expandedLitters.add(id);
+      render(); if(profileRabbitId) renderProfile();
+    };
+  });
+}
+
+function openSheet(html){ document.getElementById('sheet').innerHTML=html; document.getElementById('sheetBackdrop').classList.add('on'); document.getElementById('sheet').scrollTop=0; }
+function closeSheet(){ document.getElementById('sheetBackdrop').classList.remove('on'); }
+document.getElementById('sheetBackdrop').addEventListener('click',e=>{ if(e.target.id==='sheetBackdrop') closeSheet(); });
+function done(origin){ closeSheet(); if(typeof origin==='function'){ origin(); } render(); if(profileRabbitId) renderProfile(); }
+
+/* Kept for compatibility with call sites (litter kit rows, search, etc.) — now opens the full profile */
+function openQuickActions(r){ openRabbitProfile(r); }
+
+let kitRows=[];
+function renderKitRows(){
+  document.getElementById('kit-rows').innerHTML = kitRows.map((row,i)=>`
+    <div style="border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:8px; background:var(--card);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-family:'Jost',sans-serif; font-size:11px; font-weight:600; color:var(--ink-soft);">Kit ${i+1}</span>
+        <button type="button" class="btn btn-danger btn-sm" data-kitremove="${i}">Remove</button>
+      </div>
+      <div class="seg" style="margin-bottom:8px;"><button type="button" data-kitsex="doe" data-i="${i}" class="${row.sex==='doe'?'on':''}">Doe</button><button type="button" data-kitsex="buck" data-i="${i}" class="${row.sex==='buck'?'on':''}">Buck</button></div>
+      <div class="field" style="margin-bottom:0;"><label>Color</label><input data-kitcolor="${i}" value="${esc(row.color||'')}" placeholder="e.g. Broken Orange"></div>
+    </div>`).join('');
+  document.querySelectorAll('[data-kitsex]').forEach(b=>b.onclick=()=>{ kitRows[+b.dataset.i].sex=b.dataset.kitsex; renderKitRows(); });
+  document.querySelectorAll('[data-kitcolor]').forEach(i=>{ i.oninput=()=>{ kitRows[+i.dataset.kitcolor].color=i.value; }; attachSuggest(i, allKnownColors); });
+  document.querySelectorAll('[data-kitremove]').forEach(b=>b.onclick=()=>{ kitRows.splice(+b.dataset.kitremove,1); renderKitRows(); });
+}
+function openKindledSheet(r, editing){
+  kitRows = editing && r.litterKits ? r.litterKits.map(k=>({id:k.id||uid(), sex:k.sex, color:k.color, forSale:!!k.forSale, individualId:k.individualId||null})) : [{id:uid(), sex:'doe', color:'', forSale:false, individualId:null}];
+  const d = r.litterDead||{DOA:0,peanut:0,passed:0};
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>${esc(r.name)} ${editing?'— edit litter':'kindled'}</h2>
+    <div class="field"><label>Litter born</label><input type="date" id="f-born" value="${editing&&r.litterBornDate?r.litterBornDate:todayStr()}"></div>
+    <label style="display:block;font-family:'Jost',sans-serif;font-size:12px;font-weight:600;margin-bottom:5px;">Surviving kits</label>
+    <div id="kit-rows"></div>
+    <button type="button" class="btn btn-secondary btn-sm" id="f-addkit" style="margin-bottom:14px;">+ Add another kit</button>
+    <label style="display:block;font-family:'Jost',sans-serif;font-size:12px;font-weight:600;margin-bottom:5px;">Dead / lost</label>
+    <div class="row3">
+      <div class="field"><label>DOA</label><input type="number" id="f-doa" min="0" value="${d.DOA||0}"></div>
+      <div class="field"><label>Peanut</label><input type="number" id="f-peanut" min="0" value="${d.peanut||0}"></div>
+      <div class="field"><label>Passed</label><input type="number" id="f-passed" min="0" value="${d.passed||0}"></div>
+    </div>
+    <div class="field"><label>Rebreed target</label>
+      <div class="seg" id="f-weeks">${[2,3,4].map(w=>`<button data-v="${w}" class="${r.rebreedWeeks===w?'on':''}">${w} wks</button>`).join('')}</div></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>`);
+  renderKitRows();
+  document.getElementById('f-addkit').onclick=()=>{ kitRows.push({id:uid(), sex:'doe', color:'', forSale:false, individualId:null}); renderKitRows(); };
+  let weeks=r.rebreedWeeks||3;
+  document.querySelectorAll('#f-weeks button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#f-weeks button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); weeks=+b.dataset.v; });
+  document.getElementById('f-save').onclick=()=>{
+    const born=document.getElementById('f-born').value||todayStr();
+    const doa=+document.getElementById('f-doa').value||0, pea=+document.getElementById('f-peanut').value||0, pas=+document.getElementById('f-passed').value||0;
+    const bA=kitRows.filter(k=>k.sex==='buck').length, dA=kitRows.filter(k=>k.sex==='doe').length;
+    const wasEditing = editing;
+    r.status='nursing'; r.litterBornDate=born; r.litterKits=kitRows.map(k=>({id:k.id, sex:k.sex, color:k.color||'', forSale:k.forSale, individualId:k.individualId}));
+    r.litterDead={DOA:doa,peanut:pea,passed:pas}; r.weanDate=addDays(born,42); r.sellDate=addDays(born,56);
+    r.rebreedWeeks=weeks; r.dueDate=null; r.flag='';
+    r.lastLitterSummary=`${bA} buck, ${dA} doe, ${doa+pea+pas} dead (${doa} DOA, ${pea} peanut, ${pas} passed) — ${fmtDate(born)}`;
+    r.breedingHistory = r.breedingHistory||[];
+    let entry = r.breedingHistory.find(x=>x.id===r.activeBreedingId) || (wasEditing ? r.breedingHistory[r.breedingHistory.length-1] : null);
+    if(!entry){ entry={id:uid(), bredDate:r.bredDate||born, partner:r.partner||'', dueDate:null}; r.breedingHistory.push(entry); }
+    entry.outcome='litter'; entry.litterBornDate=born; entry.litterKits=r.litterKits; entry.litterDead=r.litterDead;
+    entry.weanDate=r.weanDate; entry.sellDate=r.sellDate;
+    r.litterKits.forEach(k=>{
+      if(k.individualId){
+        const kr=rabbits.find(x=>x.id===k.individualId);
+        if(kr){ kr.sex=k.sex; kr.color=k.color; kr.dob=born; }
+      }
+    });
+    saveData(); closeSheet(); render(); if(profileRabbitId) renderProfile();
+    showToast(wasEditing?'Litter updated':`${r.name} moved to nursing`);
+  };
+}
+
+function openBreedSheet(r, presetBuck, onDone){
+  const bucks = rabbits.filter(x=>x.sex==='buck'&&x.status!=='external').map(x=>x.name);
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>${esc(r.name)} bred</h2>
+    <div class="field"><label>Buck</label><input id="f-buck" placeholder="Type or pick a buck" value="${esc(presetBuck||'')}"></div>
+    <div id="f-relate" class="relate-box">Pick a buck to check relatedness.</div>
+    <div class="field" style="margin-top:12px;"><label>Bred date</label><input type="date" id="f-bred" value="${todayStr()}"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>`);
+  const buckInput=document.getElementById('f-buck'), box=document.getElementById('f-relate'), saveBtn=document.getElementById('f-save');
+  attachSuggest(buckInput, ()=>bucks);
+  function upd(){
+    const b=buckInput.value.trim();
+    if(!b){ box.className='relate-box'; box.textContent='Pick a buck to check relatedness.'; saveBtn.textContent='Save'; return; }
+    const rel=relatednessSummary(r.name,b);
+    box.className='relate-box'+(rel.close?' close':''); box.innerHTML=relateBoxHTML(rel);
+    saveBtn.textContent = rel.any?'Save anyway':'Save';
+  }
+  buckInput.addEventListener('input',upd); upd();
+  saveBtn.onclick=()=>{
+    const buck=buckInput.value.trim(), bred=document.getElementById('f-bred').value||todayStr();
+    if(buck && !rabbits.some(x=>x.name.trim().toLowerCase()===buck.toLowerCase())){
+      const dupes=fuzzyMatches(buck);
+      if(dupes.length){ openDuplicateSheet(buck, dupes, chosen=>{ commitBreed(r, chosen||buck, bred, onDone); }); return; }
+    }
+    commitBreed(r, buck, bred, onDone);
+  };
+}
+function commitBreed(r, buck, bred, onDone){
+  r.status='pregnant'; r.partner=buck||null; r.bredDate=bred; r.dueDate=addDays(bred,31);
+  r.litterBornDate=null; r.litterKits=null; r.litterDead=null; r.flag='';
+  r.breedingHistory = r.breedingHistory||[];
+  const entry = {id:uid(), bredDate:bred, partner:buck||'', dueDate:r.dueDate, outcome:'pending', litterBornDate:null, litterKits:null, litterDead:null, weanDate:null, sellDate:null};
+  r.breedingHistory.push(entry); r.activeBreedingId = entry.id;
+  if(buck && !rabbits.some(x=>x.name.trim().toLowerCase()===buck.trim().toLowerCase())) rabbits.push(blankRabbit({name:buck,sex:'buck',status:'available'}));
+  saveData(); closeSheet(); render(); if(profileRabbitId) renderProfile(); showToast(r.name+' marked bred');
+  if(onDone) onDone();
+}
+
+function openQuickBreedSheet(){
+  const open = rabbits.filter(r=>r.sex==='doe'&&(r.status==='open'||r.status==='resting'));
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Mark a doe bred</h2>
+    <div class="field"><label>Which doe</label><select id="f-whichdoe"><option value="">Select a doe</option>${open.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select></div>
+    ${!open.length?'<div class="empty" style="padding:12px 0;">No does are currently open.</div>':''}
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-next">Next</button></div>`);
+  document.getElementById('f-next').onclick=()=>{
+    const d=open.find(x=>x.id===document.getElementById('f-whichdoe').value);
+    if(!d){ showToast('Pick a doe'); return; }
+    openBreedSheet(d);
+  };
+}
+document.getElementById('quickBredBtn').onclick=openQuickBreedSheet;
+
+function openSaleSheet(r){
+  const s=r.sale||{};
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Sell ${esc(r.name)}</h2>
+    <div class="card-sub" style="margin-bottom:12px;">Only a sold date is required. A deposit with no sold date marks this rabbit Reserved.</div>
+    <div class="field"><label>Deposit ($)</label><input type="number" id="f-dep" value="${esc(s.deposit||'')}" placeholder="50"></div>
+    <div class="field"><label>Deposit date</label><input type="date" id="f-depdate" value="${s.depositDate||''}"></div>
+    <div class="field"><label>Sold date</label><input type="date" id="f-sold" value="${s.soldDate||''}"></div>
+    <div class="field"><label>Pickup date</label><input type="date" id="f-pickup" value="${s.pickupDate||''}"></div>
+    <div class="row2">
+      <div class="field"><label>Buyer</label><input id="f-buyer" value="${esc(s.buyer||'')}"></div>
+      <div class="field"><label>Sale price ($)</label><input type="number" id="f-price" value="${esc(s.price||'')}"></div>
+    </div>
+    <div class="field"><label>Notes</label><textarea id="f-salenotes">${esc(s.notes||'')}</textarea></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>`);
+  document.getElementById('f-save').onclick=()=>{
+    const dep=document.getElementById('f-dep').value.trim(), sold=document.getElementById('f-sold').value;
+    if(!dep && !sold){ showToast('Add a sold date, or a deposit to reserve'); return; }
+    if(!r.prevStatus && isActive(r)) r.prevStatus=r.status;
+    r.sale={ deposit:dep, depositDate:document.getElementById('f-depdate').value, soldDate:sold,
+      pickupDate:document.getElementById('f-pickup').value, buyer:document.getElementById('f-buyer').value.trim(),
+      price:document.getElementById('f-price').value.trim(), notes:document.getElementById('f-salenotes').value.trim() };
+    r.status = sold ? 'sold' : 'reserved';
+    saveData(); closeSheet(); render(); if(profileRabbitId) renderProfile();
+    showToast(r.name+(sold?' marked sold':' marked reserved'));
+  };
+}
+
+function openUnarchive(r){
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Return ${esc(r.name)} to the roster</h2>
+    <div class="card-detail">All pedigree links, litter history, and details stay exactly as they are. ${r.sale?'The previous sale record will be cleared.':''}</div>
+    <div class="field" style="margin-top:14px;"><label>Bring back as</label>
+      <select id="f-back">
+        <option value="${r.sex==='doe'?'open':'available'}">${r.sex==='doe'?'Open':'Available'}</option>
+        <option value="resting">Resting</option>
+        <option value="growing">Junior (still growing)</option>
+      </select></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Return to roster</button></div>`);
+  document.getElementById('f-save').onclick=()=>{
+    r.status=document.getElementById('f-back').value; r.sale=null; r.prevStatus=null;
+    saveData(); closeSheet(); render(); if(profileRabbitId) renderProfile(); showToast(r.name+' is back on the roster');
+  };
+}
+
+function openDuplicateSheet(typedName, matches, onResolve){
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Possible duplicate</h2>
+    <div class="dupe-box">You typed <b>${esc(typedName)}</b>. These look very similar to rabbits already on file.</div>
+    <div class="section-label">IS IT ONE OF THESE?</div>
+    ${matches.map(m=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px; text-align:left;" data-usedupe="${esc(m.name)}">${esc(m.name)} — ${m.status}${m.color?' · '+esc(m.color):''}</button>`).join('')}
+    <div class="sheet-actions"><button class="btn btn-primary" id="f-new" style="width:100%;">No, "${esc(typedName)}" is a different rabbit</button></div>`);
+  document.querySelectorAll('[data-usedupe]').forEach(b=>b.onclick=()=>{ closeSheet(); onResolve(b.dataset.usedupe); });
+  document.getElementById('f-new').onclick=()=>{ closeSheet(); onResolve(null); };
+}
+
+function openMergeSheet(){
+  const names = rabbits.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Merge duplicates</h2>
+    <div class="card-sub" style="margin-bottom:12px;">Combines two records into one. The keeper gains any details only the duplicate had, every sire/dam reference is repointed, and the duplicate is removed.</div>
+    <div class="field"><label>Keep this rabbit</label><select id="f-keep"><option value="">Select</option>${names.map(x=>`<option value="${x.id}">${esc(x.name)} — ${x.status}</option>`).join('')}</select></div>
+    <div class="field"><label>Merge this one into it</label><select id="f-drop"><option value="">Select</option>${names.map(x=>`<option value="${x.id}">${esc(x.name)} — ${x.status}</option>`).join('')}</select></div>
+    <div id="f-mergewarn" class="dupe-box" style="display:none;"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Merge</button></div>`);
+  let armed=false;
+  const warn=document.getElementById('f-mergewarn'), btn=document.getElementById('f-save');
+  function check(){
+    const k=rabbits.find(x=>x.id===document.getElementById('f-keep').value);
+    const d=rabbits.find(x=>x.id===document.getElementById('f-drop').value);
+    armed=false; btn.textContent='Merge';
+    if(k&&d&&k.id!==d.id){ warn.style.display='block'; warn.innerHTML=`<b>${esc(d.name)}</b> will be removed and everything pointing at it will point to <b>${esc(k.name)}</b> instead. This can't be undone.`; }
+    else warn.style.display='none';
+  }
+  document.getElementById('f-keep').onchange=check; document.getElementById('f-drop').onchange=check;
+  btn.onclick=()=>{
+    const k=rabbits.find(x=>x.id===document.getElementById('f-keep').value);
+    const d=rabbits.find(x=>x.id===document.getElementById('f-drop').value);
+    if(!k||!d||k.id===d.id){ showToast('Pick two different rabbits'); return; }
+    if(!armed){ armed=true; btn.textContent='Tap again to confirm merge'; return; }
+    ['breed','color','earNumber','weight','legsWins','sireName','damName','dob','notes','registrationNumber'].forEach(f=>{ if(!k[f]&&d[f]) k[f]=d[f]; });
+    if(!k.alias && d.name!==k.name) k.alias=d.name;
+    if((!k.weightLog||!k.weightLog.length) && d.weightLog && d.weightLog.length) k.weightLog=d.weightLog;
+    if((!k.photos||!k.photos.length) && d.photos && d.photos.length) k.photos=d.photos;
+    if(d.notesLog && d.notesLog.length) k.notesLog=(k.notesLog||[]).concat(d.notesLog);
+    if(!k.litterKits && d.litterKits){ k.litterKits=d.litterKits; k.litterBornDate=d.litterBornDate; k.litterDead=d.litterDead; k.weanDate=d.weanDate; k.sellDate=d.sellDate; }
+    if(!k.lastLitterSummary && d.lastLitterSummary) k.lastLitterSummary=d.lastLitterSummary;
+    if(isActive(k) && k.status==='open' && d.status==='pregnant'){ k.status='pregnant'; k.partner=d.partner; k.bredDate=d.bredDate; k.dueDate=d.dueDate; }
+    const dn=d.name.trim().toLowerCase();
+    rabbits.forEach(x=>{
+      if(x.sireName && x.sireName.trim().toLowerCase()===dn) x.sireName=k.name;
+      if(x.damName && x.damName.trim().toLowerCase()===dn) x.damName=k.name;
+      if(x.partner && x.partner.trim().toLowerCase()===dn) x.partner=k.name;
+    });
+    planned.forEach(p=>{ if(p.doeId===d.id) p.doeId=k.id; if(p.buckId===d.id) p.buckId=k.id; if(p.doeName===d.name) p.doeName=k.name; if(p.buckName===d.name) p.buckName=k.name; });
+    k.flag='';
+    rabbits=rabbits.filter(x=>x.id!==d.id);
+    saveData(); savePlanned(); closeSheet(); render(); showToast('Merged into '+k.name);
+  };
+}
+
+function openEditSheet(r, origin){
+  const known = rabbits.filter(x=>x.id!==r.id).map(x=>x.name);
+  openSheet(`<button class="close-x" id="f-cancel-x">&times;</button>
+    <h2>Edit ${esc(r.name)}</h2>
+    <div class="field"><label>Name</label><input id="f-name" value="${esc(r.name)}"></div>
+    <div class="field"><label>Also known as (optional)</label><input id="f-alias" value="${esc(r.alias||'')}" placeholder="Nickname or previous name"></div>
+    <div class="field"><label>Sex</label><div class="seg" id="f-sex">
+      <button data-v="doe" class="${r.sex==='doe'?'on':''}">Doe</button><button data-v="buck" class="${r.sex==='buck'?'on':''}">Buck</button></div></div>
+    <div class="row2">
+      <div class="field"><label>Breed</label><select id="f-breed">
+        <option ${r.breed==='Holland Lop'?'selected':''}>Holland Lop</option>
+        <option ${r.breed==='Dwarf Hotot'?'selected':''}>Dwarf Hotot</option>
+        <option ${r.breed&&r.breed!=='Holland Lop'&&r.breed!=='Dwarf Hotot'?'selected':''}>Other</option></select></div>
+      <div class="field"><label>Color / Variety</label><input id="f-color" value="${esc(r.color||'')}"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Ear #</label><input id="f-ear" value="${esc(r.earNumber||'')}"></div>
+      <div class="field"><label>Weight (lbs)</label><input id="f-weight" value="${esc(r.weight||'')}"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Date of birth</label><input type="date" id="f-dob" value="${r.dob||''}"></div>
+      <div class="field"><label>Registration #</label><input id="f-reg" value="${esc(r.registrationNumber||'')}"></div>
+    </div>
+    <div class="field"><label>Legs / Wins</label><input id="f-legs" value="${esc(r.legsWins||'')}"></div>
+    <div class="row2">
+      <div class="field"><label>Sire</label><input id="f-sire" value="${esc(r.sireName||'')}"></div>
+      <div class="field"><label>Dam</label><input id="f-dam" value="${esc(r.damName||'')}"></div>
+    </div>
+    <div class="field"><label>General notes</label><textarea id="f-notes">${esc(r.notes||'')}</textarea></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" id="f-cancel">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>
+    ${r.status!=='external'?`<div class="sheet-actions">
+      <button class="btn btn-secondary" id="f-forsale" style="flex:1;">${r.forSale?'For sale &#10003;':'Mark for sale'}</button>
+      <button class="btn btn-secondary" id="f-sell" style="flex:1;">Sell</button></div>
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" id="f-deceased" style="flex:1;">Mark deceased</button>
+      <button class="btn btn-secondary" id="f-retired" style="flex:1;">Mark retired</button></div>`:''}
+    <div class="sheet-actions"><button class="btn btn-danger" id="f-delete" style="flex:1;">Delete permanently</button></div>`);
+  attachSuggest(document.getElementById('f-color'), allKnownColors);
+  attachSuggest(document.getElementById('f-sire'), ()=>rabbits.filter(x=>x.sex==='buck'&&x.id!==r.id).map(x=>x.name));
+  attachSuggest(document.getElementById('f-dam'), ()=>rabbits.filter(x=>x.sex==='doe'&&x.id!==r.id).map(x=>x.name));
+  document.getElementById('f-cancel-x').onclick=()=>done(origin);
+  document.getElementById('f-cancel').onclick=()=>done(origin);
+  let sex=r.sex;
+  document.querySelectorAll('#f-sex button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#f-sex button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); sex=b.dataset.v; });
+  document.getElementById('f-save').onclick=()=>{
+    const sire=document.getElementById('f-sire').value.trim(), dam=document.getElementById('f-dam').value.trim();
+    const check=(val, cb)=>{
+      if(!val || rabbits.some(x=>x.name.trim().toLowerCase()===val.toLowerCase())) return cb(val);
+      const m=fuzzyMatches(val, r.id);
+      if(!m.length) return cb(val);
+      openDuplicateSheet(val, m, chosen=>cb(chosen||val));
+    };
+    check(sire, finalSire=>check(dam, finalDam=>{
+      r.name=document.getElementById('f-name').value.trim()||r.name;
+      r.alias=document.getElementById('f-alias').value.trim();
+      r.sex=sex; r.breed=document.getElementById('f-breed').value; r.color=document.getElementById('f-color').value;
+      r.earNumber=document.getElementById('f-ear').value; r.weight=document.getElementById('f-weight').value;
+      r.dob=document.getElementById('f-dob').value||null; r.legsWins=document.getElementById('f-legs').value;
+      r.registrationNumber=document.getElementById('f-reg').value;
+      r.sireName=finalSire; r.damName=finalDam; r.notes=document.getElementById('f-notes').value;
+      if(finalSire) ensureAncestor(finalSire,'buck');
+      if(finalDam) ensureAncestor(finalDam,'doe');
+      if(r.status==='growing'&&r.dob) r.flag='';
+      saveData(); done(origin);
+    }));
+  };
+  const dec=document.getElementById('f-deceased');
+  const sellBtn=document.getElementById('f-sell');
+  if(sellBtn) sellBtn.onclick=()=>{ closeSheet(); openSaleSheet(r); };
+  const forSaleBtn=document.getElementById('f-forsale');
+  if(forSaleBtn) forSaleBtn.onclick=()=>{ r.forSale=!r.forSale; saveData(); closeSheet(); render(); if(profileRabbitId) renderProfile(); showToast(r.forSale?r.name+' marked for sale':r.name+' unmarked'); };
+  if(dec) dec.onclick=()=>{
+    r.status='deceased';
+    if(r.damName&&r.dob){
+      const dam=rabbits.find(x=>x.sex==='doe'&&x.name===r.damName&&x.litterBornDate===r.dob);
+      if(dam){ dam.litterDead=dam.litterDead||{DOA:0,peanut:0,passed:0}; dam.litterDead.passed=(dam.litterDead.passed||0)+1;
+        if(dam.litterKits){ const i=dam.litterKits.findIndex(k=>k.sex===r.sex&&(k.color||'')===(r.color||'')); if(i>=0) dam.litterKits.splice(i,1); } }
+    }
+    saveData(); closeSheet(); render(); if(profileRabbitId) renderProfile(); showToast(r.name+' marked deceased');
+  };
+  const ret=document.getElementById('f-retired');
+  if(ret) ret.onclick=()=>{ r.status='retired'; saveData(); closeSheet(); render(); if(profileRabbitId) renderProfile(); showToast(r.name+' marked retired'); };
+  document.getElementById('f-delete').onclick=(e)=>{ armConfirm(e.target, 'Tap again to confirm', ()=>{ rabbits=rabbits.filter(x=>x.id!==r.id); saveData(); closeSheet(); closeProfile(); render(); showToast(r.name+' deleted'); }); };
+}
+
+function openAddSheet(){
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Add rabbit</h2>
+    <div class="field"><label>Name</label><input id="f-name" placeholder="CJM Clover"></div>
+    <div class="field"><label>Sex</label><div class="seg" id="f-sex"><button data-v="doe" class="on">Doe</button><button data-v="buck">Buck</button></div></div>
+    <div class="row2">
+      <div class="field"><label>Breed</label><select id="f-breed"><option>Holland Lop</option><option>Dwarf Hotot</option><option>Other</option></select></div>
+      <div class="field"><label>Color / Variety</label><input id="f-color"></div>
+    </div>
+    <div class="field"><label>Date of birth</label><input type="date" id="f-dob"></div>
+    <div class="field"><label>Status</label><select id="f-status">
+        <option value="open">Open / available</option><option value="growing">Junior (growing)</option>
+        <option value="pregnant">Bred</option>
+        <option value="retired">Retired (archive)</option><option value="deceased">Deceased (archive)</option></select></div>
+    <div class="row2">
+      <div class="field"><label>Sire</label><input id="f-sire"></div>
+      <div class="field"><label>Dam</label><input id="f-dam"></div>
+    </div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Add</button></div>`);
+  attachSuggest(document.getElementById('f-color'), allKnownColors);
+  attachSuggest(document.getElementById('f-sire'), ()=>rabbits.filter(x=>x.sex==='buck').map(x=>x.name));
+  attachSuggest(document.getElementById('f-dam'), ()=>rabbits.filter(x=>x.sex==='doe').map(x=>x.name));
+  let sex='doe';
+  document.querySelectorAll('#f-sex button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#f-sex button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); sex=b.dataset.v; });
+  document.getElementById('f-save').onclick=()=>{
+    const name=document.getElementById('f-name').value.trim();
+    if(!name){ showToast('Enter a name'); return; }
+    const m=fuzzyMatches(name);
+    if(m.length){
+      openDuplicateSheet(name, m, chosen=>{
+        if(chosen){ const ex=findByName(chosen); if(ex){ if(isArchived(ex)) openUnarchive(ex); else openRabbitProfile(ex); return; } }
+        commitAdd(name, sex);
+      });
+      return;
+    }
+    commitAdd(name, sex);
+  };
+}
+function commitAdd(name, sex){
+  let status=document.getElementById('f-status').value;
+  if(sex==='buck'&&status==='open') status='available';
+  const sire=document.getElementById('f-sire').value.trim(), dam=document.getElementById('f-dam').value.trim();
+  rabbits.push(blankRabbit({ name, sex, status, breed:document.getElementById('f-breed').value,
+    color:document.getElementById('f-color').value, dob:document.getElementById('f-dob').value||null,
+    sireName:sire, damName:dam }));
+  if(sire) ensureAncestor(sire,'buck');
+  if(dam) ensureAncestor(dam,'doe');
+  saveData(); closeSheet(); render(); showToast(name+' added');
+}
+
+function pedBox(node,path,role){
+  const label = role?`<div class="pc" style="opacity:.6; text-transform:uppercase; font-size:9px; letter-spacing:.04em;">${role}</div>`:'';
+  if(!node||!node.name) return `<div class="ped-box unknown" data-pedpath="${path}">${label}<div class="pn">+ Add name</div></div>`;
+  return `<div class="ped-box ${node.external?'unknown':''}" data-pedname="${esc(node.name)}">${label}<div class="pn">${esc(node.name)}</div>${node.color?`<div class="pc">${esc(node.color)}</div>`:''}</div>`;
+}
+function historyEntryHTML(damObj, e){
+  const cls = e.outcome==='litter'?'took':e.outcome==='lost'?'lost':'pending';
+  const label = e.outcome==='litter'?'Took — litter born':e.outcome==='lost'?'Did not take / litter lost':'Pending';
+  let detail = `Bred to <b>${esc(e.partner||'?')}</b> on ${fmtDate(e.bredDate)}`;
+  if(damObj) detail = `<b>${esc(damObj.name)}</b> &times; ${esc(e.partner||'?')} — bred ${fmtDate(e.bredDate)}`;
+  if(e.outcome==='litter' && e.litterKits) detail += `<br>${e.litterKits.length} kits born ${fmtDate(e.litterBornDate)}`;
+  return `<div class="history-entry ${cls}"><div class="card-detail" style="margin:0;"><b>${label}</b></div><div class="card-detail" style="margin-top:2px;">${detail}</div>
+    ${damObj?`<div class="card-actions" style="margin-top:8px;"><button class="btn btn-secondary btn-sm" data-histedit="${damObj.id}:${e.id}">Edit this entry</button></div>`:''}</div>`;
+}
+function openHistorySheet(r){
+  let html;
+  if(r.sex==='doe'){
+    const hist = (r.breedingHistory||[]).slice().sort((a,b)=>b.bredDate.localeCompare(a.bredDate));
+    html = hist.length ? hist.map(e=>historyEntryHTML(r,e)).join('') : `<div class="empty">No breedings logged yet for ${esc(r.name)}.</div>`;
+  } else {
+    const rows=[];
+    rabbits.forEach(d=>{ if(d.sex==='doe') (d.breedingHistory||[]).forEach(e=>{ if(e.partner && e.partner.trim().toLowerCase()===r.name.trim().toLowerCase()) rows.push({dam:d, e}); }); });
+    rows.sort((a,b)=>b.e.bredDate.localeCompare(a.e.bredDate));
+    html = rows.length ? rows.map(x=>historyEntryHTML(x.dam,x.e)).join('') : `<div class="empty">No breedings logged yet for ${esc(r.name)}.</div>`;
+  }
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>${esc(r.name)} — Breeding history</h2>${html}
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()" style="flex:1;">Close</button></div>`);
+  document.querySelectorAll('[data-histedit]').forEach(b=>b.onclick=()=>{
+    const [damId,entryId]=b.dataset.histedit.split(':');
+    const dam=rabbits.find(x=>x.id===damId); const entry=dam&&dam.breedingHistory.find(x=>x.id===entryId);
+    if(dam&&entry) openHistoryEditSheet(dam, entry, ()=>openHistorySheet(r));
+  });
+}
+function openHistoryEditSheet(dam, entry, back){
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Edit breeding entry</h2>
+    <div class="card-sub" style="margin-bottom:12px;">${esc(dam.name)} &times; ${esc(entry.partner||'?')} — bred ${fmtDate(entry.bredDate)}</div>
+    <div class="field"><label>Outcome</label><div class="seg" id="f-outcome">
+      <button data-v="pending" class="${entry.outcome==='pending'?'on':''}">Pending</button>
+      <button data-v="litter" class="${entry.outcome==='litter'?'on':''}">Took</button>
+      <button data-v="lost" class="${entry.outcome==='lost'?'on':''}">Lost</button></div></div>
+    <div class="sheet-actions"><button class="btn btn-danger" id="f-histdelete">Delete this entry</button><button class="btn btn-primary" id="f-histsave">Save</button></div>`);
+  let outcome=entry.outcome;
+  document.querySelectorAll('#f-outcome button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#f-outcome button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); outcome=b.dataset.v; });
+  document.getElementById('f-histsave').onclick=()=>{
+    entry.outcome=outcome;
+    if(outcome!=='litter'){ entry.litterBornDate=null; entry.litterKits=null; entry.litterDead=null; }
+    saveData(); back();
+  };
+  document.getElementById('f-histdelete').onclick=(e)=>{ armConfirm(e.target, 'Tap again to confirm', ()=>{
+    dam.breedingHistory = dam.breedingHistory.filter(x=>x.id!==entry.id);
+    if(dam.activeBreedingId===entry.id) dam.activeBreedingId=null;
+    saveData(); back();
+  }); };
+}
+function openAncestorSheet(anc, origin){
+  openSheet(`<button class="close-x" id="f-cancel-x">&times;</button>
+    <h2>${esc(anc.name)}</h2>
+    <div class="card-sub" style="margin-bottom:14px;">${anc.sex==='buck'?'Buck':'Doe'} &middot; pedigree ancestor</div>
+    <div class="field"><label>Name</label><input id="f-aname" value="${esc(anc.name)}"></div>
+    <div class="row2">
+      <div class="field"><label>Ear #</label><input id="f-aear" value="${esc(anc.earNumber||'')}"></div>
+      <div class="field"><label>Weight (lbs)</label><input id="f-aweight" value="${esc(anc.weight||'')}"></div>
+    </div>
+    <div class="field"><label>Color / Variety</label><input id="f-acolor" value="${esc(anc.color||'')}"></div>
+    <div class="field"><label>Legs / Wins</label><input id="f-alegs" value="${esc(anc.legsWins||'')}"></div>
+    <div class="field"><label>Registration #</label><input id="f-areg" value="${esc(anc.registrationNumber||'')}"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" id="f-cancel">Cancel</button><button class="btn btn-primary" id="f-asave">Save</button></div>
+    <div class="sheet-actions"><button class="btn btn-danger" id="f-adelete" style="flex:1;">Delete</button></div>`);
+  attachSuggest(document.getElementById('f-acolor'), allKnownColors);
+  document.getElementById('f-cancel-x').onclick=()=>done(origin);
+  document.getElementById('f-cancel').onclick=()=>done(origin);
+  document.getElementById('f-asave').onclick=()=>{
+    anc.name=document.getElementById('f-aname').value.trim()||anc.name;
+    anc.earNumber=document.getElementById('f-aear').value; anc.weight=document.getElementById('f-aweight').value;
+    anc.color=document.getElementById('f-acolor').value; anc.legsWins=document.getElementById('f-alegs').value;
+    anc.registrationNumber=document.getElementById('f-areg').value;
+    saveData(); done(origin);
+  };
+  document.getElementById('f-adelete').onclick=(e)=>{ armConfirm(e.target, 'Tap again to confirm', ()=>{ rabbits=rabbits.filter(x=>x.id!==anc.id); saveData(); done(origin); }); };
+}
+function pedigreeTreeHTML(r){
+  const g=p=>ancestorByPath(r.name,p);
+  return `<div class="ped-gen"><div class="ped-gen-label">PARENTS</div><div class="ped-row">${pedBox(g('s'),'s','Sire')}${pedBox(g('d'),'d','Dam')}</div></div>
+    <div class="ped-gen"><div class="ped-gen-label">GRANDPARENTS</div>
+      <div class="ped-side-label">SIRE'S SIDE</div>
+      <div class="ped-row">${pedBox(g('ss'),'ss','Grandsire')}${pedBox(g('sd'),'sd','Granddam')}</div>
+      <div class="ped-side-label">DAM'S SIDE</div>
+      <div class="ped-row">${pedBox(g('ds'),'ds','Grandsire')}${pedBox(g('dd'),'dd','Granddam')}</div></div>
+    <div class="ped-gen"><div class="ped-gen-label">GREAT-GRANDPARENTS</div>
+      <div class="ped-side-label">SIRE'S SIDE</div>
+      <div class="ped-subgroup-label">Grandsire's parents</div>
+      <div class="ped-row">${pedBox(g('sss'),'sss','Sire')}${pedBox(g('ssd'),'ssd','Dam')}</div>
+      <div class="ped-subgroup-label">Granddam's parents</div>
+      <div class="ped-row">${pedBox(g('sds'),'sds','Sire')}${pedBox(g('sdd'),'sdd','Dam')}</div>
+      <div class="ped-side-label">DAM'S SIDE</div>
+      <div class="ped-subgroup-label">Grandsire's parents</div>
+      <div class="ped-row">${pedBox(g('dss'),'dss','Sire')}${pedBox(g('dsd'),'dsd','Dam')}</div>
+      <div class="ped-subgroup-label">Granddam's parents</div>
+      <div class="ped-row">${pedBox(g('dds'),'dds','Sire')}${pedBox(g('ddd'),'ddd','Dam')}</div></div>`;
+}
+function wirePedigreeTaps(container, r, back){
+  container.querySelectorAll('[data-pedname]').forEach(b=>b.onclick=()=>{
+    const anc=findByName(b.dataset.pedname); if(anc) (anc.external?openAncestorSheet(anc,back):openEditSheet(anc,back));
+  });
+  container.querySelectorAll('[data-pedpath]').forEach(b=>b.onclick=()=>{
+    const path=b.dataset.pedpath, rel=path.slice(-1), pp=path.slice(0,-1);
+    const parent = pp===''?r:ancestorByPath(r.name,pp);
+    if(!parent||!parent.name){ showToast('Fill in the closer generation first'); return; }
+    openQuickNameSheet(ensureAncestor(parent.name), rel, back);
+  });
+}
+function openPedigreeSheet(r){
+  const back=()=>openPedigreeSheet(r);
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>${esc(r.name)} — Pedigree</h2>
+    <div class="card-sub" style="margin-bottom:12px;">${subLine(r)}${r.dob?' &middot; b. '+fmtDate(r.dob):''}</div>
+    ${pedigreeTreeHTML(r)}
+    <div class="card-sub">Tap a name to edit it, or "+ Add name" to fill a blank spot.</div>
+    <div class="sheet-actions" style="flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="closeSheet()">Close</button>
+      <button class="btn btn-primary" id="f-print">Print / Save PDF</button>
+      <button class="btn btn-primary" id="f-official-pdf" style="flex:1 1 100%;">Download Official Pedigree PDF</button>
+    </div>`);
+  wirePedigreeTaps(document.getElementById('sheet'), r, back);
+  document.getElementById('f-print').onclick=()=>openPrintOptionsSheet(r, back);
+  document.getElementById('f-official-pdf').onclick=()=>downloadOfficialPedigreePDF(r);
+}
+function openQuickNameSheet(parent, rel, back){
+  const label = rel==='s'?'Sire':'Dam';
+  openSheet(`<button class="close-x" id="f-cancel-x">&times;</button>
+    <h2>${esc(parent.name)}'s ${label.toLowerCase()}</h2>
+    <div class="field"><label>${label}'s name</label><input id="f-qn" placeholder="Type a name"></div>
+    <div class="row2">
+      <div class="field"><label>Ear #</label><input id="f-qear"></div>
+      <div class="field"><label>Weight (lbs)</label><input id="f-qweight"></div>
+    </div>
+    <div class="field"><label>Color / Variety</label><input id="f-qcolor"></div>
+    <div class="field"><label>Legs / Wins</label><input id="f-qlegs"></div>
+    <div class="field"><label>Registration #</label><input id="f-qreg"></div>
+    <div class="card-sub" id="f-qnote" style="display:none;"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" id="f-cancel">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>`);
+  document.getElementById('f-cancel-x').onclick=()=>done(back);
+  document.getElementById('f-cancel').onclick=()=>done(back);
+  const nameInput = document.getElementById('f-qn');
+  attachSuggest(nameInput, ()=>rabbits.filter(x=>x.sex===(rel==='s'?'buck':'doe')).map(x=>x.name));
+  attachSuggest(document.getElementById('f-qcolor'), allKnownColors);
+  const note = document.getElementById('f-qnote');
+  nameInput.addEventListener('input', ()=>{
+    const existing = findByName(nameInput.value.trim());
+    if(existing && !existing.external){
+      note.style.display='block';
+      note.textContent = `${existing.name} is already on your roster — this will link to that record instead of the details below.`;
+    } else {
+      note.style.display='none';
+    }
+  });
+  document.getElementById('f-save').onclick=()=>{
+    const name=document.getElementById('f-qn').value.trim();
+    if(!name){ showToast('Enter a name'); return; }
+    const fields = {
+      earNumber: document.getElementById('f-qear').value,
+      weight: document.getElementById('f-qweight').value,
+      color: document.getElementById('f-qcolor').value,
+      legsWins: document.getElementById('f-qlegs').value,
+      registrationNumber: document.getElementById('f-qreg').value
+    };
+    const commit=(finalName)=>{
+      if(rel==='s') parent.sireName=finalName; else parent.damName=finalName;
+      let anc = findByName(finalName);
+      if(!anc){
+        anc = blankRabbit(Object.assign({name:finalName, sex:rel==='s'?'buck':'doe', status:'external', external:true}, fields));
+        rabbits.push(anc);
+      } else if(anc.external){
+        // fill in any blanks on the existing pedigree-only record with what was just typed
+        Object.keys(fields).forEach(k=>{ if(!anc[k] && fields[k]) anc[k]=fields[k]; });
+      }
+      saveData(); done(back);
+    };
+    if(rabbits.some(x=>x.name.trim().toLowerCase()===name.toLowerCase())) return commit(name);
+    const m=fuzzyMatches(name);
+    if(m.length){ openDuplicateSheet(name, m, chosen=>commit(chosen||name)); return; }
+    commit(name);
+  };
+}
+
+function ppBoxFieldsFull(n){
+  return `<div class="pp-line"><b>Name:</b> ${esc(n.name||'')}</div>
+    <div class="pp-line"><b>Ear #:</b> ${esc(n.earNumber||'')}</div>
+    <div class="pp-line"><b>Color:</b> ${esc(n.color||'')}</div>
+    <div class="pp-line"><b>Weight:</b> ${n.weight?esc(n.weight)+' lbs':''}</div>
+    <div class="pp-line"><b>Legs (wins):</b> ${esc(n.legsWins||'')}</div>`;
+}
+function ppBoxFieldsCompact(n){
+  return `<div class="pp-line-compact"><b>Name:</b> ${esc(n.name||'')} &nbsp; <b>Ear #:</b> ${esc(n.earNumber||'')}</div>
+    <div class="pp-line-compact"><b>Color:</b> ${esc(n.color||'')} &nbsp; <b>Weight:</b> ${n.weight?esc(n.weight)+' lbs':''}</div>
+    <div class="pp-line-compact"><b>Legs (wins):</b> ${esc(n.legsWins||'')}</div>`;
+}
+function ppBoxFieldsSimple(n){
+  return `<div class="pp-simple-box-name">${esc(n.name||'')}</div>
+    <div class="pp-simple-box-color">${esc(n.color||'')}</div>`;
+}
+function ppBoxMarkup(n, label, detail, compact, id){
+  n = n||{};
+  const inner = detail==='simple' ? ppBoxFieldsSimple(n) : (compact ? ppBoxFieldsCompact(n) : ppBoxFieldsFull(n));
+  return `<div class="pp-box ${detail==='simple'?'pp-box-simple':''}" id="${id}">
+    <div class="pp-pill">${esc(label)}</div>${inner}</div>`;
+}
+function ppBoxCell(n, label, gridColumn, rowStart, rowSpan, detail, compact, id){
+  // Every box is sized to its own content and centered within the
+  // vertical space its generation slot occupies — not stretched to
+  // fill it. Because each tier's slot height already equals the
+  // combined height of the two child slots below it, this alone is
+  // enough to make every parent land exactly centered between its
+  // own two children, matching a standard pedigree chart, without
+  // any special-casing per generation.
+  return `<div style="grid-column:${gridColumn}; grid-row:${rowStart} / span ${rowSpan}; display:flex; flex-direction:column; justify-content:center;">${ppBoxMarkup(n,label,detail,compact,id)}</div>`;
+}
+function pedigreePrintHTML(r, orientation, detail){
+  const g = p => ancestorByPath(r.name, p);
+  const cols = '0.85fr 0.9fr 1fr 1.3fr';
+  const genLabels = `<div class="pp-gen-labels" style="grid-template-columns:${cols};">
+    <div class="pp-gen-label">GENERATION 1</div><div class="pp-gen-label">GENERATION 2</div>
+    <div class="pp-gen-label">GENERATION 3</div><div class="pp-gen-label">GENERATION 4</div></div>`;
+  const boxes = [
+    ppBoxCell(r, 'Rabbit', 1, 1, 8, detail, false, 'pp-self'),
+    ppBoxCell(g('s'), 'Sire (father)', 2, 1, 4, detail, false, 'pp-sire'),
+    ppBoxCell(g('d'), 'Dam (mother)', 2, 5, 4, detail, false, 'pp-dam'),
+    ppBoxCell(g('ss'), 'Paternal grandsire', 3, 1, 2, detail, false, 'pp-ss'),
+    ppBoxCell(g('sd'), 'Paternal granddam', 3, 3, 2, detail, false, 'pp-sd'),
+    ppBoxCell(g('ds'), 'Maternal grandsire', 3, 5, 2, detail, false, 'pp-ds'),
+    ppBoxCell(g('dd'), 'Maternal granddam', 3, 7, 2, detail, false, 'pp-dd'),
+    ppBoxCell(g('sss'), 'GG sire 1', 4, 1, 1, detail, true, 'pp-sss'),
+    ppBoxCell(g('ssd'), 'GG dam 1', 4, 2, 1, detail, true, 'pp-ssd'),
+    ppBoxCell(g('sds'), 'GG sire 2', 4, 3, 1, detail, true, 'pp-sds'),
+    ppBoxCell(g('sdd'), 'GG dam 2', 4, 4, 1, detail, true, 'pp-sdd'),
+    ppBoxCell(g('dss'), 'GG sire 3', 4, 5, 1, detail, true, 'pp-dss'),
+    ppBoxCell(g('dsd'), 'GG dam 3', 4, 6, 1, detail, true, 'pp-dsd'),
+    ppBoxCell(g('dds'), 'GG sire 4', 4, 7, 1, detail, true, 'pp-dds'),
+    ppBoxCell(g('ddd'), 'GG dam 4', 4, 8, 1, detail, true, 'pp-ddd'),
+  ].join('');
+  const headerRight = detail==='simple'
+    ? `<div class="pp-simple-title"><div class="pp-simple-name">Ear # ${esc(r.earNumber||'—')}</div><div class="pp-simple-dob">${r.dob?'Born '+fmtDate(r.dob):''}</div></div>`
+    : `<div class="pp-meta-table">
+        <div class="pp-meta-label">BREED</div><div class="pp-meta-value">${esc(r.breed||'')}</div>
+        <div class="pp-meta-label">DATE OF BIRTH</div><div class="pp-meta-value">${r.dob?fmtDate(r.dob):''}</div>
+        <div class="pp-meta-label">SEX</div><div class="pp-meta-value">${r.sex==='doe'?'Doe':r.sex==='buck'?'Buck':''}</div>
+      </div>`;
+  return `<div class="pp-page pp-${orientation} pp-${detail}">
+      <div class="pp-header">
+        <div><div class="pp-brand">CJM</div><div class="pp-brand2">LEGACY RABBITRY</div><div class="pp-rope"></div>
+          <div class="pp-tag1">QUALITY &middot; TYPE &middot; PURPOSE</div></div>
+        ${headerRight}
+      </div>
+      ${genLabels}
+      <div class="pp-grid" id="pp-grid-wrap" style="grid-template-columns:${cols}; grid-template-rows:repeat(8,1fr); position:relative;">
+        <svg id="pp-lines" style="position:absolute; top:0; left:0; pointer-events:none; overflow:visible;"></svg>
+        ${boxes}
+      </div>
+      <div class="pp-footer">
+        <div style="font-family:'Jost',sans-serif; font-size:9px; color:#142440;">www.CJMRabbitry.com</div>
+
+        <div class="pp-anchor">&#9875;</div>
+      </div>
+    </div>`;
+}
+function drawPedigreeConnectors(){
+  const wrap=document.getElementById('pp-grid-wrap'), svg=document.getElementById('pp-lines');
+  if(!wrap||!svg) return;
+  const cr=wrap.getBoundingClientRect();
+  svg.setAttribute('width',cr.width); svg.setAttribute('height',cr.height); svg.setAttribute('viewBox',`0 0 ${cr.width} ${cr.height}`);
+  const rc=id=>{ const el=document.getElementById(id); if(!el) return null; const r=el.getBoundingClientRect();
+    return {right:r.right-cr.left, left:r.left-cr.left, midY:r.top-cr.top+r.height/2}; };
+  const bracket=(c,p1,p2)=>{ const a=rc(c),b=rc(p1),d=rc(p2); if(!a||!b||!d) return '';
+    const mx=(a.right+b.left)/2;
+    return `<path d="M${a.right},${a.midY} L${mx},${a.midY} M${mx},${b.midY} L${mx},${d.midY} M${mx},${b.midY} L${b.left},${b.midY} M${mx},${d.midY} L${d.left},${d.midY}" stroke="#b08535" stroke-width="1" fill="none"/>`; };
+  svg.innerHTML=[bracket('pp-self','pp-sire','pp-dam'),bracket('pp-sire','pp-ss','pp-sd'),bracket('pp-dam','pp-ds','pp-dd'),
+    bracket('pp-ss','pp-sss','pp-ssd'),bracket('pp-sd','pp-sds','pp-sdd'),bracket('pp-ds','pp-dss','pp-dsd'),bracket('pp-dd','pp-dds','pp-ddd')].join('');
+}
+function printPedigreeAdvanced(r, orientation, detail){
+  const sizeStr = orientation==='landscape' ? '11in 8.5in' : '8.5in 11in';
+  document.getElementById('pp-page-size').textContent = `@page{ size: ${sizeStr}; margin: 0.15in; }`;
+  document.getElementById('printPedigree').innerHTML = pedigreePrintHTML(r, orientation, detail);
+  document.getElementById('printPedigree').classList.add('active');
+  // Wait for the web fonts to actually finish loading before measuring
+  // or printing — printing too early can silently use fallback-font
+  // metrics that are taller than the real fonts, which pushed content
+  // past the fixed page height and got clipped at the bottom edge.
+  const ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+  ready.then(()=>{
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      drawPedigreeConnectors();
+      setTimeout(()=>window.print(),60);
+    }));
+  });
+}
+window.addEventListener('afterprint',()=>document.getElementById('printPedigree').classList.remove('active'));
+function openPrintOptionsSheet(r, back){
+  let orientation='landscape', detail='full';
+  const returnHome = ()=>{ closeSheet(); if(back) back(); };
+  openSheet(`<button class="close-x" id="f-cancel-x">&times;</button>
+    <h2>${esc(r.name)} — Print / Save PDF</h2>
+    <div class="field"><label>Orientation</label><div class="seg" id="f-orient">
+      <button data-v="landscape" class="on">Sideways (landscape)</button><button data-v="portrait">Long ways (portrait)</button></div></div>
+    <div class="field"><label>Detail level</label><div class="seg" id="f-detail">
+      <button data-v="full" class="on">Full pedigree</button><button data-v="simple">Simplified — name &amp; color only</button></div></div>
+    <div class="card-sub" style="margin-bottom:6px;">Always fits on a single page. In the print dialog, choose "Save as PDF" to download instead of printing.</div>
+    <div class="sheet-actions"><button class="btn btn-secondary" id="f-cancel">Cancel</button><button class="btn btn-primary" id="f-go">Generate</button></div>`);
+  document.getElementById('f-cancel-x').onclick = returnHome;
+  document.getElementById('f-cancel').onclick = returnHome;
+  document.querySelectorAll('#f-orient button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#f-orient button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); orientation=b.dataset.v; });
+  document.querySelectorAll('#f-detail button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#f-detail button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); detail=b.dataset.v; });
+  document.getElementById('f-go').onclick=()=>{ returnHome(); printPedigreeAdvanced(r, orientation, detail); };
+}
+
+/* ============================================================
+   OFFICIAL PEDIGREE PDF EXPORT (fillable template, imaging locked)
+   ============================================================ */
+const PEDIGREE_FIELD_MAP = {
+  BREED: 'f1_580_601', DATE_OF_BIRTH: 'f2_589_610', SEX: 'f3_571_592',
+  G1_NAME: 'f32_598_619', G1_EAR: 'f37_91_91', G1_WEIGHT: 'f41_202_223',
+  G1_COLOR: 'f42_226_247', G1_LEGS: 'f50_567_588',
+  SIRE_NAME: 'f18_453_474', SIRE_EAR: 'f20_131_138', SIRE_WEIGHT: 'f21_536_543',
+  SIRE_COLOR: 'f28_142_156', SIRE_LEGS: 'f31_336_357',
+  DAM_NAME: 'f49_482_496', DAM_EAR: 'f53_102_109', DAM_WEIGHT: 'f57_372_393',
+  DAM_COLOR: 'f61_46_46', DAM_LEGS: 'f63_462_483',
+  PGS_NAME: 'f8_133_147', PGS_EAR: 'f10_93_100', PGS_WEIGHT: 'f11_327_348',
+  PGS_COLOR: 'f12_55_55', PGS_LEGS: 'f15_129_136',
+  PGD_NAME: 'f24_64_64', PGD_EAR: 'f27_527_534', PGD_WEIGHT: 'f30_19_19',
+  PGD_COLOR: 'f33_255_276', PGD_LEGS: 'f36_464_485',
+  MGS_NAME: 'f45_273_294', MGS_EAR: 'f48_435_456', MGS_WEIGHT: 'f52_408_429',
+  MGS_COLOR: 'f54_291_312', MGS_LEGS: 'f58_198_205',
+  MGD_NAME: 'f64_399_420', MGD_EAR: 'f67_558_579', MGD_WEIGHT: 'f71_300_321',
+  MGD_COLOR: 'f72_244_265', MGD_LEGS: 'f73_569_590',
+  GGSIRE1_NAME: 'f5_111_118', GGSIRE1_EAR: 'f4_363_384', GGSIRE1_WEIGHT: 'f7_82_82',
+  GGSIRE1_COLOR: 'f6_538_552', GGSIRE1_LEGS: 'f9_518_532',
+  GGDAM1_NAME: 'f14_10_10', GGDAM1_EAR: 'f13_417_438', GGDAM1_WEIGHT: 'f17_37_37',
+  GGDAM1_COLOR: 'f16_160_174', GGDAM1_LEGS: 'f19_253_274',
+  GGSIRE2_NAME: 'f23_187_194', GGSIRE2_EAR: 'f22_473_487', GGSIRE2_WEIGHT: 'f26_282_303',
+  GGSIRE2_COLOR: 'f25_381_402', GGSIRE2_LEGS: 'f29_196_203',
+  GGDAM2_NAME: 'f35_318_339', GGDAM2_EAR: 'f34_444_465', GGDAM2_WEIGHT: 'f38_120_127',
+  GGDAM2_COLOR: 'f39_426_447', GGDAM2_LEGS: 'f40_178_192',
+  GGSIRE3_NAME: 'f44_547_561', GGSIRE3_EAR: 'f43_169_183', GGSIRE3_WEIGHT: 'f47_217_238',
+  GGSIRE3_COLOR: 'f46_151_165', GGSIRE3_LEGS: 'f51_200_214',
+  GGDAM3_NAME: 'f56_28_28', GGDAM3_EAR: 'f55_235_256', GGDAM3_WEIGHT: 'f60_500_514',
+  GGDAM3_COLOR: 'f59_309_330', GGDAM3_LEGS: 'f62_204_225',
+  GGSIRE4_NAME: 'f66_73_73', GGSIRE4_EAR: 'f65_345_366', GGSIRE4_WEIGHT: 'f69_509_523',
+  GGSIRE4_COLOR: 'f68_208_229', GGSIRE4_LEGS: 'f70_556_570',
+  GGDAM4_NAME: 'f75_354_375', GGDAM4_EAR: 'f74_264_285', GGDAM4_WEIGHT: 'f76_390_411',
+  GGDAM4_COLOR: 'f77_491_505', GGDAM4_LEGS: 'f78_206_227',
+};
+function fillAncestorBoxValues(prefix, anc, put){
+  if(!anc) return;
+  put(`${prefix}_NAME`, anc.name);
+  put(`${prefix}_EAR`, anc.earNumber);
+  put(`${prefix}_WEIGHT`, anc.weight);
+  put(`${prefix}_COLOR`, anc.color);
+  put(`${prefix}_LEGS`, anc.legsWins);
+}
+function sanitizeForPdf(str){
+  if(str===undefined || str===null) return '';
+  // The template's font can only render standard Latin/Western
+  // characters. Emoji and other special characters used as
+  // placeholder buck/doe names (e.g. temp IDs like a raised
+  // hand icon) can't be rendered and will crash the PDF export
+  // entirely if left in, so they're stripped out here rather
+  // than left to fail at save time.
+  return String(str).replace(/[^\x00-\xFF]/g, '').replace(/\s+/g, ' ').trim();
+}
+function buildOfficialPedigreeValues(r){
+  const g = p => ancestorByPath(r.name, p);
+  const v = {};
+  // Every field is set explicitly (blank string if no data) so any
+  // stray leftover value already baked into the template PDF (e.g.
+  // a stray space character) always gets overwritten, not just skipped.
+  Object.keys(PEDIGREE_FIELD_MAP).forEach(role => { v[role] = ''; });
+  const put = (role, val) => {
+    const clean = sanitizeForPdf(val);
+    // If sanitizing wiped out a NAME field entirely (e.g. the recorded
+    // name was just an emoji placeholder), show a visible marker
+    // instead of a blank box — a blank box would look like no sire/dam
+    // is on file at all, which would be misleading.
+    if(!clean && val && String(val).trim() && role.endsWith('_NAME')) v[role] = '(name unavailable)';
+    else v[role] = clean;
+  };
+  put('BREED', r.breed);
+  put('DATE_OF_BIRTH', r.dob ? fmtDate(r.dob) : '');
+  put('SEX', r.sex==='doe' ? 'Doe' : r.sex==='buck' ? 'Buck' : '');
+  fillAncestorBoxValues('G1', r, put);
+  fillAncestorBoxValues('SIRE', g('s'), put);
+  fillAncestorBoxValues('DAM', g('d'), put);
+  fillAncestorBoxValues('PGS', g('ss'), put);
+  fillAncestorBoxValues('PGD', g('sd'), put);
+  fillAncestorBoxValues('MGS', g('ds'), put);
+  fillAncestorBoxValues('MGD', g('dd'), put);
+  fillAncestorBoxValues('GGSIRE1', g('sss'), put);
+  fillAncestorBoxValues('GGDAM1', g('ssd'), put);
+  fillAncestorBoxValues('GGSIRE2', g('sds'), put);
+  fillAncestorBoxValues('GGDAM2', g('sdd'), put);
+  fillAncestorBoxValues('GGSIRE3', g('dss'), put);
+  fillAncestorBoxValues('GGDAM3', g('dsd'), put);
+  fillAncestorBoxValues('GGSIRE4', g('dds'), put);
+  fillAncestorBoxValues('GGDAM4', g('ddd'), put);
+  return v;
+}
+async function downloadOfficialPedigreePDF(r){
+  try{
+    const { PDFDocument, StandardFonts } = PDFLib;
+    const existingBytes = await fetch('pedigree-template.pdf').then(res=>{
+      if(!res.ok) throw new Error('Template PDF not found: '+res.status);
+      return res.arrayBuffer();
+    });
+    const pdfDoc = await PDFDocument.load(existingBytes);
+    const form = pdfDoc.getForm();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const values = buildOfficialPedigreeValues(r);
+
+    const MAX_SIZE = 11, MIN_SIZE = 6, H_PADDING = 8; // points
+    Object.entries(values).forEach(([role, value])=>{
+      const fieldId = PEDIGREE_FIELD_MAP[role];
+      if(!fieldId) return;
+      try{
+        const field = form.getTextField(fieldId);
+        // Shrink-to-fit: measure the field's real width and reduce
+        // font size only as much as needed so long values (long
+        // rabbit names, colors, etc.) never get clipped at the box
+        // edge. Falls back gracefully if widget geometry is missing.
+        let fontSize = MAX_SIZE;
+        try{
+          const widget = field.acroField.getWidgets()[0];
+          const rect = widget.getRectangle();
+          const availableWidth = Math.max(rect.width - H_PADDING, 1);
+          while (fontSize > MIN_SIZE && font.widthOfTextAtSize(value, fontSize) > availableWidth) {
+            fontSize -= 0.5;
+          }
+        }catch(geomErr){ /* keep default MAX_SIZE if geometry read fails */ }
+        field.setFontSize(fontSize);
+        field.setText(value);
+      }
+      catch(err){ console.warn('Pedigree field could not be set:', role, err); }
+    });
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(r.name||'pedigree').replace(/\s+/g,'-')}-pedigree.pdf`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }catch(err){
+    console.error(err);
+    showToast('Could not generate the official PDF — check console for details.');
+  }
+}
+
+function keepKitForBreeding(damId, idx){
+  const dam=rabbits.find(x=>x.id===damId); if(!dam||!dam.litterKits||!dam.litterKits[idx]) return;
+  const k=dam.litterKits[idx];
+  const kit=blankRabbit({ name:`${dam.name} x ${dam.partner||'?'} — ${k.sex==='buck'?'Buck':'Doe'} ${idx+1}`,
+    sex:k.sex, breed:dam.breed, color:k.color||'', dob:dam.litterBornDate, sireName:dam.partner||'', damName:dam.name, status:'growing' });
+  rabbits.push(kit); k.individualId=kit.id;
+  saveData(); render(); showToast(kit.name+' — profile created');
+}
+function toggleKitForSale(damId, idx){
+  const dam=rabbits.find(x=>x.id===damId); if(!dam||!dam.litterKits||!dam.litterKits[idx]) return;
+  dam.litterKits[idx].forSale = !dam.litterKits[idx].forSale;
+  saveData(); render();
+}
+function openLitterPedigreeSheet(dam){
+  const sire = findByName(dam.partner);
+  const ss = sire?ancestorByPath(sire.name,'s'):null, sd = sire?ancestorByPath(sire.name,'d'):null;
+  const ds = ancestorByPath(dam.name,'s'), dd = ancestorByPath(dam.name,'d');
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>${esc(dam.name)}'s litter — pedigree preview</h2>
+    <div class="card-sub" style="margin-bottom:12px;">This is what any kit from this litter would inherit. Individual kits get their own editable pedigree once you tap "Create a profile."</div>
+    <div class="ped-gen"><div class="ped-gen-label">PARENTS</div><div class="ped-row">${pedBox(sire||{name:dam.partner},'','Sire')}${pedBox(dam,'','Dam')}</div></div>
+    <div class="ped-gen"><div class="ped-gen-label">GRANDPARENTS</div>
+      <div class="ped-side-label">SIRE'S SIDE</div>
+      <div class="ped-row">${pedBox(ss,'','Grandsire')}${pedBox(sd,'','Granddam')}</div>
+      <div class="ped-side-label">DAM'S SIDE</div>
+      <div class="ped-row">${pedBox(ds,'','Grandsire')}${pedBox(dd,'','Granddam')}</div></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()" style="flex:1;">Close</button></div>`);
+  document.querySelectorAll('#sheet [data-pedname]').forEach(b=>b.onclick=null);
+}
+function openAddPlannedSheet(presetDoeId){
+  const does=rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing');
+  const bucks=rabbits.filter(r=>r.sex==='buck'&&isActive(r)&&r.status!=='growing');
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Plan a breeding</h2>
+    <div class="field"><label>Doe</label><select id="f-doe"><option value="">Select a doe</option>${does.map(x=>`<option value="${x.id}" ${x.id===presetDoeId?'selected':''}>${esc(x.name)} — ${x.status}</option>`).join('')}</select></div>
+    <div class="field"><label>Buck</label><select id="f-buck"><option value="">Select a buck</option>${bucks.map(x=>`<option value="${x.id}">${esc(x.name)} — ${x.status}</option>`).join('')}</select></div>
+    <div class="field"><label>Target date</label><input type="date" id="f-date" value="${todayStr()}"></div>
+    <div id="f-relate" class="relate-box">Select both a doe and a buck to check relatedness.</div>
+    <div class="field" style="margin-top:12px;"><label>Notes</label><textarea id="f-notes" placeholder="Pairing goal, line you're working"></textarea></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save plan</button></div>`);
+  function upd(){
+    const d=does.find(x=>x.id===document.getElementById('f-doe').value), b=bucks.find(x=>x.id===document.getElementById('f-buck').value);
+    const box=document.getElementById('f-relate');
+    if(!d||!b){ box.className='relate-box'; box.textContent='Select both a doe and a buck to check relatedness.'; return; }
+    const rel=relatednessSummary(d.name,b.name); box.className='relate-box'+(rel.close?' close':''); box.innerHTML=relateBoxHTML(rel);
+  }
+  document.getElementById('f-doe').onchange=upd; document.getElementById('f-buck').onchange=upd;
+  if(presetDoeId) upd();
+  document.getElementById('f-save').onclick=()=>{
+    const di=document.getElementById('f-doe').value, bi=document.getElementById('f-buck').value;
+    if(!di||!bi){ showToast('Pick a doe and a buck'); return; }
+    planned.push({ id:uid(), doeId:di, buckId:bi, doeName:(does.find(x=>x.id===di)||{}).name, buckName:(bucks.find(x=>x.id===bi)||{}).name,
+      targetDate:document.getElementById('f-date').value||todayStr(), notes:document.getElementById('f-notes').value });
+    savePlanned(); closeSheet(); currentTab='planned'; render(); showToast('Breeding planned');
+  };
+}
+
+function openMoreSheet(){
+  const items=[['add','Add rabbit'],['import','Import from CSV'],['planned','Planned breedings'],['forsale','For sale'],['ancestors','Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['backup','Backup and restore']];
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>More</h2>
+    ${items.map(([k,l])=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" data-more="${k}">${l}</button>`).join('')}`);
+  document.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.more;
+    if(k==='add') openAddSheet();
+    else if(k==='merge') openMergeSheet();
+    else if(k==='import') openImportCsvSheet();
+    else { currentTab=k; closeSheet(); render(); window.scrollTo(0,0); }
+  });
+}
+
+function renderForSale(main){
+  const rabbitsForSale = rabbits.filter(r=>r.forSale && r.status!=='sold' && !isArchived(r) && r.status!=='external');
+  const litterKitRows = [];
+  rabbits.forEach(d=>{ if(d.sex==='doe'&&d.status==='nursing'&&d.litterKits) d.litterKits.forEach((k,i)=>{ if(k.forSale && !k.individualId) litterKitRows.push({dam:d, kit:k, idx:i}); }); });
+  if(!rabbitsForSale.length && !litterKitRows.length){
+    main.innerHTML = `<div class="empty">Nothing marked for sale right now.<br>Toggle "Mark for sale" from a rabbit's Edit screen, or "For sale" on a kit's Litters card.</div>`;
+    return;
+  }
+  let h='';
+  const total = rabbitsForSale.length + litterKitRows.length;
+  h += `<div class="section-label">${total} TOTAL FOR SALE</div>`;
+  if(rabbitsForSale.length){
+    h += `<div class="section-label">RABBITS</div>`;
+    h += rabbitsForSale.sort((a,b)=>a.name.localeCompare(b.name)).map(r=>{
+      const detail = r.sale ? saleLine(r) : ((r.sireName||r.damName)?`Sire: ${esc(r.sireName||'?')} &middot; Dam: ${esc(r.damName||'?')}`:'');
+      return `<div class="card" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${statusBadge(r)}</div>
+        ${detail?`<div class="card-detail">${detail}</div>`:''}
+        <div class="card-actions">
+          <button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button>
+          <button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">Edit</button>
+        </div></div>`;
+    }).join('');
+  }
+  if(litterKitRows.length){
+    h += `<div class="section-label">KITS STILL IN A LITTER</div>`;
+    h += litterKitRows.map(({dam,kit,idx})=>`<div class="card no-tap">
+        <div class="card-top"><div><div class="card-name">${kit.sex==='buck'?'Buck':'Doe'} kit &middot; ${esc(kit.color||'color?')}</div><div class="card-sub">From ${esc(dam.name)}'s litter, born ${fmtDate(dam.litterBornDate)}</div></div></div>
+        <div class="card-actions">
+          <button class="btn btn-primary btn-sm" data-keepkit="${dam.id}:${idx}">Create a profile</button>
+          <button class="btn btn-secondary btn-sm" data-act="litterpedigree" data-id="${dam.id}">Litter pedigree</button>
+        </div></div>`).join('');
+  }
+  main.innerHTML = h;
+  attachCardEvents();
+}
+function renderBackup(main){
+  const snap=JSON.stringify({rabbits,planned,customEvents,savedAt:new Date().toISOString()},null,2);
+  main.innerHTML=`
+    <div class="section-label">SAVE A SNAPSHOT</div>
+    <div class="card no-tap"><div class="card-detail">Copy this and paste it somewhere safe — Notes, or an email to yourself. It's a complete copy of every rabbit, litter, photo, and plan, independent of this file.</div>
+      <textarea id="bk-out" readonly style="width:100%; height:130px; margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:10px; padding:8px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); color:var(--ink);">${esc(snap)}</textarea>
+      <div class="card-actions"><button class="btn btn-primary" id="bk-copy">Copy to clipboard</button></div></div>
+    <div class="section-label">RESTORE FROM A SNAPSHOT</div>
+    <div class="card no-tap"><div class="card-detail">Paste a saved snapshot below. <b>This replaces everything currently in the app.</b></div>
+      <textarea id="bk-in" placeholder="Paste snapshot here" style="width:100%; height:90px; margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:10px; padding:8px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); color:var(--ink);"></textarea>
+      <div class="card-actions"><button class="btn btn-danger" id="bk-restore">Restore this snapshot</button></div></div>`;
+  document.getElementById('bk-copy').onclick=async()=>{
+    const ta=document.getElementById('bk-out'); ta.select();
+    try{ await navigator.clipboard.writeText(ta.value); showToast('Copied'); }catch(e){ showToast('Select the text above and copy manually'); }
+  };
+  let armed=false; const rb=document.getElementById('bk-restore');
+  rb.onclick=()=>{
+    if(!armed){ armed=true; rb.textContent='Tap again to confirm — replaces everything'; return; }
+    const t=document.getElementById('bk-in').value.trim();
+    if(!t){ showToast('Paste a snapshot first'); return; }
+    try{
+      const p=JSON.parse(t);
+      if(!Array.isArray(p.rabbits)) throw 0;
+      rabbits=p.rabbits; planned=p.planned||[]; customEvents=p.customEvents||[];
+      enrichFromRoster();
+      saveData(); savePlanned(); saveEvents(); currentTab='home'; render(); showToast('Snapshot restored');
+    }catch(e){ showToast("That doesn't look like a valid snapshot"); }
+  };
+}
+
+/* ---------------- RABBIT PROFILE (full screen) ---------------- */
+function contextualActions(r){
+  const acts=[];
+  if(r.status==='pregnant'){ acts.push(['kindled','Record litter'],['lost','Litter lost']); }
+  else if(r.status==='nursing'){ if(canRebred(r)) acts.push(['rebred','Rebred']); acts.push(['wean','Weaned'],['editlitter','Edit litter']); }
+  else if(isArchived(r)){ acts.push(['unarchive','Return to roster']); }
+  else if(r.status==='growing'){ acts.push(['graduate','Move to roster']); }
+  else if(r.sex==='doe'){ acts.push(['bred','Mark doe bred'],['plan','Plan a breeding']); }
+  return acts;
+}
+function profileTabsFor(r){
+  const tabs=[['overview','Overview']];
+  if(r.sex==='doe' && r.status!=='growing' && r.status!=='external'){ tabs.push(['breeding','Breeding'],['litters','Litters']); }
+  tabs.push(['pedigree','Pedigree'],['photos','Photos'],['notes','Notes']);
+  return tabs;
+}
+function openRabbitProfile(r){
+  profileRabbitId = r.id; profileTab='overview'; photoActiveCategory='Primary';
+  document.getElementById('profileView').classList.add('on');
+  renderProfile();
+}
+function closeProfile(){ profileRabbitId=null; document.getElementById('profileView').classList.remove('on'); render(); }
+function renderProfile(){
+  const r = rabbits.find(x=>x.id===profileRabbitId);
+  const view = document.getElementById('profileView');
+  if(!r){ closeProfile(); return; }
+  const tabs = profileTabsFor(r);
+  if(!tabs.some(t=>t[0]===profileTab)) profileTab='overview';
+  view.innerHTML = `
+    <div class="profile-head">
+      <div class="profile-head-top">
+        <button class="profile-back" id="profBack" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fffdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div>
+          <div class="profile-head-name">${esc(r.name)}</div>
+          <div class="profile-head-sub">${subLine(r)}${r.status?' &middot; '+esc(r.status.toUpperCase()):''}</div>
+        </div>
+      </div>
+      <div class="profile-tabs">
+        ${tabs.map(([k,l])=>`<button class="profile-tab-btn ${profileTab===k?'on':''}" data-ptab="${k}">${l}</button>`).join('')}
+      </div>
+    </div>
+    <div class="profile-body" id="profileBody"></div>`;
+  document.getElementById('profBack').onclick=closeProfile;
+  document.querySelectorAll('[data-ptab]').forEach(b=>b.onclick=()=>{ profileTab=b.dataset.ptab; renderProfile(); });
+  const body = document.getElementById('profileBody');
+  if(profileTab==='overview') body.innerHTML = overviewTabHTML(r);
+  else if(profileTab==='breeding') body.innerHTML = breedingTabHTML(r);
+  else if(profileTab==='litters') body.innerHTML = littersTabHTML(r);
+  else if(profileTab==='pedigree') body.innerHTML = `${pedigreeTreeHTML(r)}<div class="sheet-actions" style="flex-wrap:wrap;"><button class="btn btn-secondary" style="flex:1;" id="profPrint">Print / Save PDF</button><button class="btn btn-primary" style="flex:1;" id="profOfficialPdf">Download Official Pedigree PDF</button></div>`;
+  else if(profileTab==='photos') body.innerHTML = photosTabHTML(r);
+  else if(profileTab==='notes') body.innerHTML = notesTabHTML(r);
+  wireProfileTab(r);
+}
+function overviewTabHTML(r){
+  const primary = (r.photos||[]).find(p=>p.category==='Primary');
+  const acts = contextualActions(r);
+  const rows = [
+    ['Name', r.name], ['Ear #', r.earNumber||'—'], ['Sex', r.sex==='doe'?'Doe':'Buck'],
+    ['Breed', r.breed||'—'], ['Color', r.color||'—'], ['DOB', r.dob?fmtDate(r.dob):'—'],
+    ['Status', r.status], ['Registration', r.registrationNumber||'—'],
+    ['Sire', r.sireName||'—'], ['Dam', r.damName||'—']
+  ];
+  return `
+    ${primary?`<img class="primary-photo" src="${primary.dataUrl}" alt="${esc(r.name)}">`:''}
+    ${acts.length?`<div class="qa-row">${acts.map(([a,l])=>`<button class="btn btn-secondary btn-sm" data-pa="${a}">${l}</button>`).join('')}</div>`:''}
+    ${r.flag?`<div class="flag">${esc(r.flag)}</div>`:''}
+    <div class="overview-grid">${rows.map(([l,v])=>`<div class="ov-cell"><div class="ov-label">${l.toUpperCase()}</div><div class="ov-val">${esc(v)}</div></div>`).join('')}</div>
+    <button class="btn btn-secondary" style="width:100%;" data-pa="edit">Edit details</button>`;
+}
+function breedingTabHTML(r){
+  let cur='';
+  if(r.status==='pregnant'){
+    const d=daysToDue(r);
+    cur = `<div class="card no-tap"><div class="card-name" style="font-size:16px;">Current breeding</div>
+      <div class="card-detail">Bred to <b>${esc(r.partner||'?')}</b> on ${fmtDate(r.bredDate)}<br>Estimated kindling: <b>${fmtDate(r.dueDate)}</b> (${d<0?-d+' days overdue':d===0?'today':'in '+d+' days'})</div>
+      <div class="card-actions"><button class="btn btn-primary btn-sm" data-pa="kindled">Record litter</button><button class="btn btn-danger btn-sm" data-pa="lost">Litter lost</button></div></div>`;
+  } else if(r.status==='nursing'){
+    cur = `<div class="card no-tap"><div class="card-name" style="font-size:16px;">Currently on a litter</div>
+      <div class="card-detail">${r.litterKits?r.litterKits.length:0} kits, born ${fmtDate(r.litterBornDate)}</div>
+      <div class="card-actions"><button class="btn btn-secondary btn-sm" data-pa="litters">View in Litters tab</button></div></div>`;
+  } else if(r.sex==='doe' && r.status!=='growing'){
+    cur = `<div class="card no-tap"><div class="card-detail">Currently open — not bred.</div>
+      <div class="card-actions"><button class="btn btn-primary btn-sm" data-pa="bred">Mark doe bred</button><button class="btn btn-secondary btn-sm" data-pa="plan">Plan a breeding</button></div></div>`;
+  }
+  const hist = (r.breedingHistory||[]).slice().sort((a,b)=>b.bredDate.localeCompare(a.bredDate));
+  const histHTML = hist.length ? hist.map(e=>historyEntryHTML(r,e)).join('') : `<div class="empty">No breedings logged yet.</div>`;
+  return `${cur}<div class="section-label">BREEDING HISTORY</div>${histHTML}`;
+}
+function littersTabHTML(r){
+  if(r.status==='nursing') return nurseryCardHTML(r).replace('data-openprofile','data-noop');
+  const litters = (r.breedingHistory||[]).filter(e=>e.outcome==='litter').slice().sort((a,b)=>b.litterBornDate.localeCompare(a.litterBornDate));
+  if(!litters.length) return `<div class="empty">No litters recorded yet for ${esc(r.name)}.</div>`;
+  return `<div class="section-label">PAST LITTERS</div>`+litters.map(e=>{
+    const dead=e.litterDead?`${(e.litterDead.DOA||0)+(e.litterDead.peanut||0)+(e.litterDead.passed||0)} lost`:'';
+    return `<div class="card no-tap"><div class="card-name" style="font-size:16px;">Born ${fmtDate(e.litterBornDate)}</div>
+      <div class="card-detail">Sired by ${esc(e.partner||'?')} &middot; ${e.litterKits?e.litterKits.length:0} kits${dead?' &middot; '+dead:''}</div></div>`;
+  }).join('');
+}
+function photoCategories(){ return ['Primary','Front','Side Profile','Pedigree Photo','Other']; }
+function photosTabHTML(r){
+  const cats = photoCategories();
+  const photos = (r.photos||[]).filter(p=>p.category===photoActiveCategory);
+  return `
+    <div class="photo-chips">${cats.map(c=>`<button class="photo-chip ${photoActiveCategory===c?'on':''}" data-pcat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+    <button class="btn btn-primary" style="width:100%; margin-bottom:14px;" id="profAddPhoto">+ Add photo to ${esc(photoActiveCategory)}</button>
+    <div class="photo-grid">${photos.map(p=>`<div class="photo-thumb-wrap" data-popen="${p.id}"><img src="${p.dataUrl}" alt=""><button class="photo-del" data-pdel="${p.id}">&times;</button></div>`).join('')}</div>
+    ${!photos.length?`<div class="empty">No ${esc(photoActiveCategory).toLowerCase()} photos yet.</div>`:''}`;
+}
+function notesTabHTML(r){
+  const log = (r.notesLog||[]).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  return `
+    <div class="field"><textarea id="profNoteInput" placeholder="Add a note about ${esc(r.name)}..."></textarea></div>
+    <button class="btn btn-primary" style="width:100%; margin-bottom:16px;" id="profAddNote">Add note</button>
+    ${log.length?log.map(n=>`<div class="note-entry"><div class="note-date">${fmtDate(n.date)}</div><div class="note-text">${esc(n.text)}</div></div>`).join(''):`<div class="empty">No notes yet.</div>`}`;
+}
+function wireProfileTab(r){
+  document.querySelectorAll('[data-pa]').forEach(b=>{
+    b.onclick=()=>{
+      const a=b.dataset.pa;
+      if(a==='kindled') openKindledSheet(r);
+      else if(a==='editlitter') openKindledSheet(r,true);
+      else if(a==='lost') armConfirm(b,'Tap again to confirm',()=>{ markLitterLost(r); saveData(); renderProfile(); render(); showToast(r.name+' marked open'); });
+      else if(a==='rebred'||a==='bred') openBreedSheet(r);
+      else if(a==='plan'){ openAddPlannedSheet(r.id); }
+      else if(a==='wean'){ r.status='open'; saveData(); renderProfile(); render(); showToast(r.name+' weaned'); }
+      else if(a==='graduate'){ r.status=r.sex==='doe'?'open':'available'; saveData(); renderProfile(); render(); showToast(r.name+' moved to the main roster'); }
+      else if(a==='unarchive') openUnarchive(r);
+      else if(a==='edit') openEditSheet(r, renderProfile);
+      else if(a==='pedigree'){ profileTab='pedigree'; renderProfile(); }
+      else if(a==='addphoto'){ profileTab='photos'; renderProfile(); }
+      else if(a==='addnote'){ profileTab='notes'; renderProfile(); }
+      else if(a==='litters'){ profileTab='litters'; renderProfile(); }
+    };
+  });
+  if(profileTab==='breeding'){
+    document.querySelectorAll('[data-histedit]').forEach(b=>b.onclick=()=>{
+      const [damId,entryId]=b.dataset.histedit.split(':');
+      const dam=rabbits.find(x=>x.id===damId); const entry=dam&&dam.breedingHistory.find(x=>x.id===entryId);
+      if(dam&&entry) openHistoryEditSheet(dam, entry, ()=>{ closeSheet(); renderProfile(); });
+    });
+  }
+  if(profileTab==='pedigree'){
+    wirePedigreeTaps(document.getElementById('profileBody'), r, renderProfile);
+    const pb=document.getElementById('profPrint'); if(pb) pb.onclick=()=>openPrintOptionsSheet(r, renderProfile);
+    const pob=document.getElementById('profOfficialPdf'); if(pob) pob.onclick=()=>downloadOfficialPedigreePDF(r);
+  }
+  if(profileTab==='litters'){ attachCardEvents(); }
+  if(profileTab==='photos'){
+    document.querySelectorAll('[data-pcat]').forEach(b=>b.onclick=()=>{ photoActiveCategory=b.dataset.pcat; renderProfile(); });
+    const addBtn=document.getElementById('profAddPhoto');
+    if(addBtn) addBtn.onclick=()=>{
+      const input=document.getElementById('photoFileInput');
+      input.onchange=()=>{
+        const file=input.files[0]; input.value='';
+        if(!file) return;
+        const reader=new FileReader();
+        reader.onload=()=>{
+          r.photos=r.photos||[];
+          r.photos.push({id:uid(), category:photoActiveCategory, dataUrl:reader.result, addedAt:todayStr()});
+          saveData(); renderProfile(); showToast('Photo added');
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    };
+    document.querySelectorAll('[data-pdel]').forEach(b=>b.onclick=(ev)=>{
+      ev.stopPropagation();
+      armConfirm(b,'Tap again',()=>{ r.photos=(r.photos||[]).filter(p=>p.id!==b.dataset.pdel); saveData(); renderProfile(); });
+    });
+    document.querySelectorAll('[data-popen]').forEach(el=>el.onclick=(ev)=>{
+      if(ev.target.closest('[data-pdel]')) return;
+      const photo=(r.photos||[]).find(p=>p.id===el.dataset.popen);
+      if(photo) openPhotoViewer(r, photo);
+    });
+  }
+  if(profileTab==='notes'){
+    const addBtn=document.getElementById('profAddNote');
+    if(addBtn) addBtn.onclick=()=>{
+      const ta=document.getElementById('profNoteInput'); const text=ta.value.trim();
+      if(!text){ showToast('Write a note first'); return; }
+      r.notesLog=r.notesLog||[]; r.notesLog.push({id:uid(), date:todayStr(), text});
+      saveData(); renderProfile(); showToast('Note added');
+    };
+  }
+}
+
+/* ============================================================
+   PHOTO VIEWER — full-size view with pinch/wheel zoom + pan,
+   plus a crop tool that writes the cropped result back in place.
+   ============================================================ */
+let pvState = null; // { rabbitId, photoId, mode:'view'|'crop', scale, tx, ty }
+
+function openPhotoViewer(r, photo){
+  pvState = { rabbitId:r.id, photoId:photo.id, mode:'view', scale:1, tx:0, ty:0 };
+  renderPhotoViewer();
+  document.getElementById('photoViewer').classList.add('on');
+}
+function closePhotoViewer(){
+  document.getElementById('photoViewer').classList.remove('on');
+  document.getElementById('photoViewer').innerHTML='';
+  pvState=null;
+}
+function renderPhotoViewer(){
+  if(!pvState) return;
+  const r = rabbits.find(x=>x.id===pvState.rabbitId);
+  const photo = r && (r.photos||[]).find(p=>p.id===pvState.photoId);
+  const el = document.getElementById('photoViewer');
+  if(!r || !photo){ closePhotoViewer(); return; }
+  const cropping = pvState.mode==='crop';
+  el.innerHTML = `
+    <div class="pv-topbar">
+      <button class="pv-icon-btn" id="pvClose" aria-label="Close">&times;</button>
+      <div class="pv-title">${esc(photo.category||'Photo')}</div>
+      <button class="pv-icon-btn" id="pvDelete" aria-label="Delete">&#128465;</button>
+    </div>
+    <div class="pv-stage" id="pvStage">
+      <img id="pvImg" src="${photo.dataUrl}" draggable="false">
+      ${cropping ? `<div class="pv-crop-mask"></div><div class="pv-crop-box" id="pvCropBox">
+        <div class="pv-crop-handle" data-h="nw"></div><div class="pv-crop-handle" data-h="ne"></div>
+        <div class="pv-crop-handle" data-h="sw"></div><div class="pv-crop-handle" data-h="se"></div>
+      </div>` : `<div class="pv-hint">Pinch or scroll to zoom &middot; drag to pan</div>`}
+    </div>
+    <div class="pv-bottombar">
+      ${cropping
+        ? `<button class="btn btn-secondary" id="pvCropCancel">Cancel</button><button class="btn btn-primary" id="pvCropApply">Apply crop</button>`
+        : `<button class="btn btn-secondary" id="pvCropBtn">Crop</button>`}
+    </div>`;
+  wirePhotoViewer(r, photo);
+}
+function pvApplyTransform(){
+  const img=document.getElementById('pvImg'); if(!img) return;
+  img.style.transform = `translate(${pvState.tx}px, ${pvState.ty}px) scale(${pvState.scale})`;
+}
+function wirePhotoViewer(r, photo){
+  document.getElementById('pvClose').onclick = closePhotoViewer;
+  const delBtn = document.getElementById('pvDelete');
+  delBtn.onclick = ()=>{
+    armConfirm(delBtn, 'Tap again to delete', ()=>{
+      r.photos = (r.photos||[]).filter(p=>p.id!==photo.id);
+      saveData(); closePhotoViewer(); renderProfile(); showToast('Photo deleted');
+    });
+  };
+
+  if(pvState.mode==='view'){
+    const stage = document.getElementById('pvStage');
+    const img = document.getElementById('pvImg');
+    pvApplyTransform();
+    const pointers = new Map();
+    let lastDist = null, lastMid = null;
+
+    function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+    function mid(a,b){ return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; }
+    function clampPan(){
+      const maxPan = Math.max(0, (pvState.scale-1)) * (stage.clientWidth/2) + 40;
+      pvState.tx = Math.max(-maxPan, Math.min(maxPan, pvState.tx));
+      pvState.ty = Math.max(-maxPan, Math.min(maxPan, pvState.ty));
+    }
+
+    stage.onpointerdown = (e)=>{
+      stage.setPointerCapture(e.pointerId);
+      pointers.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(pointers.size===2){
+        const [a,b] = [...pointers.values()];
+        lastDist = dist(a,b); lastMid = mid(a,b);
+      }
+    };
+    stage.onpointermove = (e)=>{
+      if(!pointers.has(e.pointerId)) return;
+      const prev = pointers.get(e.pointerId);
+      const cur = {x:e.clientX, y:e.clientY};
+      pointers.set(e.pointerId, cur);
+      if(pointers.size===2){
+        const [a,b] = [...pointers.values()];
+        const d = dist(a,b), m = mid(a,b);
+        if(lastDist){
+          const factor = d/lastDist;
+          pvState.scale = Math.max(1, Math.min(5, pvState.scale*factor));
+        }
+        if(lastMid){ pvState.tx += m.x-lastMid.x; pvState.ty += m.y-lastMid.y; }
+        lastDist = d; lastMid = m;
+        clampPan(); pvApplyTransform();
+      } else if(pointers.size===1 && pvState.scale>1){
+        pvState.tx += cur.x-prev.x; pvState.ty += cur.y-prev.y;
+        clampPan(); pvApplyTransform();
+      }
+    };
+    function endPointer(e){
+      pointers.delete(e.pointerId);
+      if(pointers.size<2){ lastDist=null; lastMid=null; }
+    }
+    stage.onpointerup = endPointer;
+    stage.onpointercancel = endPointer;
+    stage.onwheel = (e)=>{
+      e.preventDefault();
+      const factor = e.deltaY<0 ? 1.12 : 1/1.12;
+      pvState.scale = Math.max(1, Math.min(5, pvState.scale*factor));
+      clampPan(); pvApplyTransform();
+    };
+    stage.ondblclick = ()=>{
+      pvState.scale = pvState.scale>1 ? 1 : 2.5;
+      pvState.tx=0; pvState.ty=0;
+      pvApplyTransform();
+    };
+    document.getElementById('pvCropBtn').onclick = ()=>{
+      pvState.mode='crop'; pvState.scale=1; pvState.tx=0; pvState.ty=0;
+      renderPhotoViewer();
+    };
+  } else {
+    wireCropMode(r, photo);
+  }
+}
+function wireCropMode(r, photo){
+  const img = document.getElementById('pvImg');
+  const box = document.getElementById('pvCropBox');
+  document.getElementById('pvCropCancel').onclick = ()=>{ pvState.mode='view'; renderPhotoViewer(); };
+
+  function initBox(){
+    const ir = img.getBoundingClientRect();
+    const w = ir.width*0.8, h = ir.height*0.8;
+    box.dataset.x = ir.left + (ir.width-w)/2;
+    box.dataset.y = ir.top + (ir.height-h)/2;
+    box.dataset.w = w; box.dataset.h = h;
+    paintBox();
+  }
+  function paintBox(){
+    const stage = document.getElementById('pvStage').getBoundingClientRect();
+    box.style.left = (parseFloat(box.dataset.x)-stage.left)+'px';
+    box.style.top = (parseFloat(box.dataset.y)-stage.top)+'px';
+    box.style.width = box.dataset.w+'px';
+    box.style.height = box.dataset.h+'px';
+  }
+  // Wait a frame so the image has its natural rendered size before measuring.
+  requestAnimationFrame(()=>requestAnimationFrame(initBox));
+
+  const MIN=40;
+  function imgBounds(){ return img.getBoundingClientRect(); }
+
+  box.onpointerdown = (e)=>{
+    if(e.target.closest('.pv-crop-handle')) return;
+    e.preventDefault();
+    box.setPointerCapture(e.pointerId);
+    const startX=e.clientX, startY=e.clientY;
+    const ox=parseFloat(box.dataset.x), oy=parseFloat(box.dataset.y);
+    box.onpointermove = (ev)=>{
+      const ib = imgBounds();
+      const w=parseFloat(box.dataset.w), h=parseFloat(box.dataset.h);
+      let nx = ox + (ev.clientX-startX), ny = oy + (ev.clientY-startY);
+      nx = Math.max(ib.left, Math.min(ib.left+ib.width-w, nx));
+      ny = Math.max(ib.top, Math.min(ib.top+ib.height-h, ny));
+      box.dataset.x=nx; box.dataset.y=ny; paintBox();
+    };
+    box.onpointerup = ()=>{ box.onpointermove=null; box.onpointerup=null; };
+  };
+
+  box.querySelectorAll('.pv-crop-handle').forEach(h=>{
+    h.onpointerdown = (e)=>{
+      e.stopPropagation(); e.preventDefault();
+      h.setPointerCapture(e.pointerId);
+      const corner = h.dataset.h;
+      const startX=e.clientX, startY=e.clientY;
+      const ox=parseFloat(box.dataset.x), oy=parseFloat(box.dataset.y);
+      const ow=parseFloat(box.dataset.w), oh=parseFloat(box.dataset.h);
+      h.onpointermove = (ev)=>{
+        const ib = imgBounds();
+        const dx = ev.clientX-startX, dy = ev.clientY-startY;
+        let x=ox,y=oy,w=ow,hh=oh;
+        if(corner==='se'){ w=ow+dx; hh=oh+dy; }
+        else if(corner==='sw'){ x=ox+dx; w=ow-dx; hh=oh+dy; }
+        else if(corner==='ne'){ y=oy+dy; w=ow+dx; hh=oh-dy; }
+        else if(corner==='nw'){ x=ox+dx; y=oy+dy; w=ow-dx; hh=oh-dy; }
+        w=Math.max(MIN,w); hh=Math.max(MIN,hh);
+        x=Math.max(ib.left, Math.min(ib.left+ib.width-w, x));
+        y=Math.max(ib.top, Math.min(ib.top+ib.height-hh, y));
+        // Prevent the box's far edge from being pushed past the image edge as it grows.
+        w=Math.min(w, ib.left+ib.width-x); hh=Math.min(hh, ib.top+ib.height-y);
+        box.dataset.x=x; box.dataset.y=y; box.dataset.w=w; box.dataset.h=hh;
+        paintBox();
+      };
+      h.onpointerup = ()=>{ h.onpointermove=null; h.onpointerup=null; };
+    };
+  });
+
+  document.getElementById('pvCropApply').onclick = ()=>{
+    const ib = imgBounds();
+    const scaleX = img.naturalWidth/ib.width, scaleY = img.naturalHeight/ib.height;
+    const sx = (parseFloat(box.dataset.x)-ib.left)*scaleX;
+    const sy = (parseFloat(box.dataset.y)-ib.top)*scaleY;
+    const sw = parseFloat(box.dataset.w)*scaleX;
+    const sh = parseFloat(box.dataset.h)*scaleY;
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1,Math.round(sw)); canvas.height = Math.max(1,Math.round(sh));
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+    photo.dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    saveData();
+    pvState.mode='view'; pvState.scale=1; pvState.tx=0; pvState.ty=0;
+    renderPhotoViewer(); renderProfile();
+    showToast('Photo cropped');
+  };
+}
+
+/* ============================================================
+   CSV IMPORT — parses a CSV, auto-matches columns to fields,
+   and asks how to handle any name collisions before committing.
+   ============================================================ */
+function parseCSV(text){
+  if(text.charCodeAt(0)===0xFEFF) text = text.slice(1); // strip BOM from Excel exports
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i], next = text[i+1];
+    if(inQuotes){
+      if(c === '"'){ if(next === '"'){ field += '"'; i++; } else inQuotes = false; }
+      else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field=''; }
+      else if(c === '\r'){ /* handled by \n */ }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => !(r.length===1 && r[0].trim()===''));
+}
+const CSV_FIELD_ALIASES = {
+  name: ['name','rabbit name','rabbit'],
+  sex: ['sex','gender'],
+  breed: ['breed'],
+  color: ['color','colour','color variety','variety','color / variety'],
+  earNumber: ['ear #','ear#','ear number','ear tag','eartag'],
+  dob: ['dob','date of birth','birthdate','birth date'],
+  weight: ['weight','weight lbs','weight (lbs)'],
+  legsWins: ['legs wins','legs (wins)','legs','wins'],
+  registrationNumber: ['registration #','registration number','reg #','reg number','registration'],
+  sireName: ['sire','sire name','father'],
+  damName: ['dam','dam name','mother'],
+  status: ['status'],
+  notes: ['notes','note'],
+};
+function csvNormalizeHeader(s){ return s.toLowerCase().trim().replace(/[_\-]/g,' ').replace(/\s+/g,' '); }
+function mapCsvHeaders(headerRow){
+  const map = {};
+  headerRow.forEach((h,i)=>{
+    const norm = csvNormalizeHeader(h);
+    for(const [field,aliases] of Object.entries(CSV_FIELD_ALIASES)){
+      if(map[field]===undefined && aliases.includes(norm)) map[field]=i;
+    }
+  });
+  return map;
+}
+function csvNormalizeSex(s){
+  if(!s) return 'doe';
+  const v = s.trim().toLowerCase();
+  return ['buck','male','m','b'].includes(v) ? 'buck' : 'doe';
+}
+function csvParseDate(s){
+  if(!s) return null;
+  s = s.trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(m){ return `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`; }
+  return null; // unrecognized format — left blank rather than guessed wrong
+}
+let csvImportRows = [];
+function openImportCsvSheet(){
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Import from CSV</h2>
+    <div class="card-sub" style="margin-bottom:12px;">Upload a CSV with a header row. Columns like Name, Sex, Breed, Color, Ear #, DOB, Weight, Legs (wins), Sire, Dam, Notes are matched automatically — you don't need exact column names or a particular order. Only Name is required.</div>
+    <button class="btn btn-primary" style="width:100%;" id="csvPickBtn">Choose CSV file</button>
+    <div id="csvPreviewArea"></div>`);
+  document.getElementById('csvPickBtn').onclick = ()=>document.getElementById('csvFileInput').click();
+  document.getElementById('csvFileInput').onchange = (e)=>{
+    const file = e.target.files[0]; e.target.value='';
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{ handleCsvParsed(reader.result); }
+      catch(err){ console.error(err); showToast("Couldn't read that file — check it's a plain CSV export."); }
+    };
+    reader.readAsText(file);
+  };
+}
+function handleCsvParsed(text){
+  const rows = parseCSV(text);
+  const area = document.getElementById('csvPreviewArea');
+  if(rows.length < 2){ area.innerHTML = `<div class="empty">No data rows found in that file.</div>`; return; }
+  const headerMap = mapCsvHeaders(rows[0]);
+  if(headerMap.name===undefined){
+    area.innerHTML = `<div class="dupe-box">Couldn't find a "Name" column in the header row. Rename the column to "Name" and try again.</div>`;
+    return;
+  }
+  const dataRows = rows.slice(1).filter(r=>r.some(c=>c.trim()!==''));
+  csvImportRows = dataRows.map(cols=>{
+    const get = (field)=> headerMap[field]!==undefined ? (cols[headerMap[field]]||'').trim() : '';
+    const name = get('name');
+    const data = {
+      name, sex: csvNormalizeSex(get('sex')), breed: get('breed'), color: get('color'),
+      earNumber: get('earNumber'), dob: csvParseDate(get('dob')), weight: get('weight'),
+      legsWins: get('legsWins'), registrationNumber: get('registrationNumber'),
+      sireName: get('sireName'), damName: get('damName'), notes: get('notes'),
+    };
+    const statusRaw = get('status').trim().toLowerCase();
+    if(statusRaw) data.status = statusRaw;
+    else data.status = data.sex==='doe' ? 'open' : 'available';
+    const existing = name ? findByName(name) : null;
+    return { data, existing, action: existing ? 'skip' : 'new' };
+  }).filter(row=>row.data.name);
+  renderCsvPreview();
+}
+function renderCsvPreview(){
+  const area = document.getElementById('csvPreviewArea');
+  const total = csvImportRows.length;
+  const dupes = csvImportRows.filter(r=>r.existing);
+  const newCount = total - dupes.length;
+  area.innerHTML = `
+    <div class="section-label">${total} ROW${total===1?'':'S'} FOUND</div>
+    <div class="card-sub" style="margin-bottom:10px;">${newCount} new &middot; ${dupes.length} match${dupes.length===1?'es':''} an existing rabbit by name</div>
+    ${dupes.length ? `<div class="row2" style="margin-bottom:12px;">
+        <button class="btn btn-secondary btn-sm" id="csvSkipAll">Skip all matches</button>
+        <button class="btn btn-secondary btn-sm" id="csvUpdateAll">Update all matches</button>
+      </div>
+      <div class="section-label">REVIEW MATCHES</div>
+      ${dupes.map((row)=>{
+        const i = csvImportRows.indexOf(row);
+        return `<div class="card no-tap">
+          <div class="card-name" style="font-size:15px;">${esc(row.data.name)}</div>
+          <div class="card-sub">Matches existing rabbit &middot; ${esc(row.existing.status)}${row.existing.color?' &middot; '+esc(row.existing.color):''}</div>
+          <div class="seg" style="margin-top:8px;" data-csvrow="${i}">
+            <button data-v="skip" class="${row.action==='skip'?'on':''}">Skip</button>
+            <button data-v="update" class="${row.action==='update'?'on':''}">Update</button>
+            <button data-v="new" class="${row.action==='new'?'on':''}">Import as new</button>
+          </div>
+        </div>`;
+      }).join('')}` : ''}
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="csvImportBtn">Import</button></div>`;
+  document.querySelectorAll('[data-csvrow]').forEach(seg=>{
+    seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      csvImportRows[+seg.dataset.csvrow].action = b.dataset.v;
+      seg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+    });
+  });
+  const skipAll = document.getElementById('csvSkipAll');
+  if(skipAll) skipAll.onclick = ()=>{ csvImportRows.forEach(r=>{ if(r.existing) r.action='skip'; }); renderCsvPreview(); };
+  const updateAll = document.getElementById('csvUpdateAll');
+  if(updateAll) updateAll.onclick = ()=>{ csvImportRows.forEach(r=>{ if(r.existing) r.action='update'; }); renderCsvPreview(); };
+  document.getElementById('csvImportBtn').onclick = commitCsvImport;
+}
+function commitCsvImport(){
+  let imported=0, updated=0, skipped=0;
+  csvImportRows.forEach(row=>{
+    if(row.existing && row.action==='skip'){ skipped++; return; }
+    if(row.existing && row.action==='update'){
+      const ex = row.existing;
+      Object.keys(row.data).forEach(k=>{ if(row.data[k]) ex[k]=row.data[k]; });
+      updated++;
+    } else {
+      rabbits.push(blankRabbit(row.data));
+      imported++;
+    }
+    if(row.data.sireName) ensureAncestor(row.data.sireName,'buck');
+    if(row.data.damName) ensureAncestor(row.data.damName,'doe');
+  });
+  saveData(); closeSheet(); render();
+  const parts=[]; if(imported) parts.push(imported+' imported'); if(updated) parts.push(updated+' updated'); if(skipped) parts.push(skipped+' skipped');
+  showToast(parts.join(', ')||'Nothing to import');
+  csvImportRows = [];
+}
+
+loadData();
+</script>
+</body>
+</html>
