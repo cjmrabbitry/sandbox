@@ -184,6 +184,7 @@
   .pp-portrait.pp-simple .pp-simple-box-name{ font-size:11px; }
   .pp-portrait.pp-simple .pp-simple-box-color{ font-size:8.8px; }
   .pp-portrait.pp-simple .pp-pill{ font-size:7.6px; }
+
   @media print{
     /* display:none (not visibility:hidden) so the rest of the app
        contributes zero layout height during print — otherwise the
@@ -250,6 +251,58 @@
   .cal-dot{ width:8px; height:8px; border-radius:50%; margin-top:5px; flex:0 0 auto; }
   .cal-row-text{ font-size:13.5px; color:var(--ink); line-height:1.4; }
   .cal-row-text b{color:var(--navy);}
+
+  /* ============================================================
+     DESKTOP / IPAD-LANDSCAPE LAYOUT (900px and up)
+     Placed last in the stylesheet so it reliably overrides every
+     base rule above regardless of selector order. Phones and
+     portrait iPad stay on the mobile layout defined earlier.
+     ============================================================ */
+  @media screen and (min-width:900px){
+    body{ padding-bottom:0; }
+    header.top{
+      position:fixed; top:0; left:0; bottom:0; width:230px; z-index:20;
+      flex-direction:column; align-items:flex-start; gap:18px;
+      padding:22px 18px 18px; overflow-y:auto;
+    }
+    header.top .theme-btn{ margin-top:auto; }
+    nav.bottom{
+      position:fixed; top:110px; left:0; bottom:0; width:230px; z-index:20;
+      display:flex; flex-direction:column; gap:2px;
+      background:var(--navbar); padding:10px 10px 16px;
+    }
+    nav.bottom button{
+      flex-direction:row; justify-content:flex-start; align-items:center;
+      gap:12px; width:100%; padding:11px 12px; border-radius:9px;
+    }
+    nav.bottom button.on{ background:rgba(255,255,255,.08); }
+    nav.bottom svg{ width:18px; height:18px; flex:0 0 auto; }
+    nav.bottom span{ font-size:13px; }
+    .toolbar, main, #printPedigree{ margin-left:230px; }
+    .profile-view{ left:230px; width:auto; }
+    .stats{ grid-template-columns:repeat(4,minmax(0,1fr)); }
+
+    /* Card-list views get a responsive multi-column grid instead of
+       one long single-column scroll. Section labels, top action
+       buttons, and other full-width elements span every column so
+       they still read as dividers rather than becoming grid cells. */
+    #main.card-grid{
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+      gap:12px; align-items:start;
+    }
+    #main.card-grid > .section-label,
+    #main.card-grid > .empty,
+    #main.card-grid > .stats,
+    #main.card-grid > .subnav-wrap,
+    #main.card-grid > .todo-row,
+    #main.card-grid > button{
+      grid-column:1 / -1;
+    }
+
+    /* Sheets become a centered dialog instead of a bottom sheet. */
+    .sheet-backdrop{ align-items:center; justify-content:center; }
+    .sheet{ width:600px; max-width:88vw; max-height:85vh; border-radius:18px; }
+  }
 </style>
 <style id="pp-page-size">@page{ size: landscape; margin: 0.15in; }</style>
 </head>
@@ -776,6 +829,8 @@ function convertLitterToIndividuals(damId){
 /* ---------- main render dispatcher ---------- */
 function renderMain(){
   const main=document.getElementById('main');
+  const gridTabs = ['rabbits','litters','planned','ancestors','archive','forsale'];
+  main.classList.toggle('card-grid', !!searchQuery.trim() || gridTabs.includes(currentTab));
   if(searchQuery.trim()){ renderSearch(main); return; }
   if(currentTab==='home'){ renderHome(main); }
   else if(currentTab==='rabbits'){ renderRabbits(main); }
