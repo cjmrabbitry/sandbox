@@ -2319,13 +2319,30 @@ function buildOfficialPedigreeValues(r){
   fillAncestorBoxValues('GGDAM4', g('ddd'), put);
   return v;
 }
+async function getMyPedigreeTemplateName(){
+  try{
+    const {data} = await sb.from('profiles').select('pedigree_template').eq('id',currentUser.id).maybeSingle();
+    return (data && data.pedigree_template) || 'generic';
+  }catch(e){ return 'generic'; }
+}
 async function downloadOfficialPedigreePDF(r){
   try{
     const { PDFDocument, StandardFonts } = PDFLib;
-    const existingBytes = await fetch('pedigree-template.pdf').then(res=>{
-      if(!res.ok) throw new Error('Template PDF not found: '+res.status);
-      return res.arrayBuffer();
-    });
+    const templateName = await getMyPedigreeTemplateName();
+    const storageUrl = `${SUPABASE_URL}/storage/v1/object/public/pedigree-templates/${templateName}.pdf`;
+    let existingBytes;
+    try{
+      const res = await fetch(storageUrl);
+      if(!res.ok) throw new Error('not found in storage');
+      existingBytes = await res.arrayBuffer();
+    }catch(storageErr){
+      // Fall back to the file bundled with the app so an export never
+      // fails outright just because a template name isn't set up yet.
+      existingBytes = await fetch('pedigree-template.pdf').then(res=>{
+        if(!res.ok) throw new Error('Template PDF not found: '+res.status);
+        return res.arrayBuffer();
+      });
+    }
     const pdfDoc = await PDFDocument.load(existingBytes);
     const form = pdfDoc.getForm();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -2476,8 +2493,11 @@ async function openAdminSheet(){
         <div class="card-top"><div>
           <div class="card-name">${esc(p.email||p.id)}</div>
           <div class="card-sub">${p.role==='admin'?'Admin':'Customer'} &middot; ${p.access_granted?'Access granted':'Access NOT granted'}${grantMap[p.id]?' &middot; support access active':''}</div>
+          <div class="card-sub" style="margin-top:8px;">Pedigree template: <b>${esc(p.pedigree_template||'generic')}</b></div>
         </div></div>
         <div class="card-actions">
+          <div class="field" style="flex:1 1 100%; margin-bottom:6px;"><input type="text" data-templateinput="${p.id}" placeholder="filename in Storage, e.g. cjm-legacy" value="${esc(p.pedigree_template||'')}"></div>
+          <button class="btn btn-secondary btn-sm" data-savetemplate="${p.id}">Save template</button>
           <button class="btn btn-secondary btn-sm" data-toggleaccess="${p.id}" data-current="${p.access_granted}">${p.access_granted?'Revoke access':'Grant access'}</button>
           <button class="btn btn-secondary btn-sm" data-viewlog="${p.id}" data-email="${esc(p.email||'')}">Activity log</button>
           ${grantMap[p.id]?`<button class="btn btn-primary btn-sm" data-viewcustomer="${p.id}" data-email="${esc(p.email||'')}">View account</button>`:''}
@@ -2488,6 +2508,13 @@ async function openAdminSheet(){
     await sb.from('profiles').update({access_granted:!cur}).eq('id',id);
     showToast(!cur?'Access granted':'Access revoked');
     openAdminSheet();
+  });
+  document.querySelectorAll('[data-savetemplate]').forEach(b=>b.onclick=async ()=>{
+    const id=b.dataset.savetemplate;
+    const input=document.querySelector(`[data-templateinput="${id}"]`);
+    const val=(input.value||'generic').trim();
+    await sb.from('profiles').update({pedigree_template:val}).eq('id',id);
+    showToast('Pedigree template updated'); openAdminSheet();
   });
   document.querySelectorAll('[data-viewcustomer]').forEach(b=>b.onclick=()=>adminViewCustomer(b.dataset.viewcustomer, b.dataset.email));
   document.querySelectorAll('[data-viewlog]').forEach(b=>b.onclick=()=>openAuditLogSheet(b.dataset.viewlog, b.dataset.email));
