@@ -418,7 +418,7 @@
     <input type="search" id="searchInput" placeholder="Search by name, ear #, color, or breed">
     <button id="searchClear" aria-label="Clear search" style="display:none;">&times;</button>
   </div>
-  <button class="btn btn-secondary quickbred" id="quickBredBtn">+ Mark a doe bred</button>
+  <button class="btn btn-secondary quickbred" id="quickBredBtn">+ Record a breeding</button>
 </div>
 
 <main id="main"></main>
@@ -1609,7 +1609,7 @@ function commitBreed(r, buck, bred, onDone){
 function openQuickBreedSheet(){
   const open = rabbits.filter(r=>r.sex==='doe'&&(r.status==='open'||r.status==='resting'));
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
-    <h2>Mark a doe bred</h2>
+    <h2>Record a breeding</h2>
     <div class="field"><label>Which doe</label><select id="f-whichdoe"><option value="">Select a doe</option>${open.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}</select></div>
     ${!open.length?'<div class="empty" style="padding:12px 0;">No does are currently open.</div>':''}
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-next">Next</button></div>`);
