@@ -152,7 +152,8 @@
   .comingup-date{ opacity:.75; font-size:12.5px; flex:0 0 auto; padding-left:10px; }
 
   /* Admin support-view banner */
-  .admin-view-banner{ display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--rust); color:#fffdf8; padding:9px 16px; font-family:'Jost',sans-serif; font-size:13px; font-weight:600; }
+  .admin-view-banner{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 10px; background:var(--rust); color:#fffdf8; padding:9px 16px; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; line-height:1.3; }
+  .admin-view-banner span{ flex:1 1 200px; min-width:0; }
   .admin-view-banner button{ background:#fffdf8; color:var(--rust); border:none; border-radius:7px; padding:5px 11px; font-size:12px; font-weight:700; cursor:pointer; flex:0 0 auto; }
   .seg{display:flex; gap:6px;}
   .seg button{ flex:1; padding:12px 9px; min-height:44px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer; }
@@ -2478,6 +2479,7 @@ async function openAdminSheet(){
         </div></div>
         <div class="card-actions">
           <button class="btn btn-secondary btn-sm" data-toggleaccess="${p.id}" data-current="${p.access_granted}">${p.access_granted?'Revoke access':'Grant access'}</button>
+          <button class="btn btn-secondary btn-sm" data-viewlog="${p.id}" data-email="${esc(p.email||'')}">Activity log</button>
           ${grantMap[p.id]?`<button class="btn btn-primary btn-sm" data-viewcustomer="${p.id}" data-email="${esc(p.email||'')}">View account</button>`:''}
         </div>
       </div>`).join('') : `<div class="card no-tap"><div class="card-detail">No other accounts yet.</div></div>`}`);
@@ -2488,6 +2490,30 @@ async function openAdminSheet(){
     openAdminSheet();
   });
   document.querySelectorAll('[data-viewcustomer]').forEach(b=>b.onclick=()=>adminViewCustomer(b.dataset.viewcustomer, b.dataset.email));
+  document.querySelectorAll('[data-viewlog]').forEach(b=>b.onclick=()=>openAuditLogSheet(b.dataset.viewlog, b.dataset.email));
+}
+function summarizeAuditValue(v){
+  if(v===null || v===undefined) return '(empty)';
+  const s = typeof v==='string' ? v : JSON.stringify(v);
+  return s.length>70 ? s.slice(0,70)+'…' : s;
+}
+async function openAuditLogSheet(customerId, customerEmail){
+  let entries=[];
+  try{
+    const {data} = await sb.from('audit_log').select('*').eq('customer_id',customerId).order('created_at',{ascending:false}).limit(50);
+    entries = data||[];
+  }catch(e){}
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Activity log</h2>
+    <div class="card-sub" style="margin-bottom:12px;">Changes made to ${esc(customerEmail)}'s account while support was viewing it. Most recent first.</div>
+    ${entries.length ? entries.map(e=>`
+      <div class="card no-tap">
+        <div class="card-sub">${new Date(e.created_at).toLocaleString()}</div>
+        <div class="card-detail" style="margin-top:4px;"><b>${esc(e.row_id)}</b> changed</div>
+        <div class="card-detail" style="margin-top:4px; font-size:12px; opacity:.8;">Before: ${esc(summarizeAuditValue(e.old_value))}</div>
+        <div class="card-detail" style="font-size:12px; opacity:.8;">After: ${esc(summarizeAuditValue(e.new_value))}</div>
+      </div>`).join('') : `<div class="card no-tap"><div class="card-detail">No logged edits for this account yet.</div></div>`}
+    <button class="btn btn-secondary" style="width:100%; margin-top:10px;" onclick="openAdminSheet()">Back to all accounts</button>`);
 }
 async function openMoreSheet(){
   const items=[['add','Add rabbit'],['import','Import from CSV'],['importpdf','Import from Pedigree PDF'],['planned','Planned breedings'],['forsale','For sale'],['shows','Upcoming shows'],['ancestors','Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['backup','Backup and restore']];
