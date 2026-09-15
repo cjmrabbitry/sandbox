@@ -302,8 +302,22 @@
   .cal-row-text b{color:var(--navy);}
 
   /* Authentication */
-  body.auth-locked > *:not(#authScreen){ visibility:hidden !important; }
   #authScreen{ position:fixed; inset:0; z-index:200; background:var(--page); display:flex; align-items:center; justify-content:center; padding:24px; overflow:auto; }
+  #agreementScreen{ position:fixed; inset:0; z-index:210; background:var(--page); overflow:auto; padding:24px 16px 60px; }
+  #agreementScreen.hidden{ display:none; }
+  body.auth-locked > *:not(#authScreen):not(#agreementScreen){ visibility:hidden !important; }
+  .agreement-wrap{ max-width:640px; margin:0 auto; }
+  .agreement-header{ text-align:center; margin-bottom:16px; }
+  .agreement-fields{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:16px; font-family:'Public Sans',sans-serif; font-size:13.5px; line-height:1.9; }
+  .agreement-body{ background:var(--card); border:1px solid var(--line-strong); border-radius:10px; padding:16px 18px; max-height:340px; overflow-y:auto; font-family:'Public Sans',sans-serif; font-size:12.5px; line-height:1.6; color:var(--ink); margin-bottom:16px; }
+  .agreement-body p{ margin:0 0 10px; }
+  .agreement-body ul{ margin:0 0 10px; padding-left:20px; }
+  .agreement-body strong{ color:var(--navy); }
+  .agreement-checks{ margin-bottom:14px; }
+  .agreement-check{ display:flex; align-items:flex-start; gap:10px; font-family:'Public Sans',sans-serif; font-size:13px; line-height:1.5; padding:8px 0; border-bottom:1px solid var(--line); cursor:pointer; }
+  .agreement-check input{ margin-top:3px; flex:0 0 auto; width:18px; height:18px; }
+  .agreement-sig{ margin-bottom:6px; }
+  #sigCanvas{ width:100%; height:180px; touch-action:none; background:#fffdf8; border:1px solid var(--line-strong); border-radius:10px; display:block; }
   #authScreen.hidden{ display:none; }
   .auth-card{ width:min(430px,100%); background:var(--card); border:1px solid var(--line); border-radius:18px; padding:28px 22px 24px; box-shadow:0 12px 40px rgba(12,24,48,.10); }
   .auth-brand{ text-align:center; margin-bottom:24px; }
@@ -432,6 +446,8 @@
   </div>
 </div>
 
+<div id="agreementScreen" class="hidden"></div>
+
 <header class="top">
   <div class="wordmark">HerdNerd<span class="pro">Pro</span></div>
   <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">
@@ -559,6 +575,967 @@ async function adminExitCustomerView(){
   await loadData();
   showToast('Back to your own account');
 }
+
+const NDA_BODY_HTML = `<strong>RECITALS AND CONSIDERATION</strong></p>
+<p>WHEREAS, HerdNerd Pro is developing a proprietary software platform
+for rabbit breeders, rabbitry operators, and related users, and is
+making a limited, private version of that software available to a select
+group of testers for evaluation purposes; and</p>
+<p>WHEREAS, Tester wishes to participate in that private evaluation
+program and, in exchange for the right to access and use the pre-release
+software, is willing to accept the confidentiality obligations set out
+in this Agreement;</p>
+<p>NOW, THEREFORE, in consideration of HerdNerd Pro granting Tester
+access to the private Beta Program, and for other good and valuable
+consideration, the receipt and sufficiency of which is acknowledged, the
+Parties agree as follows:</p>
+<p><strong>1. DEFINITIONS AND PURPOSE</strong></p>
+<p>For purposes of this Agreement:</p>
+<ul>
+<li><p>“Agreement” means this Private Beta Confidentiality &amp;
+Non-Disclosure Agreement, together with any exhibits, amendments, or
+successor versions issued under Section 37.</p></li>
+<li><p>“Beta Program” means HerdNerd Pro’s private, invitation-only
+pre-release testing program, including any sandbox, staging, or
+production-preview environment made available to Tester for evaluation
+purposes.</p></li>
+<li><p>“Effective Date” means the date Tester first accepts this
+Agreement by any of the methods described above, as recorded by HerdNerd
+Pro’s systems.</p></li>
+<li><p>“License Agreement” means the separate HerdNerd Pro Beta Software
+License Agreement (or successor terms of use) governing Tester’s
+permitted use of the software itself, as referenced in Section
+28.</p></li>
+</ul>
+<p>HerdNerd Pro is making a limited, private version of its software
+available to Tester solely for the purpose of evaluating the software,
+identifying bugs or usability issues, providing feedback, and otherwise
+participating in the Beta Program.</p>
+<p>Tester acknowledges that the Beta Program is confidential and that
+HerdNerd Pro is disclosing or making available information that HerdNerd
+Pro considers proprietary, confidential, commercially valuable, and/or
+not publicly available. The purpose of this Agreement is to protect
+HerdNerd Pro’s confidential information, intellectual property,
+proprietary software, designs, features, workflows, business
+information, and other non-public information from unauthorized
+disclosure, use, copying, reproduction, or exploitation.</p>
+<p><strong>2. DEFINITION OF CONFIDENTIAL INFORMATION</strong></p>
+<p>“Confidential Information” means all non-public information
+disclosed, displayed, demonstrated, communicated, transmitted, made
+available, or otherwise provided to Tester by or on behalf of HerdNerd
+Pro, whether provided orally, visually, electronically, digitally, in
+writing, through the software itself, through demonstrations, through
+screenshots, through documentation, or through Tester’s access to the
+Beta Program. Confidential Information includes, without limitation, the
+following categories:</p>
+<p><strong>2.1 Software and Technology</strong></p>
+<ul>
+<li><p>Source code and object code</p></li>
+<li><p>Software, application, and database architecture and
+schemas</p></li>
+<li><p>APIs, integrations, algorithms, formulas, and logic</p></li>
+<li><p>Technical processes and technical specifications</p></li>
+<li><p>Backend and frontend processes, automation, and security
+methods</p></li>
+<li><p>Authentication systems, data structures, and data models</p></li>
+<li><p>Development methods and unpublished, unreleased, experimental, or
+planned functionality</p></li>
+<li><p>Feature roadmaps and other technical information relating to
+HerdNerd Pro</p></li>
+</ul>
+<p><strong>2.2 Proprietary Features</strong></p>
+<p>Confidential Information specifically includes HerdNerd Pro’s
+proprietary features, functions, workflows, systems, tools, methods, and
+processes that distinguish HerdNerd Pro from other rabbitry management
+software — including any feature, workflow, functionality, method,
+process, system, user interaction, organizational structure, or
+combination thereof that HerdNerd Pro has developed independently and
+considers proprietary or confidential, whether or not similar features
+exist in competing software. The existence, operation, design,
+implementation, methodology, functionality, and underlying concept of
+non-public HerdNerd Pro features may itself constitute Confidential
+Information.</p>
+<p><strong>2.3 User Interface and Design</strong></p>
+<ul>
+<li><p>User interface, user experience, and page/screen layouts</p></li>
+<li><p>Navigation systems, dashboards, menus, and buttons</p></li>
+<li><p>Workflows, information hierarchy, and visual
+organization</p></li>
+<li><p>Card structures, data presentation, and interaction
+patterns</p></li>
+<li><p>Terminology, design systems, and visual styling</p></li>
+<li><p>Graphical elements, icons, typography, and color
+combinations</p></li>
+<li><p>Arrangement of elements and responsive (mobile/tablet/desktop)
+layouts</p></li>
+<li><p>The overall look, feel, organization, and presentation of the
+software</p></li>
+</ul>
+<p>The particular combination and arrangement of these elements may
+constitute Confidential Information even where individual elements,
+concepts, or design conventions are generally known.</p>
+<p><strong>2.4 Business Information</strong></p>
+<ul>
+<li><p>Business plans, product strategy, and pricing (current and
+future)</p></li>
+<li><p>Commercialization, marketing, and customer-acquisition
+strategy</p></li>
+<li><p>Beta testing strategy, development plans, and product
+roadmaps</p></li>
+<li><p>Partnerships, potential partnerships, and investor
+information</p></li>
+<li><p>Financial information and competitive or market analysis</p></li>
+<li><p>Customer, prospective customer, breeder, and vendor
+information</p></li>
+<li><p>Other non-public business relationships or information</p></li>
+</ul>
+<p><strong>2.5 Beta Program Information</strong></p>
+<ul>
+<li><p>The existence of the private Beta Program and the identity or
+number of beta testers</p></li>
+<li><p>Beta tester discussions and communications</p></li>
+<li><p>Unreleased features, test results, bugs, defects, or
+vulnerabilities</p></li>
+<li><p>Development status, product limitations, and performance</p></li>
+<li><p>Screenshots, recordings, and demonstrations</p></li>
+<li><p>Product changes, feedback, and internal discussions not publicly
+released by HerdNerd Pro</p></li>
+</ul>
+<p><strong>2.6 Demonstrations and Visual Information</strong></p>
+<p>Any portion of HerdNerd Pro that Tester observes, accesses, views,
+hears, or interacts with through the Beta Program is Confidential
+Information unless HerdNerd Pro has expressly designated it as public —
+including information learned merely by using or observing the software,
+whether or not separately labeled “Confidential.”</p>
+<p><strong>3. INFORMATION IS CONFIDENTIAL WHETHER OR NOT MARKED
+“CONFIDENTIAL”</strong></p>
+<p>HerdNerd Pro may not individually mark every screen, feature,
+document, communication, or piece of information as “CONFIDENTIAL.” The
+nature of the Beta Program and the circumstances under which information
+is provided are sufficient to establish that information reasonably
+understood to be non-public or proprietary is Confidential Information.
+Tester agrees to treat as Confidential Information any information that
+a reasonable person would understand, based on the circumstances, to be
+confidential, proprietary, commercially sensitive, or not intended for
+public disclosure.</p>
+<p><strong>4. TESTER’S CONFIDENTIALITY OBLIGATIONS</strong></p>
+<p>Tester agrees to:</p>
+<ul>
+<li><p>Keep all Confidential Information strictly confidential</p></li>
+<li><p>Use Confidential Information solely to participate in and
+evaluate the HerdNerd Pro Beta Program</p></li>
+<li><p>Not disclose Confidential Information to any other person or
+entity without HerdNerd Pro’s prior written authorization</p></li>
+<li><p>Not publish or post Confidential Information, including on social
+media</p></li>
+<li><p>Not discuss Confidential Information with persons who are not
+authorized beta testers</p></li>
+<li><p>Not disclose Confidential Information to friends, family,
+coworkers, employers, competitors, developers, consultants, or
+vendors</p></li>
+<li><p>Not upload Confidential Information to any public website, forum,
+social media platform, discussion board, repository, or file-sharing
+service</p></li>
+<li><p>Not use Confidential Information for any purpose other than
+evaluating HerdNerd Pro</p></li>
+<li><p>Take reasonable measures to prevent unauthorized access to
+Confidential Information</p></li>
+<li><p>Immediately notify HerdNerd Pro of any unauthorized disclosure,
+access, loss, theft, or use of Confidential Information</p></li>
+<li><p>Cooperate reasonably with HerdNerd Pro in responding to any
+suspected unauthorized disclosure or misuse</p></li>
+</ul>
+<p><strong>5. NO DISCLOSURE OF HERDNERD PRO FEATURES</strong></p>
+<p>Tester agrees not to disclose, describe, demonstrate, reproduce,
+explain, or otherwise communicate to any third party:</p>
+<ul>
+<li><p>How HerdNerd Pro’s proprietary features or workflows work or
+operate</p></li>
+<li><p>What makes HerdNerd Pro’s features different from competing
+products</p></li>
+<li><p>How HerdNerd Pro organizes information, structures screens, or
+operates its dashboard</p></li>
+<li><p>How particular functions are implemented or how portions of the
+software interact</p></li>
+<li><p>Unpublished or unreleased functionality, or any other non-public
+aspect of HerdNerd Pro</p></li>
+</ul>
+<p>Tester may not provide another person with sufficient information to
+reproduce, imitate, reconstruct, or develop a substantially similar
+implementation of a proprietary HerdNerd Pro feature.</p>
+<p><strong>6. NO SCREENSHOTS, RECORDINGS, OR PUBLIC
+DEMONSTRATIONS</strong></p>
+<p>Unless HerdNerd Pro gives prior written permission, Tester may
+not:</p>
+<ul>
+<li><p>Take screenshots of HerdNerd Pro for distribution, or record
+video or audio of HerdNerd Pro</p></li>
+<li><p>Livestream or photograph HerdNerd Pro screens for
+publication</p></li>
+<li><p>Create tutorials or reviews containing confidential screenshots
+or demonstrations</p></li>
+<li><p>Demonstrate HerdNerd Pro to unauthorized persons</p></li>
+<li><p>Otherwise reproduce or distribute visual or audio representations
+of the private beta</p></li>
+</ul>
+<p>Tester may take screenshots solely to privately report a bug to
+HerdNerd Pro, provided those screenshots are transmitted only to
+HerdNerd Pro and are not retained or distributed for any other
+purpose.</p>
+<p><strong>7. NO COPYING OR REPRODUCTION</strong></p>
+<p>Tester shall not copy, reproduce, duplicate, imitate, recreate,
+translate, modify, adapt, distribute, publish, sell, license,
+sublicense, transfer, lease, rent, or otherwise exploit any portion of
+HerdNerd Pro or its Confidential Information, including its layout,
+dashboard structure, workflows, proprietary features, user interface,
+navigation structure, database organization, written content, graphics,
+or visual assets, and shall not use HerdNerd Pro as a blueprint for
+another software product.</p>
+<p><strong>8. NO REVERSE ENGINEERING</strong></p>
+<p>To the maximum extent permitted by applicable law, Tester shall not
+reverse engineer, decompile, disassemble, decode, translate, derive
+source code from, analyze the underlying code of, attempt to discover
+the algorithms or database structures of, circumvent security measures
+of, or otherwise attempt to derive the underlying structure, ideas,
+algorithms, or source code of HerdNerd Pro. Tester shall not attempt to
+gain access to any portion of HerdNerd Pro’s systems, repositories,
+databases, APIs, administrative tools, source code, credentials, or
+infrastructure that Tester has not been expressly authorized to
+access.</p>
+<p><strong>9. NO COMPETITIVE USE</strong></p>
+<p>Tester shall not use HerdNerd Pro or its Confidential Information to
+develop, design, improve, advise upon, market, or operate a competing or
+substantially similar software product or service, or to intentionally
+reproduce or replicate HerdNerd Pro’s proprietary features, workflows,
+layouts, or systems for another software product. Nothing in this
+section prohibits Tester from independently developing software based
+solely upon Tester’s own pre-existing knowledge, experience, and
+independently developed ideas, provided Tester does not use or disclose
+HerdNerd Pro’s Confidential Information in doing so.</p>
+<p><strong>10. INTELLECTUAL PROPERTY OWNERSHIP</strong></p>
+<p>HerdNerd Pro and its licensors retain all right, title, and interest
+in and to HerdNerd Pro, including all associated intellectual property
+rights. Except for the limited right to access the Beta Program as
+expressly provided in this Agreement, Tester receives no ownership
+interest, license, assignment, or other right in or to HerdNerd Pro. All
+rights not expressly granted to Tester are reserved by HerdNerd Pro, and
+nothing in this Agreement transfers any ownership interest in HerdNerd
+Pro to Tester.</p>
+<p><strong>11. PROPRIETARY SOFTWARE AND ORIGINAL WORK</strong></p>
+<p>HerdNerd Pro contains original work developed by or for HerdNerd Pro,
+including software, interface designs, workflows, written materials,
+graphics, organizational systems, product concepts, and technical
+implementations. HerdNerd Pro’s ownership rights include all rights
+available under applicable copyright, trademark, trade-secret,
+unfair-competition, contract, and other applicable laws.</p>
+<p><strong>12. TRADE SECRETS</strong></p>
+<p>The Parties intend that Confidential Information qualifying as a
+trade secret under applicable law shall be treated as a trade secret.
+Nothing in this Agreement limits HerdNerd Pro’s rights or remedies under
+applicable trade-secret law. Tester acknowledges that certain HerdNerd
+Pro information may derive actual or potential economic value from not
+being generally known, that HerdNerd Pro is taking reasonable measures
+to maintain the secrecy of such information, and agrees not to acquire,
+use, or disclose any HerdNerd Pro trade secret except as expressly
+authorized under this Agreement.</p>
+<p><strong>13. EXCLUSIONS FROM CONFIDENTIAL INFORMATION</strong></p>
+<p>Confidential Information does not include information that Tester can
+demonstrate through competent written evidence:</p>
+<ul>
+<li><p>Was lawfully known to Tester before HerdNerd Pro disclosed it,
+without any confidentiality obligation</p></li>
+<li><p>Becomes publicly available through no breach of this Agreement by
+Tester</p></li>
+<li><p>Is lawfully received from a third party who had the legal right
+to disclose it without restriction</p></li>
+<li><p>Is independently developed by Tester without use of or reference
+to HerdNerd Pro’s Confidential Information</p></li>
+</ul>
+<p>The burden of proving an exclusion under this Section rests upon
+Tester.</p>
+<p><strong>14. LEGALLY REQUIRED DISCLOSURE</strong></p>
+<p>If Tester is legally required by subpoena, court order, law,
+regulation, or governmental authority to disclose Confidential
+Information, Tester shall, to the extent legally permitted: promptly
+notify HerdNerd Pro in writing; provide HerdNerd Pro with reasonable
+information concerning the requested disclosure; cooperate with HerdNerd
+Pro, at HerdNerd Pro’s expense, in seeking a protective order or other
+appropriate remedy; and disclose only the portion of Confidential
+Information legally required. Nothing in this Agreement prohibits
+disclosures protected or required by applicable law.</p>
+<p><strong>15. RETURN OR DESTRUCTION OF CONFIDENTIAL
+INFORMATION</strong></p>
+<p>Upon HerdNerd Pro’s request, or upon termination of Tester’s
+participation in the Beta Program, Tester shall promptly cease accessing
+HerdNerd Pro and using Confidential Information, and shall return or
+destroy Confidential Information in Tester’s possession or control —
+including downloaded copies, screenshots, recordings, and exported
+information — and certify destruction if reasonably requested. This
+requirement does not require deletion of information that must be
+retained by law or that exists solely in automatic archival or backup
+systems, provided that information remains subject to this
+Agreement.</p>
+<p><strong>16. BETA ACCESS IS REVOCABLE</strong></p>
+<p>HerdNerd Pro may suspend or terminate Tester’s access to the Beta
+Program at any time, with or without cause, in HerdNerd Pro’s sole
+discretion. Termination of access does not terminate Tester’s continuing
+confidentiality obligations. Tester has no right to continued access to
+HerdNerd Pro.</p>
+<p><strong>17. DURATION OF CONFIDENTIALITY OBLIGATIONS</strong></p>
+<p>Tester’s confidentiality obligations begin on the Effective Date and
+continue after termination of the Beta Program. For information that
+does not constitute a trade secret, the confidentiality obligations
+continue for five (5) years following the date Tester’s access to the
+Beta Program terminates. For information that constitutes a trade secret
+under applicable law, Tester’s obligations continue for so long as the
+information remains a trade secret under applicable law.</p>
+<p><strong>18. FEEDBACK</strong></p>
+<p>Tester may voluntarily provide HerdNerd Pro with comments,
+suggestions, recommendations, ideas, bug reports, usability
+observations, feature requests, or other feedback concerning HerdNerd
+Pro (“Feedback”). Tester agrees that HerdNerd Pro may use, reproduce,
+modify, incorporate, distribute, commercialize, and otherwise exploit
+Feedback without restriction and without compensation or attribution to
+Tester. Tester shall not provide Feedback that intentionally
+incorporates another person’s confidential or proprietary
+information.</p>
+<p><strong>19. NO PUBLICITY</strong></p>
+<p>Tester shall not publicly identify itself as a HerdNerd Pro beta
+tester or publicly disclose its participation in the Beta Program
+without HerdNerd Pro’s prior written consent. HerdNerd Pro may
+separately request permission to use Tester’s name, business name,
+testimonial, or feedback for marketing purposes; no such permission is
+granted by this Agreement.</p>
+<p><strong>20. NO RELATIONSHIP CREATED</strong></p>
+<p>Nothing in this Agreement creates a partnership, joint venture,
+employment, agency, franchise, fiduciary, or other business relationship
+between the Parties. Tester participates solely as an independent beta
+tester.</p>
+<p><strong>21. NO GUARANTEE OF AVAILABILITY OR
+FUNCTIONALITY</strong></p>
+<p>Tester understands that HerdNerd Pro is pre-release software and may
+contain bugs, defects, errors, incomplete features, changes,
+interruptions, security issues, performance limitations, or other
+deficiencies. HerdNerd Pro may modify, suspend, discontinue, or replace
+any portion of the Beta Program at any time.</p>
+<p><strong>22. NO WARRANTY</strong></p>
+<p><strong>TO THE MAXIMUM EXTENT PERMITTED BY LAW, HERDNERD PRO IS
+PROVIDED TO TESTER ON AN “AS IS” AND “AS AVAILABLE” BASIS FOR BETA
+TESTING AND EVALUATION PURPOSES. HERDNERD PRO MAKES NO WARRANTY THAT THE
+SOFTWARE WILL BE UNINTERRUPTED, ERROR-FREE, SECURE, COMPLETE, OR
+SUITABLE FOR ANY PARTICULAR PURPOSE.</strong></p>
+<p><strong>23. LIMITATION OF LIABILITY</strong></p>
+<p><strong>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, HERDNERD
+PRO AND ITS OWNERS, DEVELOPERS, CONTRACTORS, REPRESENTATIVES, AND
+AFFILIATES SHALL NOT BE LIABLE TO TESTER FOR INDIRECT, INCIDENTAL,
+SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES ARISING FROM
+TESTER’S PARTICIPATION IN THE BETA PROGRAM.</strong></p>
+<p>Nothing in this Agreement shall be interpreted to limit liability to
+the extent such limitation is prohibited by applicable law.</p>
+<p><strong>24. INJUNCTIVE AND EQUITABLE RELIEF</strong></p>
+<p>Tester acknowledges that unauthorized disclosure, use, copying,
+reproduction, or misappropriation of HerdNerd Pro’s Confidential
+Information or intellectual property may cause HerdNerd Pro immediate
+and irreparable harm for which monetary damages alone may be inadequate.
+Accordingly, HerdNerd Pro shall be entitled, to the extent permitted by
+applicable law, to seek temporary, preliminary, and permanent injunctive
+or equitable relief to prevent or restrain any actual or threatened
+breach of this Agreement, without waiving any other rights or remedies
+available at law or in equity, and without being required to prove that
+monetary damages are impossible before seeking such relief.</p>
+<p><strong>25. REMEDIES</strong></p>
+<p>A breach of this Agreement may result in substantial harm to HerdNerd
+Pro, including loss of competitive advantage, loss of business
+opportunity, loss of intellectual property value, reputational harm, and
+other damages that may be difficult to calculate. HerdNerd Pro reserves
+all rights and remedies available under applicable law and this
+Agreement, including contractual, equitable, and trade-secret
+remedies.</p>
+<p><strong>26. ELIGIBILITY AND CAPACITY</strong></p>
+<p>Tester represents and warrants that:</p>
+<ul>
+<li><p>Tester is at least eighteen (18) years of age, or the age of
+legal majority in Tester’s state or country of residence, whichever is
+greater</p></li>
+<li><p>Tester has the legal capacity and authority to enter into this
+Agreement, and, if signing on behalf of a business or organization, has
+authority to bind that entity</p></li>
+<li><p>Tester is not barred from entering into this Agreement by any
+other contract, employer policy, or legal restriction</p></li>
+<li><p>Tester is a resident of, or is accessing the Beta Program from
+within, the United States; HerdNerd Pro does not currently offer the
+Beta Program outside the United States and reserves the right to deny or
+revoke access from outside the United States</p></li>
+</ul>
+<p>HerdNerd Pro does not knowingly permit individuals under the age of
+eighteen (18) to participate in the Beta Program. If HerdNerd Pro learns
+that a Tester does not meet these eligibility requirements, HerdNerd Pro
+may immediately terminate that Tester’s access under Section 16.</p>
+<p><strong>27. PRIVACY OF TESTER INFORMATION</strong></p>
+<p>In connection with the Beta Program, HerdNerd Pro collects certain
+information about Tester, including Tester’s name, email address, state
+or country of residence, account credentials, and, where lawfully
+collected, IP address and acceptance timestamp for this Agreement
+(“Tester Information”). HerdNerd Pro will use Tester Information solely
+to administer the Beta Program, operate Tester’s account, communicate
+with Tester about the Beta Program, and maintain a record of Tester’s
+acceptance of this Agreement.</p>
+<p>HerdNerd Pro will not sell Tester Information to third parties and
+will not share it with third parties except as reasonably necessary to
+operate the Beta Program (for example, hosting or infrastructure
+providers), to comply with applicable law, or with Tester’s consent.
+This Section is not a substitute for, and does not limit, any separate
+privacy policy HerdNerd Pro may publish for the Beta Program or the
+licensed software.</p>
+<p><strong>28. RELATIONSHIP TO LICENSE AGREEMENT</strong></p>
+<p>Tester’s access to and use of the HerdNerd Pro software — including
+any rights, restrictions, fees, or terms governing that use — is
+separately governed by the HerdNerd Pro Beta Software License Agreement
+(the “License Agreement”) presented to Tester in connection with the
+Beta Program. This Agreement governs confidentiality only and does not
+itself grant Tester any right to access or use HerdNerd Pro.</p>
+<p>If a conflict arises between this Agreement and the License
+Agreement: (a) with respect to confidentiality, non-disclosure, trade
+secrets, and intellectual property ownership, this Agreement controls;
+and (b) with respect to the scope of permitted use, fees, warranties,
+and terms of service for the software itself, the License Agreement
+controls. Both agreements are intended to be read together, and
+acceptance of one does not excuse compliance with the other.</p>
+<p><strong>29. GOVERNING LAW</strong></p>
+<p>This Agreement is governed by and construed in accordance with the
+laws of the State of Maryland, without regard to its conflict-of-laws
+principles, except to the extent applicable federal law controls a
+particular issue. The Parties expressly intend that Maryland law govern
+the interpretation, validity, enforcement, and performance of this
+Agreement to the maximum extent permitted by applicable law.</p>
+<p><strong>30. VENUE AND JURISDICTION</strong></p>
+<p>To the maximum extent permitted by applicable law, any action or
+proceeding arising out of or relating to this Agreement shall be brought
+in a state or federal court located in the State of Maryland having
+proper jurisdiction, and Tester consents to the personal jurisdiction of
+such courts. Nothing in this Section prevents HerdNerd Pro from seeking
+emergency, temporary, preliminary, or permanent injunctive relief in
+another jurisdiction when necessary to protect Confidential Information
+or intellectual property located or threatened in that jurisdiction.</p>
+<p><strong>31. WAIVER OF JURY TRIAL</strong></p>
+<p><strong>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, EACH PARTY
+KNOWINGLY, VOLUNTARILY, AND INTENTIONALLY WAIVES ANY RIGHT TO A TRIAL BY
+JURY IN ANY ACTION, PROCEEDING, OR COUNTERCLAIM ARISING OUT OF OR
+RELATING TO THIS AGREEMENT.</strong></p>
+<p><strong>32. ATTORNEYS’ FEES</strong></p>
+<p>If HerdNerd Pro brings a successful action or proceeding to enforce
+this Agreement or to obtain injunctive or other relief for Tester’s
+breach of this Agreement, HerdNerd Pro shall be entitled, to the extent
+permitted by applicable law, to recover its reasonable attorneys’ fees,
+court costs, and other expenses incurred in that action or proceeding,
+in addition to any other relief awarded.</p>
+<p><strong>33. OUT-OF-STATE AND NATIONWIDE TESTERS</strong></p>
+<p>Tester acknowledges that Tester may reside outside Maryland, and that
+HerdNerd Pro accepts testers throughout the United States. Tester agrees
+that the Parties have expressly and knowingly selected Maryland law and
+Maryland venue as set forth in Sections 29 and 30, to the maximum extent
+permitted by applicable law, regardless of Tester’s state of residence.
+If a court in Tester’s home state declines to enforce a particular
+provision of this Section, the remainder of this Agreement, including
+its confidentiality and intellectual-property protections, remains in
+full force under Section 34.</p>
+<p><strong>34. SEVERABILITY</strong></p>
+<p>If any provision of this Agreement is determined by a court of
+competent jurisdiction to be invalid, illegal, or unenforceable, that
+provision shall be modified to the minimum extent necessary to make it
+enforceable, if legally permissible. If modification is not permissible,
+the provision shall be severed, and the remaining provisions shall
+continue in full force and effect.</p>
+<p><strong>35. NO WAIVER</strong></p>
+<p>No failure or delay by HerdNerd Pro in exercising any right or remedy
+under this Agreement shall constitute a waiver of that right or remedy.
+A waiver must be in writing and shall apply only to the specific
+instance for which it is given.</p>
+<p><strong>36. ENTIRE AGREEMENT</strong></p>
+<p>This Agreement, together with the License Agreement referenced in
+Section 28, constitutes the entire agreement between the Parties
+concerning the confidentiality and permitted use of HerdNerd Pro’s
+Confidential Information in connection with the Beta Program, and
+supersedes prior oral or written understandings concerning that subject
+matter. This Agreement does not supersede a later written agreement
+specifically executed by both Parties that expressly states it
+supersedes this Agreement.</p>
+<p><strong>37. AMENDMENTS</strong></p>
+<p>HerdNerd Pro may modify this Agreement for future beta participants
+by providing a revised version before access is granted. Any material
+modification applicable to an existing Tester becomes effective only
+after Tester is provided reasonable notice and, where legally required,
+accepts the revised agreement.</p>
+<p><strong>38. ASSIGNMENT</strong></p>
+<p>Tester may not assign, transfer, delegate, sublicense, or otherwise
+transfer this Agreement or any rights or obligations under it without
+HerdNerd Pro’s prior written consent. HerdNerd Pro may assign this
+Agreement in connection with a merger, acquisition, sale of
+substantially all assets, reorganization, financing, or transfer of the
+HerdNerd Pro business or intellectual property.</p>
+<p><strong>39. NOTICES</strong></p>
+<p>Any notice Tester is required or permitted to give HerdNerd Pro under
+this Agreement shall be in writing and sent to the email address or
+physical address HerdNerd Pro designates for that purpose in the Beta
+Program. HerdNerd Pro may give Tester notice under this Agreement by
+email to the address Tester provided at signup, by in-app notification,
+or by posting within the Beta Program. Notice is deemed given when sent,
+unless the sender has actual knowledge it was not received.</p>
+<p><strong>40. ELECTRONIC AGREEMENT AND SIGNATURE</strong></p>
+<p>This Agreement may be executed electronically. An electronic
+signature, checkbox acceptance, typed name, electronic acknowledgment,
+or other electronic process intended by Tester to constitute acceptance
+has the same effect as a handwritten signature to the maximum extent
+permitted by applicable law, including the U.S. federal ESIGN Act and
+applicable state law analogs (such as UETA). Tester agrees that the
+electronic record of Tester’s acceptance — including the date, time,
+email address, account information, IP address where lawfully collected,
+version of this Agreement, and other reasonable authentication
+information — may be maintained by HerdNerd Pro or its e-signature
+service provider as evidence of acceptance.</p>
+<p><strong>41. OPPORTUNITY TO REVIEW</strong></p>
+<p>Tester acknowledges having been provided a reasonable opportunity to
+review this Agreement before accessing HerdNerd Pro, and is encouraged
+to seek independent legal advice before accepting it.</p>
+<p><strong>42. NO RIGHT TO USE HERDNERD PRO FOR COMMERCIAL
+PURPOSES</strong></p>
+<p>Tester receives access to HerdNerd Pro solely for private beta
+evaluation and testing. Tester may not:</p>
+<ul>
+<li><p>Use HerdNerd Pro commercially, or sell or sublicense access to
+it</p></li>
+<li><p>Provide access to another person or share login
+credentials</p></li>
+<li><p>Rent access, or provide HerdNerd Pro access to customers or
+employees</p></li>
+<li><p>Use HerdNerd Pro to operate a competing commercial
+service</p></li>
+<li><p>Otherwise exploit access to HerdNerd Pro for financial
+benefit</p></li>
+</ul>
+<p><strong>43. SECURITY AND CREDENTIALS</strong></p>
+<p>Tester shall maintain the confidentiality of all login credentials
+provided to Tester and shall not:</p>
+<ul>
+<li><p>Share credentials or permit another person to access Tester’s
+account</p></li>
+<li><p>Attempt to access another tester’s account or administrative
+accounts</p></li>
+<li><p>Attempt to bypass authentication or security controls</p></li>
+<li><p>Test security vulnerabilities in a manner that could damage or
+disrupt HerdNerd Pro</p></li>
+<li><p>Access systems or information beyond the permissions expressly
+granted</p></li>
+</ul>
+<p>Any suspected security vulnerability shall be reported privately and
+promptly to HerdNerd Pro.</p>
+<p><strong>44. NO DATA EXTRACTION</strong></p>
+<p>Tester shall not use automated tools, scripts, bots, crawlers,
+scraping tools, browser automation, or other methods to extract, copy,
+download, reproduce, or systematically collect information from HerdNerd
+Pro except where HerdNerd Pro has expressly authorized such activity for
+testing, and shall not attempt to reconstruct HerdNerd Pro’s database,
+database structure, data relationships, or underlying data model through
+automated or manual extraction.</p>
+<p><strong>45. NO DISCLOSURE OF COMPETITIVE INFORMATION</strong></p>
+<p>Tester agrees not to use the Beta Program to conduct competitive
+intelligence for another software company, developer, competitor, or
+prospective competitor. If Tester has an actual or prospective
+ownership, employment, consulting, development, advisory, or other
+material relationship with a business that develops competing software,
+Tester shall disclose that relationship to HerdNerd Pro before receiving
+access. HerdNerd Pro reserves the right to deny or terminate access
+based on actual or reasonably perceived competitive conflicts.</p>
+<p><strong>46. REPRESENTATION REGARDING AUTHORITY</strong></p>
+<p>Tester represents that:</p>
+<ul>
+<li><p>Tester has the legal capacity to enter into this
+Agreement</p></li>
+<li><p>Tester is not prohibited from entering into this Agreement by
+another contract</p></li>
+<li><p>Tester will not disclose to HerdNerd Pro any confidential
+information belonging to another person or company</p></li>
+<li><p>Tester will use HerdNerd Pro solely for the purposes authorized
+by this Agreement</p></li>
+</ul>
+<p><strong>47. PROTECTED DISCLOSURES AND NON-WAIVABLE
+RIGHTS</strong></p>
+<p>Nothing in this Agreement is intended to prohibit or restrict any
+disclosure or activity that cannot lawfully be restricted by contract,
+and nothing in this Agreement shall be interpreted to waive any rights
+or protections that cannot legally be waived.</p>
+<p><strong>48. CONSTRUCTION</strong></p>
+<p>The Parties acknowledge that this Agreement has been entered into
+voluntarily and for legitimate business purposes. The headings in this
+Agreement are for convenience only and do not affect interpretation.
+Words in the singular include the plural where appropriate, and vice
+versa.</p>
+<p><strong>49. SURVIVAL</strong></p>
+<p>Sections concerning confidentiality, intellectual property, trade
+secrets, restrictions on use, return or destruction of information,
+remedies, governing law, jurisdiction, attorneys’ fees, and any other
+provisions that by their nature should survive termination, survive the
+expiration or termination of this Agreement.</p>
+<p>`;
+const LICENSE_BODY_HTML = `<strong>1. DEFINITIONS AND PURPOSE</strong></p>
+<p>For purposes of this Agreement:</p>
+<ul>
+<li><p>“Software” or “HerdNerd Pro” means the private beta version of
+the HerdNerd Pro rabbitry management software platform, including its
+web application, associated databases, and documentation made available
+to Tester by HerdNerd Pro.</p></li>
+<li><p>“Beta Program” means HerdNerd Pro’s private, invitation-only
+pre-release testing program, including any sandbox, staging, or
+production-preview environment made available to Tester.</p></li>
+<li><p>“Beta Period” means the period during which Tester is granted
+access to the Software under this Agreement, beginning on the Effective
+Date and ending as described in Sections 18 and 19.</p></li>
+<li><p>“User Content” means any data, records, text, images, or other
+content that Tester uploads, enters, imports, or otherwise submits to
+the Software, including rabbitry, breeding, litter, pedigree, and
+sales-related records.</p></li>
+<li><p>“NDA” means the HerdNerd Pro Private Beta Confidentiality &amp;
+Non-Disclosure Agreement separately accepted by Tester in connection
+with the Beta Program.</p></li>
+</ul>
+<p>HerdNerd Pro is making the Software available to Tester on a limited,
+pre-release basis solely so that Tester may evaluate the Software,
+manage Tester’s own rabbitry-related records for that evaluation, and
+provide feedback to HerdNerd Pro.</p>
+<p><strong>2. ELIGIBILITY AND CAPACITY</strong></p>
+<p>Tester represents and warrants that Tester is at least eighteen (18)
+years of age (or the age of legal majority in Tester’s state or country
+of residence, whichever is greater), has the legal capacity and
+authority to enter into this Agreement (and, if signing on behalf of a
+business, has authority to bind that business), and is accessing the
+Software from within the United States. These representations mirror,
+and are not in addition to, the eligibility requirements Tester has
+already made in Section 26 of the NDA.</p>
+<p><strong>3. LICENSE GRANT</strong></p>
+<p>Subject to Tester’s ongoing compliance with this Agreement and the
+NDA, HerdNerd Pro grants Tester a limited, non-exclusive,
+non-transferable, non-sublicensable, revocable license to access and use
+the Software during the Beta Period, solely for Tester’s own internal
+evaluation of the Software and management of Tester’s own
+rabbitry-related records in connection with that evaluation. No other
+rights are granted, and all rights not expressly granted are reserved by
+HerdNerd Pro.</p>
+<p><strong>4. LICENSE RESTRICTIONS</strong></p>
+<p>Tester shall not, and shall not permit any third party to:</p>
+<ul>
+<li><p>Sell, resell, rent, lease, sublicense, distribute, or otherwise
+commercially exploit access to the Software</p></li>
+<li><p>Copy, modify, adapt, translate, or create derivative works of the
+Software</p></li>
+<li><p>Reverse engineer, decompile, disassemble, or otherwise attempt to
+derive the source code, algorithms, or database structure of the
+Software, except to the extent such restriction is prohibited by
+applicable law</p></li>
+<li><p>Use the Software to build, develop, or assist in developing a
+competing or substantially similar product or service</p></li>
+<li><p>Use automated tools, scripts, bots, or scraping methods to
+extract data from the Software except as expressly authorized</p></li>
+<li><p>Remove, obscure, or alter any proprietary notices on or within
+the Software</p></li>
+<li><p>Share Tester’s login credentials with, or otherwise provide
+access to, any person not authorized under this Agreement</p></li>
+<li><p>Use the Software in any manner that violates applicable law or
+infringes the rights of any third party</p></li>
+<li><p>Use the Software on behalf of, or for the primary benefit of, any
+third party who has not independently accepted this Agreement and the
+NDA</p></li>
+</ul>
+<p>Restrictions on disclosure, reverse engineering, and competitive use
+of HerdNerd Pro’s confidential and proprietary features are additionally
+governed by the NDA, which remains in full force regardless of the
+status of this Agreement.</p>
+<p><strong>5. BETA NATURE OF THE SOFTWARE; NO GUARANTEE OF
+AVAILABILITY</strong></p>
+<p>Tester understands that the Software is pre-release, private beta
+software and may contain bugs, defects, errors, incomplete features, or
+security issues, and that its features, workflows, and availability may
+change or be removed at any time without notice. HerdNerd Pro may
+modify, suspend, limit, or discontinue the Software, the Beta Program,
+or Tester’s access to either, at any time, with or without cause, and
+with or without notice, in HerdNerd Pro’s sole discretion.</p>
+<p><strong>6. FEES; FUTURE CONVERSION TO PAID SERVICE</strong></p>
+<p>Access to the Software is provided free of charge during the current
+phase of the Beta Program. HerdNerd Pro does not currently charge Tester
+any fee for beta access.</p>
+<p>Tester acknowledges that HerdNerd Pro intends to offer paid
+subscription plans for the Software in the future, and that free beta
+access is not guaranteed to continue indefinitely. If HerdNerd Pro
+introduces fees applicable to Tester’s account, HerdNerd Pro will
+provide Tester with at least thirty (30) days’ advance notice, delivered
+both by an in-app pop-up notice and by email to the address on file for
+Tester’s account, describing the applicable fees before any charge is
+applied. HerdNerd Pro will not charge Tester any fee without Tester’s
+prior affirmative consent to the applicable paid plan. If Tester does
+not consent, Tester’s access may be limited to a free tier (if offered)
+or terminated in accordance with Sections 18 and 19, and Tester’s
+data-export rights under Section 10 will apply.</p>
+<p><strong>7. ACCOUNT REGISTRATION AND SECURITY</strong></p>
+<p>Tester agrees to provide accurate registration information, to
+maintain the confidentiality of Tester’s login credentials, and to be
+responsible for all activity that occurs under Tester’s account. Tester
+shall promptly notify HerdNerd Pro of any suspected unauthorized use of
+Tester’s account or credentials.</p>
+<p><strong>8. USER CONTENT OWNERSHIP</strong></p>
+<p>As between Tester and HerdNerd Pro, Tester retains all right, title,
+and interest in and to Tester’s User Content, including Tester’s
+rabbitry, breeding, pedigree, litter, and sales records. Nothing in this
+Agreement transfers ownership of User Content to HerdNerd Pro. Tester
+represents that Tester has all rights necessary to submit User Content
+to the Software and that Tester’s User Content does not infringe or
+violate the intellectual property, privacy, or other rights of any third
+party.</p>
+<p><strong>9. LICENSE TO USER CONTENT</strong></p>
+<p>Tester grants HerdNerd Pro a limited, non-exclusive, worldwide,
+royalty-free license to host, store, reproduce, transmit, and display
+Tester’s User Content solely as necessary to operate, maintain, provide,
+and improve the Software and the Beta Program for Tester, including for
+backend processing, backups, and troubleshooting. This license
+terminates when Tester’s User Content is deleted from HerdNerd Pro’s
+systems, except as described in Section 20 (Effect of Termination).</p>
+<p><strong>10. DATA EXPORT AND PORTABILITY</strong></p>
+<p>HerdNerd Pro provides Tester with a self-service data export tool
+built into the Software, allowing Tester to export Tester’s own User
+Content (such as Tester’s rabbitry, breeding, pedigree, litter, and
+sales records) in a common, non-proprietary file format (such as CSV) at
+any time while Tester’s account remains active.</p>
+<p>Tester is solely responsible for exporting any User Content Tester
+wishes to retain before closing Tester’s account or otherwise ending
+this Agreement. HerdNerd Pro is not obligated to export, retrieve,
+compile, or otherwise provide Tester’s User Content to Tester, or to any
+third party, on Tester’s behalf, whether before, upon, or after
+termination of Tester’s account. Tester acknowledges that once Tester’s
+account is closed, Tester’s ability to export User Content may no longer
+be available, and HerdNerd Pro may delete User Content associated with a
+closed account without further notice, subject to Section 20.</p>
+<p><strong>11. DATA BACKUP AND LOSS</strong></p>
+<p><strong>BECAUSE THE SOFTWARE IS PRE-RELEASE BETA SOFTWARE, HERDNERD
+PRO DOES NOT GUARANTEE THAT USER CONTENT WILL BE PRESERVED WITHOUT LOSS,
+CORRUPTION, OR INTERRUPTION. TESTER IS SOLELY RESPONSIBLE FOR USING THE
+EXPORT TOOL DESCRIBED IN SECTION 10 TO MAINTAIN TESTER’S OWN INDEPENDENT
+BACKUP COPIES OF ANY USER CONTENT TESTER CONSIDERS
+IMPORTANT.</strong></p>
+<p>HerdNerd Pro will use commercially reasonable efforts to maintain the
+integrity and availability of User Content but does not warrant against
+data loss arising from beta software defects, third-party service
+interruptions, or other causes beyond HerdNerd Pro’s reasonable control,
+and has no obligation to reconstruct, recover, or re-export lost or
+deleted User Content on Tester’s behalf.</p>
+<p><strong>12. THIRD-PARTY SERVICES AND SUBPROCESSORS</strong></p>
+<p>The Software relies on third-party infrastructure and service
+providers (such as cloud hosting and database providers) to store and
+process data, including User Content. Tester consents to HerdNerd Pro’s
+use of such providers as necessary to operate the Software. HerdNerd Pro
+remains responsible for its own obligations under this Agreement
+regardless of its use of third-party providers.</p>
+<p><strong>13. INTELLECTUAL PROPERTY OWNERSHIP</strong></p>
+<p>HerdNerd Pro and its licensors retain all right, title, and interest
+in and to the Software, including all associated intellectual property
+rights, and all improvements, modifications, and derivative works of the
+Software, whether or not based on Tester’s feedback. Except for the
+limited license expressly granted in Section 3, Tester receives no
+ownership interest, license, or other right in or to the Software.</p>
+<p><strong>14. FEEDBACK</strong></p>
+<p>Tester may voluntarily provide HerdNerd Pro with comments,
+suggestions, bug reports, or other feedback concerning the Software
+(“Feedback”). Tester agrees that HerdNerd Pro may use, reproduce,
+modify, incorporate, and otherwise exploit Feedback without restriction
+and without compensation or attribution to Tester, consistent with
+Section 18 of the NDA.</p>
+<p><strong>15. CONFIDENTIALITY</strong></p>
+<p>Tester’s obligations regarding HerdNerd Pro’s confidential and
+proprietary information — including the Software’s design, features,
+workflows, and other non-public information — are governed by the
+separate NDA, which Tester has accepted and which remains in full force
+independent of this Agreement. Nothing in this Agreement narrows
+Tester’s obligations under the NDA.</p>
+<p><strong>16. ACCEPTABLE USE</strong></p>
+<p>Tester shall use the Software only for lawful purposes related to
+Tester’s own rabbitry recordkeeping and evaluation of the Software, and
+shall not use the Software to store or transmit unlawful content,
+infringe the rights of others, or interfere with or disrupt the
+integrity or performance of the Software or its underlying
+infrastructure.</p>
+<p><strong>17. SUSPENSION</strong></p>
+<p>HerdNerd Pro may suspend Tester’s access to the Software immediately,
+without prior notice, if HerdNerd Pro reasonably believes Tester has
+violated this Agreement or the NDA, or if suspension is necessary to
+protect the security or integrity of the Software or other users’
+data.</p>
+<p><strong>18. TERM</strong></p>
+<p>This Agreement begins on the Effective Date and continues until
+terminated as provided in Section 19. There is no guaranteed minimum
+term of access; the Beta Program is offered at HerdNerd Pro’s
+discretion.</p>
+<p><strong>19. TERMINATION</strong></p>
+<p>Tester may terminate this Agreement at any time by ceasing use of the
+Software and closing Tester’s account. HerdNerd Pro may terminate or
+suspend this Agreement and Tester’s access to the Software at any time,
+with or without cause, with or without notice, in HerdNerd Pro’s sole
+discretion, including upon conclusion of the Beta Program generally.</p>
+<p><strong>20. EFFECT OF TERMINATION</strong></p>
+<p>Upon termination of this Agreement, the license granted in Section 3
+immediately ends, and Tester shall stop accessing and using the
+Software. Tester is responsible for exporting, before termination, any
+User Content Tester wishes to retain, using the self-service export tool
+described in Section 10. HerdNerd Pro has no obligation to export,
+retrieve, or provide Tester’s User Content after Tester’s account is
+closed or this Agreement otherwise terminates, and may delete Tester’s
+User Content upon or following termination without further notice or
+obligation, except as required to be retained by law or as it exists in
+routine archival or backup systems. Sections of this Agreement that by
+their nature should survive termination — including Sections 8 through
+15, and 21 through 39 — survive.</p>
+<p><strong>21. MODIFICATIONS TO THE SOFTWARE</strong></p>
+<p>HerdNerd Pro may add, change, or remove features, workflows, or
+functionality of the Software at any time as part of the ongoing Beta
+Program, without liability to Tester for such changes.</p>
+<p><strong>22. MODIFICATIONS TO THIS AGREEMENT</strong></p>
+<p>HerdNerd Pro may modify this Agreement for future beta participants
+by providing a revised version before access is granted. Any material
+modification applicable to an existing Tester becomes effective only
+after Tester is provided reasonable notice and, where legally required,
+accepts the revised agreement.</p>
+<p><strong>23. SUPPORT; NO SERVICE-LEVEL COMMITMENT</strong></p>
+<p>HerdNerd Pro may provide informal support to beta testers but makes
+no commitment to any particular level of support, response time, or
+uptime during the Beta Program. Any support provided during the beta is
+offered on a best-efforts basis only.</p>
+<p><strong>24. DISCLAIMER OF WARRANTIES</strong></p>
+<p><strong>TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS
+PROVIDED “AS IS” AND “AS AVAILABLE,” WITHOUT WARRANTIES OF ANY KIND,
+WHETHER EXPRESS, IMPLIED, OR STATUTORY, INCLUDING WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
+NON-INFRINGEMENT. HERDNERD PRO DOES NOT WARRANT THAT THE SOFTWARE WILL
+BE UNINTERRUPTED, ERROR-FREE, SECURE, OR FREE OF DATA LOSS.</strong></p>
+<p><strong>25. LIMITATION OF LIABILITY</strong></p>
+<p><strong>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, HERDNERD
+PRO AND ITS OWNERS, DEVELOPERS, CONTRACTORS, REPRESENTATIVES, AND
+AFFILIATES SHALL NOT BE LIABLE TO TESTER FOR ANY INDIRECT, INCIDENTAL,
+SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, OR FOR ANY LOSS
+OF DATA, PROFITS, OR BUSINESS, ARISING FROM OR RELATING TO TESTER’S USE
+OF THE SOFTWARE, EVEN IF HERDNERD PRO HAS BEEN ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGES. HERDNERD PRO’S TOTAL AGGREGATE LIABILITY
+ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL NOT EXCEED ONE
+HUNDRED DOLLARS ($100), OR THE AMOUNT TESTER ACTUALLY PAID HERDNERD PRO
+FOR ACCESS TO THE SOFTWARE IN THE THREE (3) MONTHS PRECEDING THE CLAIM,
+WHICHEVER IS GREATER.</strong></p>
+<p>Nothing in this Agreement limits liability to the extent such
+limitation is prohibited by applicable law.</p>
+<p><strong>26. INDEMNIFICATION</strong></p>
+<p>Tester agrees to indemnify, defend, and hold harmless HerdNerd Pro
+and its owners, developers, contractors, representatives, and affiliates
+from and against any third-party claims, damages, losses, liabilities,
+costs, and expenses (including reasonable attorneys’ fees) arising out
+of or relating to: (a) Tester’s breach of this Agreement or the NDA; (b)
+Tester’s User Content, including any claim that it infringes or
+misappropriates a third party’s rights; or (c) Tester’s misuse of the
+Software or violation of applicable law.</p>
+<p><strong>27. RELATIONSHIP TO THE CONFIDENTIALITY AGREEMENT
+(NDA)</strong></p>
+<p>This Agreement and the NDA are companion agreements intended to be
+read together and are both required for participation in the Beta
+Program. This Agreement governs Tester’s right to access and use the
+Software; the NDA governs Tester’s confidentiality obligations regarding
+HerdNerd Pro’s non-public information.</p>
+<p>If a conflict arises between this Agreement and the NDA: (a) with
+respect to confidentiality, non-disclosure, trade secrets, and
+intellectual-property ownership, the NDA controls; and (b) with respect
+to the scope of permitted use, fees, warranties, and terms of service
+for the Software itself, this Agreement controls. Termination of one
+agreement does not automatically terminate the other; Tester’s
+confidentiality obligations under the NDA continue for the period stated
+in the NDA regardless of whether this Agreement has ended.</p>
+<p><strong>28. GOVERNING LAW</strong></p>
+<p>This Agreement is governed by and construed in accordance with the
+laws of the State of Maryland, without regard to its conflict-of-laws
+principles, except to the extent applicable federal law controls a
+particular issue, consistent with the governing-law provision of the
+NDA.</p>
+<p><strong>29. VENUE AND JURISDICTION</strong></p>
+<p>To the maximum extent permitted by applicable law, any action or
+proceeding arising out of or relating to this Agreement shall be brought
+in a state or federal court located in the State of Maryland having
+proper jurisdiction, and Tester consents to the personal jurisdiction of
+such courts. Nothing in this Section prevents HerdNerd Pro from seeking
+emergency or injunctive relief in another jurisdiction when necessary to
+protect its rights.</p>
+<p><strong>30. WAIVER OF JURY TRIAL</strong></p>
+<p><strong>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, EACH PARTY
+KNOWINGLY, VOLUNTARILY, AND INTENTIONALLY WAIVES ANY RIGHT TO A TRIAL BY
+JURY IN ANY ACTION, PROCEEDING, OR COUNTERCLAIM ARISING OUT OF OR
+RELATING TO THIS AGREEMENT.</strong></p>
+<p><strong>31. ATTORNEYS’ FEES</strong></p>
+<p>If HerdNerd Pro brings a successful action or proceeding to enforce
+this Agreement, HerdNerd Pro shall be entitled, to the extent permitted
+by applicable law, to recover its reasonable attorneys’ fees, court
+costs, and other expenses incurred in that action or proceeding, in
+addition to any other relief awarded.</p>
+<p><strong>32. ASSIGNMENT</strong></p>
+<p>Tester may not assign, transfer, delegate, sublicense, or otherwise
+transfer this Agreement or any rights or obligations under it without
+HerdNerd Pro’s prior written consent. HerdNerd Pro may assign this
+Agreement in connection with a merger, acquisition, sale of
+substantially all assets, reorganization, financing, or transfer of the
+HerdNerd Pro business or intellectual property.</p>
+<p><strong>33. NOTICES</strong></p>
+<p>Any notice Tester is required or permitted to give HerdNerd Pro under
+this Agreement shall be in writing and sent to the email or physical
+address HerdNerd Pro designates for that purpose. HerdNerd Pro may give
+Tester notice under this Agreement by email to the address Tester
+provided at signup, by in-app notification, or by posting within the
+Beta Program. Notice is deemed given when sent, unless the sender has
+actual knowledge it was not received.</p>
+<p><strong>34. ELECTRONIC AGREEMENT AND SIGNATURE</strong></p>
+<p>This Agreement may be executed electronically. An electronic
+signature, checkbox acceptance, typed name, electronic acknowledgment,
+or other electronic process intended by Tester to constitute acceptance
+has the same effect as a handwritten signature to the maximum extent
+permitted by applicable law, including the U.S. federal ESIGN Act and
+applicable state law analogs (such as UETA). Tester agrees that the
+electronic record of Tester’s acceptance — including the date, time,
+email address, account information, IP address where lawfully collected,
+version of this Agreement, and other reasonable authentication
+information — may be maintained by HerdNerd Pro or its e-signature
+service provider as evidence of acceptance.</p>
+<p><strong>35. SEVERABILITY</strong></p>
+<p>If any provision of this Agreement is determined by a court of
+competent jurisdiction to be invalid, illegal, or unenforceable, that
+provision shall be modified to the minimum extent necessary to make it
+enforceable, if legally permissible. If modification is not permissible,
+the provision shall be severed, and the remaining provisions shall
+continue in full force and effect.</p>
+<p><strong>36. NO WAIVER</strong></p>
+<p>No failure or delay by HerdNerd Pro in exercising any right or remedy
+under this Agreement shall constitute a waiver of that right or remedy.
+A waiver must be in writing and shall apply only to the specific
+instance for which it is given.</p>
+<p><strong>37. ENTIRE AGREEMENT</strong></p>
+<p>This Agreement, together with the NDA, constitutes the entire
+agreement between the Parties concerning Tester’s participation in the
+Beta Program, and supersedes prior oral or written understandings
+concerning that subject matter. This Agreement does not supersede a
+later written agreement specifically executed by both Parties that
+expressly states it supersedes this Agreement.</p>
+<p><strong>38. SURVIVAL</strong></p>
+<p>Sections concerning User Content ownership, data export, intellectual
+property, confidentiality, disclaimers, limitation of liability,
+indemnification, governing law, jurisdiction, attorneys’ fees, and any
+other provisions that by their nature should survive termination,
+survive the expiration or termination of this Agreement.</p>
+<p><strong>39. CONSTRUCTION</strong></p>
+<p>The Parties acknowledge that this Agreement has been entered into
+voluntarily and for legitimate business purposes. The headings in this
+Agreement are for convenience only and do not affect interpretation.
+Words in the singular include the plural where appropriate, and vice
+versa.</p>
+<p>`;
+const NDA_CHECKS = ["I have read and understand this Agreement.", "I am at least 18 years of age and have the legal capacity to enter into this Agreement.", "I understand that HerdNerd Pro is a private beta and that the software and information made available to me may be confidential and proprietary.", "I agree not to disclose, share, publish, copy, reproduce, reverse engineer, or otherwise misuse HerdNerd Pro or its Confidential Information.", "I understand that HerdNerd Pro's proprietary features, workflows, interface, layout, functionality, software, and other non-public information are protected by this Agreement.", "I understand that my access may be terminated at any time.", "I understand this Agreement is separate from, and works together with, the HerdNerd Pro License Agreement governing my use of the software.", "I agree that Maryland law will govern this Agreement to the maximum extent permitted by applicable law.", "I agree that my electronic acceptance constitutes my signature and agreement to this Agreement."];
+const LICENSE_CHECKS = ["I have read and understand this Agreement.", "I am at least 18 years of age and have the legal capacity to enter into this Agreement.", "I understand the Software is pre-release beta software provided \\\"as is,\\\" with no guarantee against data loss, and that I am responsible for my own backups.", "I understand that access is currently free but may convert to a paid plan in the future, only with advance notice and my affirmative consent before any charge.", "I understand that I retain ownership of my own rabbitry data (User Content), that HerdNerd Pro provides a self-service tool to export it, and that I am solely responsible for exporting anything I want to keep before closing my account \u2014 HerdNerd Pro is not obligated to export or provide it to me afterward.", "I understand that this Agreement works together with the separate HerdNerd Pro Confidentiality & Non-Disclosure Agreement, which I have separately accepted, and that my confidentiality obligations continue under that agreement even if this Agreement ends.", "I agree that Maryland law will govern this Agreement to the maximum extent permitted by applicable law.", "I agree that my electronic acceptance constitutes my signature and agreement to this Agreement."];
 
 const RABBITS_KEY = 'rabbits_v2';
 const PLANNED_KEY = 'planned_v1';
@@ -3893,6 +4870,121 @@ function enterPracticeMode(){
   showToast('Practice mode on — nothing here is saved to your real account');
 }
 
+let agreementStep = 'nda';
+
+async function checkAgreementStatus(){
+  try{
+    const {data} = await sb.from('demo_agreements').select('nda_signed_at, license_signed_at').eq('user_id',currentUser.id).maybeSingle();
+    return data || null;
+  }catch(e){ return null; }
+}
+
+function showAgreementScreen(){
+  document.getElementById('agreementScreen').classList.remove('hidden');
+  renderAgreementScreen();
+}
+
+function renderAgreementScreen(){
+  const isNda = agreementStep==='nda';
+  const title = isNda ? 'Confidentiality & Non-Disclosure Agreement' : 'Beta Software License Agreement';
+  const bodyHtml = isNda ? NDA_BODY_HTML : LICENSE_BODY_HTML;
+  const checks = isNda ? NDA_CHECKS : LICENSE_CHECKS;
+  const fullName = [myProfile&&myProfile.first_name, myProfile&&myProfile.last_name].filter(Boolean).join(' ') || (currentUser&&currentUser.email) || '';
+  const businessName = (myProfile&&myProfile.rabbitry_name) || '';
+
+  const screen = document.getElementById('agreementScreen');
+  screen.innerHTML = `
+    <div class="agreement-wrap">
+      <div class="agreement-header">
+        <div class="wordmark" style="color:var(--navy);">HerdNerd<span class="pro">Pro</span></div>
+        <h2 style="font-family:'Cormorant Garamond',serif; margin:8px 0 2px; font-size:22px;">${esc(title)}</h2>
+        <div class="card-sub">${isNda?'Step 1 of 2':'Step 2 of 2'} — please read the full agreement below before signing.</div>
+      </div>
+      <div class="agreement-fields">
+        <div><b>Tester Name:</b> ${esc(fullName)}</div>
+        <div><b>Email:</b> ${esc((currentUser&&currentUser.email)||'')}</div>
+        ${businessName?`<div><b>Business Name:</b> ${esc(businessName)}</div>`:''}
+        <div><b>Date:</b> ${fmtDate(todayStr())}</div>
+      </div>
+      <div class="agreement-body">${bodyHtml}</div>
+      <div class="agreement-checks">
+        ${checks.map((c,i)=>`<label class="agreement-check"><input type="checkbox" data-ackidx="${i}"><span>${esc(c)}</span></label>`).join('')}
+      </div>
+      <div class="agreement-sig">
+        <div class="card-sub" style="margin-bottom:6px;">Sign below with your finger or mouse:</div>
+        <canvas id="sigCanvas" width="600" height="180"></canvas>
+        <button class="btn btn-secondary" id="sigClearBtn" type="button" style="margin-top:8px;">Clear signature</button>
+      </div>
+      <button class="btn btn-primary" style="width:100%; margin-top:16px;" id="agreementSubmitBtn" disabled>I Agree &amp; Sign</button>
+      <div class="auth-message" id="agreementMessage"></div>
+    </div>`;
+
+  const checkEls = Array.from(screen.querySelectorAll('[data-ackidx]'));
+  const submitBtn = document.getElementById('agreementSubmitBtn');
+  let hasInk = false;
+  function updateSubmitState(){ submitBtn.disabled = !(checkEls.every(c=>c.checked) && hasInk); }
+  checkEls.forEach(c=>c.onchange=updateSubmitState);
+
+  const canvas = document.getElementById('sigCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#142440'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  let drawing=false, lastX=0, lastY=0;
+  function getPos(e){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x:(clientX-rect.left)*scaleX, y:(clientY-rect.top)*scaleY };
+  }
+  function start(e){ e.preventDefault(); drawing=true; const p=getPos(e); lastX=p.x; lastY=p.y; }
+  function move(e){
+    if(!drawing) return;
+    e.preventDefault();
+    const p=getPos(e);
+    ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x,p.y); ctx.stroke();
+    lastX=p.x; lastY=p.y; hasInk=true; updateSubmitState();
+  }
+  function end(){ drawing=false; }
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive:false});
+  canvas.addEventListener('touchmove', move, {passive:false});
+  canvas.addEventListener('touchend', end);
+
+  document.getElementById('sigClearBtn').onclick = ()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height); hasInk=false; updateSubmitState();
+  };
+
+  submitBtn.onclick = async ()=>{
+    submitBtn.disabled = true;
+    const msg = document.getElementById('agreementMessage');
+    msg.textContent = 'Saving your signature…';
+    try{
+      const sigDataUrl = canvas.toDataURL('image/png');
+      const payload = { user_id: currentUser.id, name: fullName, email: currentUser.email };
+      if(isNda){ payload.nda_signature = sigDataUrl; payload.nda_signed_at = new Date().toISOString(); }
+      else { payload.license_signature = sigDataUrl; payload.license_signed_at = new Date().toISOString(); }
+      const { data:existing } = await sb.from('demo_agreements').select('id').eq('user_id',currentUser.id).maybeSingle();
+      let error;
+      if(existing){ ({error} = await sb.from('demo_agreements').update(payload).eq('id',existing.id)); }
+      else { ({error} = await sb.from('demo_agreements').insert(payload)); }
+      if(error) throw error;
+      if(isNda){ agreementStep='license'; renderAgreementScreen(); }
+      else { await finishAgreementFlow(); }
+    }catch(err){
+      msg.textContent = err.message || 'Could not save your signature — try again.';
+      submitBtn.disabled = false;
+    }
+  };
+}
+
+async function finishAgreementFlow(){
+  document.getElementById('agreementScreen').classList.add('hidden');
+  document.body.classList.remove('auth-locked');
+  await loadData();
+}
+
 async function enterApp(user){
   try{
     document.body.classList.add('auth-locked');
@@ -3906,6 +4998,11 @@ async function enterApp(user){
       return;
     }
     authScreen.classList.add('hidden');
+    if(!isAdminUser){
+      const status = await checkAgreementStatus();
+      if(!status || !status.nda_signed_at){ agreementStep='nda'; showAgreementScreen(); return; }
+      if(!status.license_signed_at){ agreementStep='license'; showAgreementScreen(); return; }
+    }
     document.body.classList.remove('auth-locked');
     await loadData();
   }catch(err){
