@@ -2265,6 +2265,31 @@ const PEDIGREE_FIELD_MAP = {
   GGDAM4_NAME: 'f75_354_375', GGDAM4_EAR: 'f74_264_285', GGDAM4_WEIGHT: 'f76_390_411',
   GGDAM4_COLOR: 'f77_491_505', GGDAM4_LEGS: 'f78_206_227',
 };
+// A different custom template layout (landscape, decorative box
+// design) with its own field names — mapped by reading the PDF's
+// actual form field positions rather than assuming a naming scheme.
+const TONYS_HOLLANDS_FIELD_MAP = {
+  BREED:'f1', DATE_OF_BIRTH:'f2', SEX:'f3',
+  G1_NAME:'f32', G1_EAR:'f35', G1_WEIGHT:'f40', G1_COLOR:'f42', G1_LEGS:'f47',
+  SIRE_NAME:'f18', SIRE_EAR:'f20', SIRE_WEIGHT:'f23', SIRE_COLOR:'f27', SIRE_LEGS:'f31',
+  DAM_NAME:'f48', DAM_EAR:'f53', DAM_WEIGHT:'f55', DAM_COLOR:'f59', DAM_LEGS:'f62',
+  PGS_NAME:'f8', PGS_EAR:'f10', PGS_WEIGHT:'f11', PGS_COLOR:'f14', PGS_LEGS:'f17',
+  PGD_NAME:'f24', PGD_EAR:'f28', PGD_WEIGHT:'f30', PGD_COLOR:'f33', PGD_LEGS:'f37',
+  MGS_NAME:'f43', MGS_EAR:'f46', MGS_WEIGHT:'f51', MGS_COLOR:'f54', MGS_LEGS:'f56',
+  MGD_NAME:'f64', MGD_EAR:'f65', MGD_WEIGHT:'f68', MGD_COLOR:'f71', MGD_LEGS:'f73',
+  GGSIRE1_NAME:'f5', GGSIRE1_EAR:'f4', GGSIRE1_WEIGHT:'f7', GGSIRE1_COLOR:'f6', GGSIRE1_LEGS:'f9',
+  GGDAM1_NAME:'f13', GGDAM1_EAR:'f12', GGDAM1_WEIGHT:'f15', GGDAM1_COLOR:'f16', GGDAM1_LEGS:'f19',
+  GGSIRE2_NAME:'f22', GGSIRE2_EAR:'f21', GGSIRE2_WEIGHT:'f26', GGSIRE2_COLOR:'f25', GGSIRE2_LEGS:'f29',
+  GGDAM2_NAME:'f36', GGDAM2_EAR:'f34', GGDAM2_WEIGHT:'f38', GGDAM2_COLOR:'f39', GGDAM2_LEGS:'f41',
+  GGSIRE3_NAME:'f45', GGSIRE3_EAR:'f44', GGSIRE3_WEIGHT:'f49', GGSIRE3_COLOR:'f50', GGSIRE3_LEGS:'f52',
+  GGDAM3_NAME:'f58', GGDAM3_EAR:'f57', GGDAM3_WEIGHT:'f61', GGDAM3_COLOR:'f60', GGDAM3_LEGS:'f63',
+  GGSIRE4_NAME:'f67', GGSIRE4_EAR:'f66', GGSIRE4_WEIGHT:'f69', GGSIRE4_COLOR:'f70', GGSIRE4_LEGS:'f72',
+  GGDAM4_NAME:'f75', GGDAM4_EAR:'f74', GGDAM4_WEIGHT:'f76', GGDAM4_COLOR:'f77', GGDAM4_LEGS:'f78',
+};
+// Add an entry here any time a genuinely different layout needs mapping.
+// Existing/default-shaped templates need nothing added — they just work.
+const PEDIGREE_FIELD_MAPS = { 'tonys-hollands': TONYS_HOLLANDS_FIELD_MAP };
+function fieldMapForTemplate(name){ return PEDIGREE_FIELD_MAPS[name] || PEDIGREE_FIELD_MAP; }
 function fillAncestorBoxValues(prefix, anc, put){
   if(!anc) return;
   put(`${prefix}_NAME`, anc.name);
@@ -2347,10 +2372,11 @@ async function downloadOfficialPedigreePDF(r){
     const form = pdfDoc.getForm();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const values = buildOfficialPedigreeValues(r);
+    const fieldMap = fieldMapForTemplate(templateName);
 
     const MAX_SIZE = 11, MIN_SIZE = 6, H_PADDING = 8; // points
     Object.entries(values).forEach(([role, value])=>{
-      const fieldId = PEDIGREE_FIELD_MAP[role];
+      const fieldId = fieldMap[role];
       if(!fieldId) return;
       try{
         const field = form.getTextField(fieldId);
