@@ -155,6 +155,7 @@
   .admin-view-banner{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 10px; background:var(--rust); color:#fffdf8; padding:9px 16px; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; line-height:1.3; }
   .admin-view-banner span{ flex:1 1 200px; min-width:0; }
   .admin-view-banner button{ background:#fffdf8; color:var(--rust); border:none; border-radius:7px; padding:5px 11px; font-size:12px; font-weight:700; cursor:pointer; flex:0 0 auto; }
+  #localDemoBanner button{ color:#0c1830; }
   .seg{display:flex; gap:6px;}
   .seg button{ flex:1; padding:12px 9px; min-height:44px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer; }
   .seg button.on{background:var(--navy); color:var(--page); border-color:var(--navy);}
@@ -169,7 +170,7 @@
   .save-error-banner .seb-text b{ display:block; margin-bottom:2px; }
   .save-error-banner button{ flex:0 0 auto; background:rgba(255,255,255,.18); border:none; color:#fff; border-radius:6px; padding:6px 10px; font-family:'Jost',sans-serif; font-weight:600; font-size:12px; cursor:pointer; }
   [data-theme="dark"] .toast{background:var(--gold-deep); color:#0c1830;}
-  .toast.on{opacity:1;}
+  .toast.on{opacity:1; pointer-events:auto;}
 
   .relate-box{ background:#fbf7ec; border:1px solid var(--gold); border-radius:8px; padding:10px 12px; font-size:13px; margin-top:6px; line-height:1.5; color:#0c1830; }
   .relate-box.close{border-color:var(--rust); background:var(--rust-light); color:var(--ink);}
@@ -350,7 +351,7 @@
     nav.bottom button.on{ background:rgba(255,255,255,.08); }
     nav.bottom svg{ width:18px; height:18px; flex:0 0 auto; }
     nav.bottom span{ font-size:13px; }
-    .toolbar, main, #printPedigree{ margin-left:230px; }
+    .toolbar, main, #printPedigree, #adminViewBanner, #localDemoBanner{ margin-left:230px; }
     .profile-view{ left:230px; width:auto; }
     .stats{ grid-template-columns:repeat(4,minmax(0,1fr)); }
 
@@ -367,6 +368,7 @@
     #main.card-grid > .stats,
     #main.card-grid > .subnav-wrap,
     #main.card-grid > .todo-row,
+    #main.card-grid > .action-row,
     #main.card-grid > button{
       grid-column:1 / -1;
     }
@@ -391,9 +393,29 @@
       <button class="auth-tab" id="authSignupTab" type="button">Create account</button>
     </div>
     <form id="authForm">
+      <div class="auth-field" id="authFirstNameWrap" style="display:none;">
+        <label for="authFirstName">First name</label>
+        <input id="authFirstName" type="text" autocomplete="given-name">
+      </div>
+      <div class="auth-field" id="authLastNameWrap" style="display:none;">
+        <label for="authLastName">Last name</label>
+        <input id="authLastName" type="text" autocomplete="family-name">
+      </div>
+      <div class="auth-field" id="authRabbitryWrap" style="display:none;">
+        <label for="authRabbitryName">Rabbitry name</label>
+        <input id="authRabbitryName" type="text" autocomplete="organization">
+      </div>
       <div class="auth-field">
         <label for="authEmail">Email</label>
         <input id="authEmail" type="email" autocomplete="email" required>
+      </div>
+      <div class="auth-field" id="authPhoneWrap" style="display:none;">
+        <label for="authPhone">Phone number</label>
+        <input id="authPhone" type="tel" autocomplete="tel">
+      </div>
+      <div class="auth-field" id="authWebsiteWrap" style="display:none;">
+        <label for="authWebsite">Website (optional)</label>
+        <input id="authWebsite" type="text" autocomplete="url" placeholder="e.g. yourrabbitry.com">
       </div>
       <div class="auth-field">
         <label for="authPassword">Password</label>
@@ -427,6 +449,7 @@
 </div>
 
 <div class="admin-view-banner" id="adminViewBanner" style="display:none;"></div>
+<div class="admin-view-banner" id="localDemoBanner" style="display:none; background:var(--gold-deep); color:#0c1830;"></div>
 
 <main id="main"></main>
 
@@ -449,6 +472,7 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_pSzehmsrfUstMmwI4zjX-w_4SsNkvdI
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 let currentUser = null;
 let myProfile = null, isAdminUser = false, adminSelf = null, viewingAsCustomer = null;
+let localSandboxMode = false;
 let cloudDataCache = {};
 let cloudDataReady = false;
 
@@ -512,6 +536,7 @@ async function loadMyProfile(){
   if(isAdminUser) adminSelf = { id: currentUser.id, email: currentUser.email };
 }
 async function checkMySupportAccess(){
+  if(localSandboxMode) return null;
   try{
     const {data} = await sb.from('support_access').select('*').eq('customer_id',currentUser.id).gt('expires_at', new Date().toISOString()).order('expires_at',{ascending:false}).limit(1).maybeSingle();
     return data || null;
@@ -611,6 +636,21 @@ function ensureAncestor(name, sexHint){
   if(!r){ r = blankRabbit({name, sex:sexHint||'doe', status:'external', external:true}); rabbits.push(r); saveData(); }
   return r;
 }
+function ensureRabbitFieldDefaults(){
+  rabbits.forEach(r=>{
+    if(r.sex==='unknown') r.sex = 'doe';
+    if(!r.weightLog) r.weightLog=[];
+    if(!r.breedingHistory) r.breedingHistory=[];
+    if(r.presaleFlag===undefined) r.presaleFlag=false;
+    if(r.activeBreedingId===undefined) r.activeBreedingId=null;
+    if(!r.notesLog){ r.notesLog = r.notes ? [{id:uid(), date:r.createdAt?r.createdAt.slice(0,10):todayStr(), text:r.notes}] : []; }
+    if(!r.photos) r.photos=[];
+    r.photos.forEach(p=>{ if(p.category==='Show / Stack') p.category='Front'; });
+    if(r.registrationNumber===undefined) r.registrationNumber='';
+    if(r.graduatedDate===undefined) r.graduatedDate=null;
+    if(r.juniorAckDone===undefined) r.juniorAckDone=false;
+  });
+}
 function enrichFromRoster(){
   ROSTER.forEach(entry=>{
     let existing = rabbits.find(r=>r.name.trim().toLowerCase()===entry.name.trim().toLowerCase());
@@ -635,19 +675,7 @@ function enrichFromRoster(){
       }));
     }
   });
-  rabbits.forEach(r=>{
-    if(r.sex==='unknown') r.sex = 'doe';
-    if(!r.weightLog) r.weightLog=[];
-    if(!r.breedingHistory) r.breedingHistory=[];
-    if(r.presaleFlag===undefined) r.presaleFlag=false;
-    if(r.activeBreedingId===undefined) r.activeBreedingId=null;
-    if(!r.notesLog){ r.notesLog = r.notes ? [{id:uid(), date:r.createdAt?r.createdAt.slice(0,10):todayStr(), text:r.notes}] : []; }
-    if(!r.photos) r.photos=[];
-    r.photos.forEach(p=>{ if(p.category==='Show / Stack') p.category='Front'; });
-    if(r.registrationNumber===undefined) r.registrationNumber='';
-    if(r.graduatedDate===undefined) r.graduatedDate=null;
-    if(r.juniorAckDone===undefined) r.juniorAckDone=false;
-  });
+  ensureRabbitFieldDefaults();
 }
 
 function seedActiveBreedings(){
@@ -701,11 +729,28 @@ function seedDemoExtras(){
   const kit2 = blankRabbit({ name:'DEMO Willow x DEMO Ranger — Doe 1', sex:'doe', breed:'Holland Lop', color:'Solid Black Tort',
     dob:litterBorn, sireName:'DEMO Ranger', damName:'DEMO Willow', status:'growing', notes:'Demo kit.' });
 
-  const marigoldBred = addDays(t,-28);
+  const marigoldBred = addDays(t,-31);
   const marigold = blankRabbit({ name:'DEMO Marigold', sex:'doe', breed:'Holland Lop', color:'Broken Black Tort', status:'pregnant',
     partner:'DEMO Ranger', bredDate:marigoldBred, dueDate:addDays(marigoldBred,31), earNumber:'D21' });
   const margEntry = {id:uid(), bredDate:marigoldBred, partner:'DEMO Ranger', dueDate:marigold.dueDate, outcome:'pending', litterBornDate:null, litterKits:null, litterDead:null, weanDate:null, sellDate:null};
   marigold.breedingHistory=[margEntry]; marigold.activeBreedingId=margEntry.id;
+
+  // Two more does due for a nest box within the next couple of days —
+  // together with Marigold (due today) these group into one
+  // collapsible "Add nest box — 3 does" row on the dashboard.
+  const hazelBred = addDays(t,-30);
+  const hazel = blankRabbit({ name:'DEMO Hazel', sex:'doe', breed:'Holland Lop', color:'Solid Blue Tort', status:'pregnant',
+    partner:'DEMO Ranger', bredDate:hazelBred, dueDate:addDays(hazelBred,31), earNumber:'D22' });
+  const hazelEntry = {id:uid(), bredDate:hazelBred, partner:'DEMO Ranger', dueDate:hazel.dueDate, outcome:'pending', litterBornDate:null, litterKits:null, litterDead:null, weanDate:null, sellDate:null};
+  hazel.breedingHistory=[hazelEntry]; hazel.activeBreedingId=hazelEntry.id;
+
+  const sageBred = addDays(t,-29);
+  const sage = blankRabbit({ name:'DEMO Sage', sex:'doe', breed:'Holland Lop', color:'Solid Sable Point', status:'pregnant',
+    partner:'DEMO Ranger', bredDate:sageBred, dueDate:addDays(sageBred,31), earNumber:'D23' });
+  const sageEntry = {id:uid(), bredDate:sageBred, partner:'DEMO Ranger', dueDate:sage.dueDate, outcome:'pending', litterBornDate:null, litterKits:null, litterDead:null, weanDate:null, sellDate:null};
+  sage.breedingHistory=[sageEntry]; sage.activeBreedingId=sageEntry.id;
+
+  shows.push({ id:uid(), name:'Sample ARBA Show', entryDeadline:addDays(t,6), showDate:addDays(t,20) });
 
   const clementine = blankRabbit({ name:'DEMO Clementine', sex:'doe', breed:'Holland Lop', color:'Solid Orange', status:'open', sireName:'DEMO Ranger', earNumber:'D18' });
   const sky = blankRabbit({ name:'DEMO Sky', sex:'buck', breed:'Holland Lop', color:'Solid Black Tort', status:'available', sireName:'DEMO Ranger' });
@@ -717,20 +762,33 @@ function seedDemoExtras(){
   const dupeA = blankRabbit({ name:'DEMO Test Rabbit', sex:'doe', breed:'Holland Lop', color:'Solid Chestnut', status:'open' });
   const dupeB = blankRabbit({ name:'DEMO Test Rabitt', sex:'doe', breed:'Holland Lop', status:'open', notes:'Typo twin of DEMO Test Rabbit — try Merge in More.' });
 
-  rabbits.push(ranger, willow, kit1, kit2, marigold, clementine, sky, comet, oldDoe, dupeA, dupeB);
+  rabbits.push(ranger, willow, kit1, kit2, marigold, hazel, sage, clementine, sky, comet, oldDoe, dupeA, dupeB);
 
   planned.push({ id:uid(), doeId:clementine.id, buckId:sky.id, doeName:clementine.name, buckName:sky.name,
     targetDate:addDays(t,5), notes:'Demo pairing — both share DEMO Ranger as sire, so this shows the relatedness warning.' });
 }
 
 async function loadData(){
+  let hadNoSavedData = false;
   try{ rabbits = JSON.parse((await window.storage.get(RABBITS_KEY,false)).value); }
-  catch(e){ rabbits = seedActiveBreedings(); }
-  enrichFromRoster();
+  catch(e){ rabbits = []; hadNoSavedData = true; }
   try{ planned = JSON.parse((await window.storage.get(PLANNED_KEY,false)).value); }catch(e){ planned=[]; }
   try{ customEvents = JSON.parse((await window.storage.get(EVENTS_KEY,false)).value); }catch(e){ customEvents=[]; }
   try{ shows = JSON.parse((await window.storage.get(SHOWS_KEY,false)).value); }catch(e){ shows=[]; }
-  seedDemoExtras();
+  if(hadNoSavedData){
+    if(isAdminUser && !viewingAsCustomer){
+      // Your own account only: load your real roster and breeding log.
+      rabbits = seedActiveBreedings();
+      enrichFromRoster();
+    } else {
+      // Every other brand-new account gets a small illustrative demo
+      // set instead of real production data.
+      seedDemoExtras();
+      ensureRabbitFieldDefaults();
+    }
+  } else {
+    ensureRabbitFieldDefaults();
+  }
   await saveData(); await savePlanned(); await saveEvents(); await saveShows();
   try{ const t=(await window.storage.get(THEME_KEY,false)).value; if(t==='dark') document.documentElement.setAttribute('data-theme','dark'); }catch(e){}
   render();
@@ -872,7 +930,7 @@ function autoGraduateJuniors(){
 }
 function render(){
   autoGraduateJuniors();
-  document.getElementById('quickBredBtn').style.display = (currentTab==='rabbits'&&rabbitsGroup==='does') ? '' : 'none';
+  document.getElementById('quickBredBtn').style.display = 'none';
   const banner = document.getElementById('adminViewBanner');
   if(viewingAsCustomer){
     banner.style.display = 'flex';
@@ -1310,12 +1368,20 @@ function renderRabbits(main){
   } else if(rabbitsGroup==='bucks'){
     const it=rabbits.filter(r=>r.sex==='buck'&&isActive(r)&&r.status!=='growing').sort((a,b)=>a.name.localeCompare(b.name));
     body=`<div class="section-label">${it.length} TOTAL BUCK${it.length===1?'':'S'}</div>`+
-      (it.length?it.map(buckCardHTML).join(''):`<div class="empty">No bucks yet. Tap Add rabbit in More.</div>`);
+      (it.length?it.map(buckCardHTML).join(''):`<div class="empty">No bucks yet. Tap + Add a rabbit above.</div>`);
   } else if(rabbitsGroup==='juniors'){
     const it=rabbits.filter(r=>r.status==='growing'||(r.status==='reserved'&&r.dob&&ageDays(r)<182)).sort((a,b)=>(a.dob||'9').localeCompare(b.dob||'9'));
     body=it.length?it.map(juniorCardHTML).join(''):`<div class="empty">No juniors on file. They appear automatically after you log a litter.</div>`;
   }
-  main.innerHTML = groupTabs + body;
+  const actionRow = rabbitsGroup==='does'
+    ? `<div class="action-row" style="display:flex; gap:10px; margin:10px 0 14px;">
+         <button class="btn btn-primary" style="flex:1;" id="herdRecordBreedingBtn">+ Record a breeding</button>
+         <button class="btn btn-secondary" style="flex:1;" id="herdAddRabbitBtn">+ Add a rabbit</button>
+       </div>`
+    : `<button class="btn btn-secondary" style="width:100%; margin:10px 0 14px;" id="herdAddRabbitBtn">+ Add a rabbit</button>`;
+  main.innerHTML = groupTabs + actionRow + body;
+  document.getElementById('herdAddRabbitBtn').onclick = openAddSheet;
+  if(document.getElementById('herdRecordBreedingBtn')) document.getElementById('herdRecordBreedingBtn').onclick = openQuickBreedSheet;
   document.querySelectorAll('[data-rgroup]').forEach(b=>b.onclick=()=>{ rabbitsGroup=b.dataset.rgroup; render(); window.scrollTo(0,0); });
   document.querySelectorAll('[data-doesfilter]').forEach(b=>b.onclick=()=>{ doesFilter=b.dataset.doesfilter; render(); });
 }
@@ -2344,16 +2410,24 @@ function buildOfficialPedigreeValues(r){
   fillAncestorBoxValues('GGDAM4', g('ddd'), put);
   return v;
 }
-async function getMyPedigreeTemplateName(){
+async function getMyPedigreeProfile(){
+  if(localSandboxMode) return { pedigree_template:'generic' };
   try{
-    const {data} = await sb.from('profiles').select('pedigree_template').eq('id',currentUser.id).maybeSingle();
-    return (data && data.pedigree_template) || 'generic';
-  }catch(e){ return 'generic'; }
+    const {data} = await sb.from('profiles').select('pedigree_template, first_name, last_name, rabbitry_name, phone, website').eq('id',currentUser.id).maybeSingle();
+    return data || { pedigree_template:'generic' };
+  }catch(e){ return { pedigree_template:'generic' }; }
 }
+// A template's contact fields (rabbitry name, breeder name, phone,
+// website) are always named the same way across every template that
+// has them — see the field-naming instructions given when building a
+// generic template. Templates without these fields (like a custom one
+// with contact info baked into the artwork) simply skip them silently.
+const CONTACT_FIELD_IDS = { RABBITRY_NAME:'rabbitry_name', BREEDER_NAME:'breeder_name', CONTACT_PHONE:'contact_phone', CONTACT_WEBSITE:'contact_website' };
 async function downloadOfficialPedigreePDF(r){
   try{
     const { PDFDocument, StandardFonts } = PDFLib;
-    const templateName = await getMyPedigreeTemplateName();
+    const myProfileForPdf = await getMyPedigreeProfile();
+    const templateName = myProfileForPdf.pedigree_template || 'generic';
     const storageUrl = `${SUPABASE_URL}/storage/v1/object/public/pedigree-templates/${templateName}.pdf`;
     let existingBytes;
     try{
@@ -2372,7 +2446,12 @@ async function downloadOfficialPedigreePDF(r){
     const form = pdfDoc.getForm();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const values = buildOfficialPedigreeValues(r);
-    const fieldMap = fieldMapForTemplate(templateName);
+    const fieldMap = { ...fieldMapForTemplate(templateName), ...CONTACT_FIELD_IDS };
+    const breederName = [myProfileForPdf.first_name, myProfileForPdf.last_name].filter(Boolean).join(' ');
+    values.RABBITRY_NAME = sanitizeForPdf(myProfileForPdf.rabbitry_name || '');
+    values.BREEDER_NAME = sanitizeForPdf(breederName);
+    values.CONTACT_PHONE = sanitizeForPdf(myProfileForPdf.phone || '');
+    values.CONTACT_WEBSITE = sanitizeForPdf(myProfileForPdf.website || '');
 
     const MAX_SIZE = 11, MIN_SIZE = 6, H_PADDING = 8; // points
     Object.entries(values).forEach(([role, value])=>{
@@ -2577,7 +2656,8 @@ async function openMoreSheet(){
       <div style="font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(currentUser?.email||'')}</div>
     </div>
     ${isAdminUser ? `<button class="btn btn-primary" style="width:100%; margin-bottom:8px;" id="openAdminBtn">Admin — all accounts</button>` : ''}
-    ${!viewingAsCustomer ? `<div class="card no-tap" style="margin-bottom:12px;">
+    ${(!localSandboxMode && !viewingAsCustomer) ? `<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" id="practiceModeBtn">Try practice mode (local only)</button>` : ''}
+    ${(!viewingAsCustomer && !localSandboxMode) ? `<div class="card no-tap" style="margin-bottom:12px;">
       <div class="card-name">Support access</div>
       <div class="card-sub" style="margin:4px 0 10px;">${activeGrant ? `Support can view and edit your account until ${new Date(activeGrant.expires_at).toLocaleString()}.` : 'Allow CJM Legacy Rabbitry support to view and edit your account for 48 hours — useful if you need help troubleshooting something.'}</div>
       ${activeGrant ? `<button class="btn btn-danger btn-sm" id="revokeAccessBtn">Revoke access now</button>` : `<button class="btn btn-secondary btn-sm" id="grantAccessBtn">Allow support access (48h)</button>`}
@@ -2585,6 +2665,7 @@ async function openMoreSheet(){
     ${items.map(([k,l])=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" data-more="${k}">${l}</button>`).join('')}
     <button class="btn btn-danger" style="width:100%; margin-top:4px;" id="signOutBtn">Sign out</button>`);
   if(document.getElementById('openAdminBtn')) document.getElementById('openAdminBtn').onclick = openAdminSheet;
+  if(document.getElementById('practiceModeBtn')) document.getElementById('practiceModeBtn').onclick = enterPracticeMode;
   if(document.getElementById('grantAccessBtn')) document.getElementById('grantAccessBtn').onclick = async ()=>{
     await sb.from('support_access').insert({ customer_id: currentUser.id, expires_at: new Date(Date.now()+48*3600*1000).toISOString(), reason: 'Customer-granted support access' });
     showToast('Support access granted for 48 hours'); openMoreSheet();
@@ -2604,6 +2685,7 @@ async function openMoreSheet(){
   });
   document.getElementById('signOutBtn').onclick = async ()=>{
     closeSheet();
+    if(localSandboxMode){ window.location.reload(); return; }
     const {error}=await sb.auth.signOut();
     if(error) showToast(error.message);
   };
@@ -2644,33 +2726,165 @@ function renderForSale(main){
   main.innerHTML = h;
   attachCardEvents();
 }
+function csvEscape(v){
+  if(v===null||v===undefined) return '';
+  const s=String(v);
+  return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
+function toCSV(rows, columns){
+  const header=columns.join(',');
+  const body=rows.map(row=>columns.map(c=>csvEscape(row[c])).join(',')).join('\n');
+  return header+(rows.length?'\n'+body:'');
+}
+function parseCSV(text){
+  const rows=[]; let row=[], field='', inQuotes=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(inQuotes){
+      if(c==='"'){ if(text[i+1]==='"'){ field+='"'; i++; } else inQuotes=false; }
+      else field+=c;
+    } else {
+      if(c==='"') inQuotes=true;
+      else if(c===','){ row.push(field); field=''; }
+      else if(c==='\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else if(c==='\r'){ /* skip */ }
+      else field+=c;
+    }
+  }
+  if(field.length||row.length){ row.push(field); rows.push(row); }
+  if(!rows.length) return [];
+  const header=rows[0];
+  return rows.slice(1).filter(r=>r.some(v=>v!=='')).map(r=>{
+    const obj={}; header.forEach((h,i)=>obj[h]=r[i]!==undefined?r[i]:''); return obj;
+  });
+}
+function downloadCSV(filename, csvText){
+  const blob=new Blob([csvText], {type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+const RABBIT_CSV_COLUMNS = ['id','name','sex','breed','color','earNumber','dob','weight','legsWins','registrationNumber',
+  'sireName','damName','status','partner','bredDate','dueDate','litterBornDate','weanDate','sellDate','rebreedWeeks',
+  'notes','flag','alias','forSale','graduatedDate',
+  'sale_buyer','sale_price','sale_deposit','sale_depositDate','sale_pickupDate','sale_soldDate'];
+function rabbitToCsvRow(r){
+  const s=r.sale||{};
+  return { id:r.id, name:r.name, sex:r.sex, breed:r.breed||'', color:r.color||'', earNumber:r.earNumber||'', dob:r.dob||'',
+    weight:r.weight||'', legsWins:r.legsWins||'', registrationNumber:r.registrationNumber||'', sireName:r.sireName||'', damName:r.damName||'',
+    status:r.status, partner:r.partner||'', bredDate:r.bredDate||'', dueDate:r.dueDate||'', litterBornDate:r.litterBornDate||'',
+    weanDate:r.weanDate||'', sellDate:r.sellDate||'', rebreedWeeks:r.rebreedWeeks||'', notes:r.notes||'', flag:r.flag||'', alias:r.alias||'',
+    forSale:r.forSale?'yes':'no', graduatedDate:r.graduatedDate||'',
+    sale_buyer:s.buyer||'', sale_price:s.price||'', sale_deposit:s.deposit||'', sale_depositDate:s.depositDate||'',
+    sale_pickupDate:s.pickupDate||'', sale_soldDate:s.soldDate||'' };
+}
+function csvRowToRabbit(row, existing){
+  const base = existing || blankRabbit({});
+  const hasSale = row.sale_buyer||row.sale_price||row.sale_pickupDate||row.sale_soldDate;
+  return Object.assign(base, {
+    id: row.id || base.id, name: row.name, sex: row.sex||'doe', breed: row.breed, color: row.color,
+    earNumber: row.earNumber, dob: row.dob||null, weight: row.weight, legsWins: row.legsWins,
+    registrationNumber: row.registrationNumber, sireName: row.sireName, damName: row.damName,
+    status: row.status||'open', partner: row.partner||null, bredDate: row.bredDate||null, dueDate: row.dueDate||null,
+    litterBornDate: row.litterBornDate||null, weanDate: row.weanDate||null, sellDate: row.sellDate||null,
+    rebreedWeeks: Number(row.rebreedWeeks)||3, notes: row.notes||'', flag: row.flag||'', alias: row.alias||'',
+    forSale: row.forSale==='yes', graduatedDate: row.graduatedDate||null,
+    sale: hasSale ? { buyer:row.sale_buyer||'', price:row.sale_price||'', deposit:row.sale_deposit||'', depositDate:row.sale_depositDate||'',
+      pickupDate:row.sale_pickupDate||'', soldDate:row.sale_soldDate||'' } : base.sale
+  });
+}
+const BREEDING_CSV_COLUMNS = ['doeName','partner','bredDate','outcome','litterBornDate','numKits'];
+const PLANNED_CSV_COLUMNS = ['doeName','buckName','targetDate','notes'];
+const EVENTS_CSV_COLUMNS = ['title','date'];
+const SHOWS_CSV_COLUMNS = ['name','entryDeadline','showDate'];
+
 function renderBackup(main){
-  const snap=JSON.stringify({rabbits,planned,customEvents,savedAt:new Date().toISOString()},null,2);
   main.innerHTML=`
-    <div class="section-label">SAVE A SNAPSHOT</div>
-    <div class="card no-tap"><div class="card-detail">Copy this and paste it somewhere safe — Notes, or an email to yourself. It's a complete copy of every rabbit, litter, photo, and plan, independent of this file.</div>
-      <textarea id="bk-out" readonly style="width:100%; height:130px; margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:10px; padding:8px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); color:var(--ink);">${esc(snap)}</textarea>
-      <div class="card-actions"><button class="btn btn-primary" id="bk-copy">Copy to clipboard</button></div></div>
-    <div class="section-label">RESTORE FROM A SNAPSHOT</div>
-    <div class="card no-tap"><div class="card-detail">Paste a saved snapshot below. <b>This replaces everything currently in the app.</b></div>
-      <textarea id="bk-in" placeholder="Paste snapshot here" style="width:100%; height:90px; margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:10px; padding:8px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); color:var(--ink);"></textarea>
-      <div class="card-actions"><button class="btn btn-danger" id="bk-restore">Restore this snapshot</button></div></div>`;
-  document.getElementById('bk-copy').onclick=async()=>{
-    const ta=document.getElementById('bk-out'); ta.select();
-    try{ await navigator.clipboard.writeText(ta.value); showToast('Copied'); }catch(e){ showToast('Select the text above and copy manually'); }
+    <div class="section-label">DOWNLOAD YOUR DATA (CSV)</div>
+    <div class="card no-tap"><div class="card-detail">Downloads plain spreadsheet files you can open in Excel, Numbers, or Google Sheets — one for your rabbits, and separate ones for breeding history, planned breedings, calendar events, and shows. Photos, weight logs, and note logs aren't included in CSV, since spreadsheets can't hold that kind of detail.</div>
+      <div class="card-actions"><button class="btn btn-primary" id="bk-download-all">Download all as CSV</button></div></div>
+    <div class="section-label">RESTORE FROM CSV</div>
+    <div class="card no-tap"><div class="card-detail">Upload the <b>rabbits.csv</b> file from a previous download to restore your rabbit list. This matches by ID where possible, so restoring won't duplicate rabbits you already have. Optionally add the other CSV files too. <b>Photos, weight logs, and note logs can't be restored this way.</b></div>
+      <div class="field" style="margin-top:10px;"><label>rabbits.csv (required)</label><input type="file" id="bk-in-rabbits" accept=".csv"></div>
+      <div class="field"><label>breeding_history.csv (optional)</label><input type="file" id="bk-in-breeding" accept=".csv"></div>
+      <div class="field"><label>planned.csv (optional)</label><input type="file" id="bk-in-planned" accept=".csv"></div>
+      <div class="field"><label>events.csv (optional)</label><input type="file" id="bk-in-events" accept=".csv"></div>
+      <div class="field"><label>shows.csv (optional)</label><input type="file" id="bk-in-shows" accept=".csv"></div>
+      <div class="card-actions"><button class="btn btn-danger" id="bk-restore">Restore from these files</button></div></div>`;
+
+  document.getElementById('bk-download-all').onclick = ()=>{
+    downloadCSV('rabbits.csv', toCSV(rabbits.map(rabbitToCsvRow), RABBIT_CSV_COLUMNS));
+    const breedingRows=[];
+    rabbits.forEach(r=>{ if(r.sex==='doe') (r.breedingHistory||[]).forEach(e=>{
+      breedingRows.push({ doeName:r.name, partner:e.partner||'', bredDate:e.bredDate||'', outcome:e.outcome||'',
+        litterBornDate:e.litterBornDate||'', numKits:(e.litterKits||[]).length||'' });
+    }); });
+    downloadCSV('breeding_history.csv', toCSV(breedingRows, BREEDING_CSV_COLUMNS));
+    downloadCSV('planned.csv', toCSV(planned.map(p=>({doeName:p.doeName||'', buckName:p.buckName||'', targetDate:p.targetDate||'', notes:p.notes||''})), PLANNED_CSV_COLUMNS));
+    downloadCSV('events.csv', toCSV(customEvents.map(e=>({title:e.title||'', date:e.date||''})), EVENTS_CSV_COLUMNS));
+    downloadCSV('shows.csv', toCSV(shows.map(s=>({name:s.name||'', entryDeadline:s.entryDeadline||'', showDate:s.showDate||''})), SHOWS_CSV_COLUMNS));
+    showToast('Downloading 5 CSV files');
   };
+
+  function readFile(input){
+    return new Promise((resolve)=>{
+      const f = input.files[0];
+      if(!f){ resolve(null); return; }
+      const reader = new FileReader();
+      reader.onload = ()=>resolve(reader.result);
+      reader.readAsText(f);
+    });
+  }
+
   let armed=false; const rb=document.getElementById('bk-restore');
-  rb.onclick=()=>{
-    if(!armed){ armed=true; rb.textContent='Tap again to confirm — replaces everything'; return; }
-    const t=document.getElementById('bk-in').value.trim();
-    if(!t){ showToast('Paste a snapshot first'); return; }
+  rb.onclick=async ()=>{
+    if(!armed){ armed=true; rb.textContent='Tap again to confirm — this adds/updates rabbits from the file'; return; }
+    const rabbitsText = await readFile(document.getElementById('bk-in-rabbits'));
+    if(!rabbitsText){ showToast('Choose a rabbits.csv file first'); armed=false; rb.textContent='Restore from these files'; return; }
     try{
-      const p=JSON.parse(t);
-      if(!Array.isArray(p.rabbits)) throw 0;
-      rabbits=p.rabbits; planned=p.planned||[]; customEvents=p.customEvents||[];
+      const rows = parseCSV(rabbitsText);
+      rows.forEach(row=>{
+        let existing = row.id ? rabbits.find(x=>x.id===row.id) : null;
+        if(!existing) existing = findByName(row.name);
+        if(existing) csvRowToRabbit(row, existing);
+        else rabbits.push(csvRowToRabbit(row, null));
+      });
+
+      const breedingText = await readFile(document.getElementById('bk-in-breeding'));
+      if(breedingText){
+        parseCSV(breedingText).forEach(row=>{
+          const dam = findByName(row.doeName);
+          if(dam){
+            dam.breedingHistory = dam.breedingHistory || [];
+            dam.breedingHistory.push({ id:uid(), partner:row.partner||'', bredDate:row.bredDate||todayStr(),
+              outcome:row.outcome||'pending', litterBornDate:row.litterBornDate||null, litterKits:null });
+          }
+        });
+      }
+      const plannedText = await readFile(document.getElementById('bk-in-planned'));
+      if(plannedText){
+        parseCSV(plannedText).forEach(row=>{
+          const doe=findByName(row.doeName), buck=findByName(row.buckName);
+          planned.push({ id:uid(), doeId:doe?doe.id:null, buckId:buck?buck.id:null, doeName:row.doeName||'', buckName:row.buckName||'',
+            targetDate:row.targetDate||todayStr(), notes:row.notes||'' });
+        });
+      }
+      const eventsText = await readFile(document.getElementById('bk-in-events'));
+      if(eventsText){
+        parseCSV(eventsText).forEach(row=>{ customEvents.push({ id:uid(), title:row.title||'', date:row.date||todayStr() }); });
+      }
+      const showsText = await readFile(document.getElementById('bk-in-shows'));
+      if(showsText){
+        parseCSV(showsText).forEach(row=>{ shows.push({ id:uid(), name:row.name||'', entryDeadline:row.entryDeadline||todayStr(), showDate:row.showDate||'' }); });
+      }
+
       enrichFromRoster();
-      saveData(); savePlanned(); saveEvents(); currentTab='home'; render(); showToast('Snapshot restored');
-    }catch(e){ showToast("That doesn't look like a valid snapshot"); }
+      saveData(); savePlanned(); saveEvents(); saveShows();
+      currentTab='home'; render(); showToast('Restored from CSV');
+    }catch(e){ console.error(e); showToast("Couldn't read that file — check it's a CSV exported from here."); }
   };
 }
 
@@ -3572,6 +3786,16 @@ const authEmail = document.getElementById('authEmail');
 const authPassword = document.getElementById('authPassword');
 const authConfirm = document.getElementById('authConfirm');
 const authConfirmWrap = document.getElementById('authConfirmWrap');
+const authFirstName = document.getElementById('authFirstName');
+const authFirstNameWrap = document.getElementById('authFirstNameWrap');
+const authLastName = document.getElementById('authLastName');
+const authLastNameWrap = document.getElementById('authLastNameWrap');
+const authRabbitryName = document.getElementById('authRabbitryName');
+const authRabbitryWrap = document.getElementById('authRabbitryWrap');
+const authPhone = document.getElementById('authPhone');
+const authPhoneWrap = document.getElementById('authPhoneWrap');
+const authWebsite = document.getElementById('authWebsite');
+const authWebsiteWrap = document.getElementById('authWebsiteWrap');
 const authSubmit = document.getElementById('authSubmit');
 const authMessage = document.getElementById('authMessage');
 const authLoginTab = document.getElementById('authLoginTab');
@@ -3586,6 +3810,12 @@ function setAuthMode(mode){
   authSignupTab.classList.toggle('on',signup);
   authConfirmWrap.style.display=signup?'block':'none';
   authConfirm.required=signup;
+  authFirstNameWrap.style.display=signup?'block':'none';
+  authLastNameWrap.style.display=signup?'block':'none';
+  authRabbitryWrap.style.display=signup?'block':'none';
+  authPhoneWrap.style.display=signup?'block':'none';
+  authWebsiteWrap.style.display=signup?'block':'none';
+  authFirstName.required=signup; authLastName.required=signup; authRabbitryName.required=signup; authPhone.required=signup;
   authSubmit.textContent=signup?'Create account':'Sign in';
   authForgot.style.display=signup?'none':'block';
   authPassword.autocomplete=signup?'new-password':'current-password';
@@ -3604,7 +3834,13 @@ authForm.onsubmit=async (e)=>{
   setAuthMessage(authMode==='signup'?'Creating your HerdNerd Pro account…':'Signing you in…',true);
   try{
     if(authMode==='signup'){
-      const {data,error}=await sb.auth.signUp({email,password});
+      const {data,error}=await sb.auth.signUp({email,password,options:{data:{
+        first_name: authFirstName.value.trim(),
+        last_name: authLastName.value.trim(),
+        rabbitry_name: authRabbitryName.value.trim(),
+        phone: authPhone.value.trim(),
+        website: authWebsite.value.trim()
+      }}});
       if(error) throw error;
       if(data.session){
         setAuthMessage('Account created. Loading HerdNerd Pro…',true);
@@ -3632,6 +3868,30 @@ authForgot.onclick=async ()=>{
   }catch(err){ setAuthMessage(err.message||'Could not send reset email.'); }
   finally{ authForgot.disabled=false; }
 };
+
+function enterPracticeMode(){
+  if(!currentUser){ showToast('Sign in first, then try Practice mode.'); return; }
+  localSandboxMode = true;
+  const prefix = 'herdnerd_practice_'+currentUser.id+'_';
+  window.storage = {
+    get: async (key)=>{
+      const v = localStorage.getItem(prefix+key);
+      if(v===null) throw new Error('not found');
+      return { value:v };
+    },
+    set: async (key,val)=>{
+      localStorage.setItem(prefix+key, val);
+      return { ok:true };
+    }
+  };
+  closeSheet();
+  const banner = document.getElementById('localDemoBanner');
+  banner.style.display = 'flex';
+  banner.innerHTML = `<span>Practice mode — changes here are local only and won't touch your real account</span><button id="exitLocalDemoBtn">Exit practice mode</button>`;
+  document.getElementById('exitLocalDemoBtn').onclick = ()=>window.location.reload();
+  loadData();
+  showToast('Practice mode on — nothing here is saved to your real account');
+}
 
 async function enterApp(user){
   try{
