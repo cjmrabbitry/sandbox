@@ -3561,6 +3561,26 @@ function openAddShowSheet(){
     saveShows(); openShowsSheet(); render(); showToast('Show added');
   };
 }
+async function openAgreementsSheet(){
+  let rows=[];
+  try{ const {data} = await sb.from('demo_agreements').select('*').order('created_at',{ascending:false}); rows = data||[]; }catch(e){}
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Signed agreements</h2>
+    ${rows.length ? rows.map(r=>`
+      <div class="card no-tap">
+        <div class="card-name">${esc(r.name||'(no name)')}</div>
+        <div class="card-sub">${esc(r.email||'')}</div>
+        <div class="card-detail" style="margin-top:8px;">
+          <b>NDA:</b> ${r.nda_signed_at ? new Date(r.nda_signed_at).toLocaleString() : 'Not signed'}
+        </div>
+        ${r.nda_signature ? `<img src="${r.nda_signature}" style="max-width:100%; height:60px; border:1px solid var(--line); border-radius:6px; background:#fffdf8; margin-top:4px;">` : ''}
+        <div class="card-detail" style="margin-top:8px;">
+          <b>License:</b> ${r.license_signed_at ? new Date(r.license_signed_at).toLocaleString() : 'Not signed'}
+        </div>
+        ${r.license_signature ? `<img src="${r.license_signature}" style="max-width:100%; height:60px; border:1px solid var(--line); border-radius:6px; background:#fffdf8; margin-top:4px;">` : ''}
+      </div>`).join('') : `<div class="card no-tap"><div class="card-detail">No agreements signed yet.</div></div>`}
+    <button class="btn btn-secondary" style="width:100%; margin-top:10px;" onclick="openAdminSheet()">Back to all accounts</button>`);
+}
 async function openAdminSheet(){
   let profiles=[], grants=[];
   try{ const {data} = await sb.from('profiles').select('*').order('email'); profiles = data||[]; }catch(e){}
@@ -3569,6 +3589,7 @@ async function openAdminSheet(){
   const others = profiles.filter(p=>p.id!==adminSelf?.id);
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>All accounts</h2>
+    <button class="btn btn-secondary" style="width:100%; margin-bottom:12px;" id="viewAgreementsBtn">View signed agreements</button>
     <div class="card-sub" style="margin-bottom:12px;">"View account" only appears once a customer has turned on support access for themselves.</div>
     ${others.length ? others.map(p=>`
       <div class="card no-tap">
@@ -3585,6 +3606,7 @@ async function openAdminSheet(){
           ${grantMap[p.id]?`<button class="btn btn-primary btn-sm" data-viewcustomer="${p.id}" data-email="${esc(p.email||'')}">View account</button>`:''}
         </div>
       </div>`).join('') : `<div class="card no-tap"><div class="card-detail">No other accounts yet.</div></div>`}`);
+  document.getElementById('viewAgreementsBtn').onclick = openAgreementsSheet;
   document.querySelectorAll('[data-toggleaccess]').forEach(b=>b.onclick=async ()=>{
     const id=b.dataset.toggleaccess, cur=b.dataset.current==='true';
     await sb.from('profiles').update({access_granted:!cur}).eq('id',id);
