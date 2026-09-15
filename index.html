@@ -150,6 +150,10 @@
   .comingup-row{ display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
   .comingup-row:last-child{ border-bottom:none; }
   .comingup-date{ opacity:.75; font-size:12.5px; flex:0 0 auto; padding-left:10px; }
+
+  /* Admin support-view banner */
+  .admin-view-banner{ display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--rust); color:#fffdf8; padding:9px 16px; font-family:'Jost',sans-serif; font-size:13px; font-weight:600; }
+  .admin-view-banner button{ background:#fffdf8; color:var(--rust); border:none; border-radius:7px; padding:5px 11px; font-size:12px; font-weight:700; cursor:pointer; flex:0 0 auto; }
   .seg{display:flex; gap:6px;}
   .seg button{ flex:1; padding:12px 9px; min-height:44px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); font-family:'Jost',sans-serif; font-size:13.5px; font-weight:600; color:var(--ink); cursor:pointer; }
   .seg button.on{background:var(--navy); color:var(--page); border-color:var(--navy);}
@@ -421,6 +425,8 @@
   <button class="btn btn-secondary quickbred" id="quickBredBtn">+ Record a breeding</button>
 </div>
 
+<div class="admin-view-banner" id="adminViewBanner" style="display:none;"></div>
+
 <main id="main"></main>
 
 <nav class="bottom" id="nav"></nav>
@@ -441,6 +447,7 @@ const SUPABASE_URL = 'https://xzsclktdryieozfvtqkv.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_pSzehmsrfUstMmwI4zjX-w_4SsNkvdI';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 let currentUser = null;
+let myProfile = null, isAdminUser = false, adminSelf = null, viewingAsCustomer = null;
 let cloudDataCache = {};
 let cloudDataReady = false;
 
@@ -479,12 +486,52 @@ async function initCloudStorage(user){
       if(!cloudDataReady || !currentUser) throw new Error('Not signed in');
       let parsed;
       try{ parsed=JSON.parse(val); }catch(e){ parsed=val; }
+      const oldVal = cloudDataCache[key];
       cloudDataCache[key]=parsed;
       const {error}=await sb.from('barn_data').upsert({user_id:currentUser.id,data:cloudDataCache},{onConflict:'user_id'});
       if(error) throw error;
+      if(viewingAsCustomer && adminSelf){
+        sb.from('audit_log').insert({
+          admin_id: adminSelf.id, customer_id: viewingAsCustomer.id,
+          table_name: 'barn_data', row_id: key,
+          old_value: oldVal===undefined?null:oldVal, new_value: parsed
+        }).then(()=>{}, ()=>{});
+      }
       return {ok:true};
     }
   };
+}
+
+async function loadMyProfile(){
+  try{
+    const {data} = await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+    myProfile = data || null;
+  }catch(e){ myProfile = null; }
+  isAdminUser = !!(myProfile && myProfile.role==='admin');
+  if(isAdminUser) adminSelf = { id: currentUser.id, email: currentUser.email };
+}
+async function checkMySupportAccess(){
+  try{
+    const {data} = await sb.from('support_access').select('*').eq('customer_id',currentUser.id).gt('expires_at', new Date().toISOString()).order('expires_at',{ascending:false}).limit(1).maybeSingle();
+    return data || null;
+  }catch(e){ return null; }
+}
+async function adminViewCustomer(customerId, customerEmail){
+  if(!isAdminUser) return;
+  try{
+    await initCloudStorage({ id:customerId, email:customerEmail });
+    viewingAsCustomer = { id:customerId, email:customerEmail };
+    closeSheet();
+    await loadData();
+    showToast('Now viewing '+customerEmail);
+  }catch(e){ showToast('Could not load that account — check they granted support access.'); }
+}
+async function adminExitCustomerView(){
+  if(!adminSelf) return;
+  await initCloudStorage(adminSelf);
+  viewingAsCustomer = null;
+  await loadData();
+  showToast('Back to your own account');
 }
 
 const RABBITS_KEY = 'rabbits_v2';
@@ -825,6 +872,14 @@ function autoGraduateJuniors(){
 function render(){
   autoGraduateJuniors();
   document.getElementById('quickBredBtn').style.display = (currentTab==='rabbits'&&rabbitsGroup==='does') ? '' : 'none';
+  const banner = document.getElementById('adminViewBanner');
+  if(viewingAsCustomer){
+    banner.style.display = 'flex';
+    banner.innerHTML = `<span>Viewing ${esc(viewingAsCustomer.email)}'s account — edits are logged</span><button id="exitAdminViewBtn">Back to my account</button>`;
+    document.getElementById('exitAdminViewBtn').onclick = adminExitCustomerView;
+  } else {
+    banner.style.display = 'none';
+  }
   renderNav(); renderMain();
 }
 
@@ -2406,15 +2461,59 @@ function openAddShowSheet(){
     saveShows(); openShowsSheet(); render(); showToast('Show added');
   };
 }
-function openMoreSheet(){
+async function openAdminSheet(){
+  let profiles=[], grants=[];
+  try{ const {data} = await sb.from('profiles').select('*').order('email'); profiles = data||[]; }catch(e){}
+  try{ const {data} = await sb.from('support_access').select('*').gt('expires_at', new Date().toISOString()); grants = data||[]; }catch(e){}
+  const grantMap = {}; grants.forEach(g=>{ grantMap[g.customer_id]=g; });
+  const others = profiles.filter(p=>p.id!==adminSelf?.id);
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>All accounts</h2>
+    <div class="card-sub" style="margin-bottom:12px;">"View account" only appears once a customer has turned on support access for themselves.</div>
+    ${others.length ? others.map(p=>`
+      <div class="card no-tap">
+        <div class="card-top"><div>
+          <div class="card-name">${esc(p.email||p.id)}</div>
+          <div class="card-sub">${p.role==='admin'?'Admin':'Customer'} &middot; ${p.access_granted?'Access granted':'Access NOT granted'}${grantMap[p.id]?' &middot; support access active':''}</div>
+        </div></div>
+        <div class="card-actions">
+          <button class="btn btn-secondary btn-sm" data-toggleaccess="${p.id}" data-current="${p.access_granted}">${p.access_granted?'Revoke access':'Grant access'}</button>
+          ${grantMap[p.id]?`<button class="btn btn-primary btn-sm" data-viewcustomer="${p.id}" data-email="${esc(p.email||'')}">View account</button>`:''}
+        </div>
+      </div>`).join('') : `<div class="card no-tap"><div class="card-detail">No other accounts yet.</div></div>`}`);
+  document.querySelectorAll('[data-toggleaccess]').forEach(b=>b.onclick=async ()=>{
+    const id=b.dataset.toggleaccess, cur=b.dataset.current==='true';
+    await sb.from('profiles').update({access_granted:!cur}).eq('id',id);
+    showToast(!cur?'Access granted':'Access revoked');
+    openAdminSheet();
+  });
+  document.querySelectorAll('[data-viewcustomer]').forEach(b=>b.onclick=()=>adminViewCustomer(b.dataset.viewcustomer, b.dataset.email));
+}
+async function openMoreSheet(){
   const items=[['add','Add rabbit'],['import','Import from CSV'],['importpdf','Import from Pedigree PDF'],['planned','Planned breedings'],['forsale','For sale'],['shows','Upcoming shows'],['ancestors','Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['backup','Backup and restore']];
+  const activeGrant = viewingAsCustomer ? null : await checkMySupportAccess();
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>More</h2>
     <div style="background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:12px;">
       <div class="section-label" style="margin:0 0 3px;">SIGNED IN AS</div>
       <div style="font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(currentUser?.email||'')}</div>
     </div>
+    ${isAdminUser ? `<button class="btn btn-primary" style="width:100%; margin-bottom:8px;" id="openAdminBtn">Admin — all accounts</button>` : ''}
+    ${!viewingAsCustomer ? `<div class="card no-tap" style="margin-bottom:12px;">
+      <div class="card-name">Support access</div>
+      <div class="card-sub" style="margin:4px 0 10px;">${activeGrant ? `Support can view and edit your account until ${new Date(activeGrant.expires_at).toLocaleString()}.` : 'Allow CJM Legacy Rabbitry support to view and edit your account for 48 hours — useful if you need help troubleshooting something.'}</div>
+      ${activeGrant ? `<button class="btn btn-danger btn-sm" id="revokeAccessBtn">Revoke access now</button>` : `<button class="btn btn-secondary btn-sm" id="grantAccessBtn">Allow support access (48h)</button>`}
+    </div>` : ''}
     ${items.map(([k,l])=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" data-more="${k}">${l}</button>`).join('')}
     <button class="btn btn-danger" style="width:100%; margin-top:4px;" id="signOutBtn">Sign out</button>`);
+  if(document.getElementById('openAdminBtn')) document.getElementById('openAdminBtn').onclick = openAdminSheet;
+  if(document.getElementById('grantAccessBtn')) document.getElementById('grantAccessBtn').onclick = async ()=>{
+    await sb.from('support_access').insert({ customer_id: currentUser.id, expires_at: new Date(Date.now()+48*3600*1000).toISOString(), reason: 'Customer-granted support access' });
+    showToast('Support access granted for 48 hours'); openMoreSheet();
+  };
+  if(document.getElementById('revokeAccessBtn')) document.getElementById('revokeAccessBtn').onclick = async ()=>{
+    await sb.from('support_access').delete().eq('customer_id', currentUser.id).gt('expires_at', new Date().toISOString());
+    showToast('Support access revoked'); openMoreSheet();
+  };
   document.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.more;
     if(k==='add') openAddSheet();
@@ -3459,6 +3558,14 @@ async function enterApp(user){
   try{
     document.body.classList.add('auth-locked');
     await initCloudStorage(user);
+    await loadMyProfile();
+    if(myProfile && myProfile.access_granted===false){
+      await sb.auth.signOut();
+      currentUser=null; cloudDataReady=false; cloudDataCache={}; myProfile=null; isAdminUser=false; adminSelf=null;
+      authScreen.classList.remove('hidden');
+      setAuthMessage("Your account doesn't have access yet. Contact CJM Legacy Rabbitry to get set up.");
+      return;
+    }
     authScreen.classList.add('hidden');
     document.body.classList.remove('auth-locked');
     await loadData();
@@ -3475,6 +3582,7 @@ sb.auth.onAuthStateChange((event,session)=>{
     if(event==='INITIAL_SESSION' || event==='SIGNED_IN' || event==='USER_UPDATED') enterApp(session.user);
   } else {
     currentUser=null; cloudDataReady=false; cloudDataCache={};
+    myProfile=null; isAdminUser=false; adminSelf=null; viewingAsCustomer=null;
     authScreen.classList.remove('hidden');
     document.body.classList.add('auth-locked');
     setAuthMode('login');
