@@ -150,6 +150,9 @@
   .lp-addrow{ color:var(--navy); } .lp-addrow .lp-num{ border-style:dashed; font-size:20px; }
   .lp-weigh{ float:right; background:none; border:none; color:var(--navy); font-weight:700; font-size:13px; text-decoration:underline; cursor:pointer; padding:0; text-transform:none; letter-spacing:0; }
   .lp-baby .nn-tag{ align-self:center; margin:0; font-size:12px; padding:3px 10px; }
+  .nn-row{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:10px 0 6px; }
+  .nn-num{ font-family:'Jost',system-ui,sans-serif; font-weight:700; font-size:18px; color:var(--navy); margin-right:4px; }
+  .nn-row .nn-tag{ align-self:center; margin:0; font-size:12px; padding:3px 10px; }
   .nn-chips{ display:flex; flex-wrap:wrap; gap:8px; }
   .nn-chip{ border:1px solid var(--line); background:var(--card); border-radius:999px; padding:8px 14px; font-weight:600; font-size:14px; cursor:pointer; color:var(--ink); }
   .nn-chip.on{ background:var(--navy); color:var(--page); border-color:var(--navy); }
@@ -2998,8 +3001,8 @@ function newNurseryCardHTML(r){
   return `<div class="card nn-card" data-nnopen="${r.id}" style="cursor:pointer;"><div class="nn-top"><div><div class="card-name">${esc(r.name)}'s litter</div>
       <div class="card-sub">${esc(litterSireName(r)?'Sired by '+litterSireName(r)+' · ':'')}born ${fmtDate(r.litterBornDate)}</div></div>
       <div class="nn-age">${esc(litterAgeText(r.litterBornDate))}</div></div>
-    <div class="nn-count"><span class="nn-big">${n}</span> in the litter</div>
-    <div class="card-sub">${lost?lost+' lost · ':''}${forSale?forSale+' for sale · ':''}${reserved?reserved+' reserved · ':''}${r.status==='nursing'?'':'Weaned · '}Wean ${fmtDate(r.weanDate)} · 8 weeks ${fmtDate(r.sellDate)}</div>
+    <div class="nn-row"><span class="nn-num">${n} ${n===1?'baby':'babies'}</span>${forSale?`<em class="nn-tag t-sale">${forSale} for sale</em>`:''}${reserved?`<em class="nn-tag t-res">${reserved} reserved</em>`:''}${lost?`<em class="nn-tag t-sold">${lost} lost</em>`:''}${r.status==='nursing'?'':'<em class="nn-tag t-keep">Weaned</em>'}</div>
+    <div class="card-sub">Wean ${fmtDate(r.weanDate)} &middot; Ready to go ${fmtDate(r.sellDate)}</div>
     <div class="nn-actions">${mainBtn}<button class="btn btn-secondary nn-more" data-nnmore="${r.id}" aria-label="More options">&#8943;</button></div></div>`;
 }
 function openNurseryMore(r){
