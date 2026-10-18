@@ -114,6 +114,42 @@
   .nn-tiles{ display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:8px; margin-top:8px; }
   .nn-tile{ display:flex; flex-direction:column; gap:2px; text-align:left; border:1px solid var(--line); background:var(--page); border-radius:12px; padding:8px 10px; cursor:pointer; color:var(--ink); font-size:13px; }
   .nn-tile b{ font-size:15px; color:var(--navy); }
+  .lp-hero{ text-align:center; padding:18px 14px 16px; }
+  .lp-count{ display:flex; flex-direction:column; align-items:center; gap:2px; }
+  .lp-count-l{ font-size:15px; color:var(--muted,#6b7280); font-weight:600; }
+  .lp-age{ font-family:'Jost',system-ui,sans-serif; font-size:20px; font-weight:700; color:var(--navy); margin-top:8px; }
+  .lp-next{ margin:10px 0 2px; font-weight:600; font-size:15px; }
+  .lp-primary{ width:100%; margin-top:10px; min-height:50px; font-size:16px; }
+  .lp-dates{ display:block; width:100%; margin-top:12px; background:none; border:none; border-top:1px solid var(--line); padding:12px 0 0; color:var(--ink); font-size:14px; cursor:pointer; }
+  .lp-dates span{ color:var(--navy); font-weight:700; text-decoration:underline; margin-left:6px; }
+  .lp-h{ font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted,#6b7280); margin:6px 2px 0; }
+  .lp-tiles{ margin-bottom:12px; }
+  .nn-add{ align-items:center; justify-content:center; border-style:dashed; color:var(--navy); }
+  .nn-add b{ font-size:24px; line-height:1; }
+  .lp-fold{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:0 14px; margin-bottom:8px; }
+  .lp-fold summary{ list-style:none; cursor:pointer; padding:14px 0; font-weight:600; display:flex; justify-content:space-between; align-items:center; min-height:24px; }
+  .lp-fold summary::-webkit-details-marker{ display:none; }
+  .lp-fold summary span{ color:var(--muted,#6b7280); font-weight:500; font-size:14px; }
+  .lp-fold[open]{ padding-bottom:14px; } .lp-fold[open] summary{ padding-bottom:8px; }
+  .lp-fold textarea{ width:100%; box-sizing:border-box; }
+  .lp-foot{ display:flex; gap:8px; margin-top:14px; } .lp-foot .btn{ flex:1; }
+  .nn-tag.t-sale{ background:#dff3e3; color:#1d6b34; border-color:#b5dfc0; }
+  .nn-tag.t-res{ background:#fdf0cf; color:#8a5a00; border-color:#f0d58a; }
+  .nn-tag.t-sold{ background:#e3e6ee; color:#3b4560; border-color:#c6cbd9; }
+  .nn-tag.t-keep{ background:var(--navy); color:#fff; border-color:var(--navy); }
+  [data-theme="dark"] .nn-tag.t-keep{ background:var(--gold-deep); color:#0c1830; border-color:var(--gold-deep); }
+  .lp-babies{ background:var(--card); border:1px solid var(--line); border-radius:16px; margin:6px 0 12px; overflow:hidden; }
+  .lp-baby{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:none; border:none; border-top:1px solid var(--line); padding:12px 14px; min-height:56px; cursor:pointer; color:var(--ink); font-size:15px; }
+  .lp-baby:first-child{ border-top:none; }
+  .lp-num{ flex:none; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Jost',system-ui,sans-serif; font-weight:700; font-size:16px; background:var(--page); border:1.5px solid var(--line-strong,var(--line)); color:var(--navy); }
+  .lp-num.bk{ background:#dbe6f7; border-color:#a9c0e6; } .lp-num.dn{ background:#f9e0e6; border-color:#e8b5c2; }
+  .lp-bmid{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .lp-bmid b{ font-weight:600; } .lp-bmid small{ color:var(--muted,#6b7280); font-size:13px; }
+  .lp-muted{ color:var(--muted,#6b7280) !important; font-weight:500 !important; }
+  .lp-chev{ color:var(--muted,#6b7280); font-size:22px; line-height:1; }
+  .lp-addrow{ color:var(--navy); } .lp-addrow .lp-num{ border-style:dashed; font-size:20px; }
+  .lp-weigh{ float:right; background:none; border:none; color:var(--navy); font-weight:700; font-size:13px; text-decoration:underline; cursor:pointer; padding:0; text-transform:none; letter-spacing:0; }
+  .lp-baby .nn-tag{ align-self:center; margin:0; font-size:12px; padding:3px 10px; }
   .nn-chips{ display:flex; flex-wrap:wrap; gap:8px; }
   .nn-chip{ border:1px solid var(--line); background:var(--card); border-radius:999px; padding:8px 14px; font-weight:600; font-size:14px; cursor:pointer; color:var(--ink); }
   .nn-chip.on{ background:var(--navy); color:var(--page); border-color:var(--navy); }
@@ -3067,31 +3103,68 @@ function openLossSheet(r, lossId, after){
   });
 }
 function litterDateRows(r){
-  const rows=[['wean','Wean (6 weeks)',r.weanDate],['sell','Sell age (8 weeks)',r.sellDate],['rebreed','Rebreed',r.rebreedDate]].filter(x=>x[2]);
+  const rows=[['wean','Wean (6 weeks)',r.weanDate],['sell','Ready to go (8 weeks)',r.sellDate],['rebreed','Rebreed',r.rebreedDate]].filter(x=>x[2]);
   return rows.sort((a,b)=>a[2].localeCompare(b[2]));
+}
+function tagClass(t){ return t==='For sale'?'t-sale':t==='Reserved'?'t-res':t==='Sold'?'t-sold':t==='Keeping'?'t-keep':'t-other'; }
+function addKitToLitter(r){
+  const kits=r.litterKits=r.litterKits||[];
+  kits.forEach((k,i)=>{ if(!k.num) k.num=i+1; });
+  const nk=blankKit(); nk.num=kits.reduce((m,k)=>Math.max(m,k.num||0),0)+1;
+  kits.push(nk); litterChanged(r);
+  return nk;
+}
+function openLitterDatesSheet(r, after){
+  const rows=litterDateRows(r);
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Litter dates</h2>
+    <div class="card-sub" style="margin-bottom:10px;">Change a date and it saves right away.</div>
+    <div class="lit-card">${rows.map(([k,l,d])=>`<div class="st-row" style="padding:8px 0;"><div class="st-lbl" style="font-weight:600;">${l}</div><input type="date" data-lpdate="${k}" value="${esc(d)}" style="max-width:170px;"></div>`).join('')}</div>
+    <div class="sheet-actions"><button class="btn btn-primary" id="ld-done">Done</button></div>`);
+  document.querySelectorAll('[data-lpdate]').forEach(inp=>inp.onchange=()=>{
+    const v=csvParseDate(inp.value); if(!v) return;
+    const k=inp.dataset.lpdate; if(k==='wean') r.weanDate=v; else if(k==='sell') r.sellDate=v; else r.rebreedDate=v;
+    syncLitterEntry(r); saveData(); render();
+  });
+  document.getElementById('ld-done').onclick=()=>{ closeSheet(); if(after) after(); };
 }
 function openLitterPage(damId){
   const r=rabbits.find(x=>x.id===damId); if(!r) return;
   const kits=r.litterKits||[], losses=r.litterLosses||[];
   const sireN=litterSireName(r); const sire=sireN?rabbits.find(x=>nameKey(x.name)===nameKey(sireN)):null;
   const age=litterAgeDays(r);
-  const rows=litterDateRows(r);
-  const next = r.status!=='nursing' ? 'Weaned' : age<42 ? `Weaning in ${42-age} day${42-age===1?'':'s'} (${fmtDate(r.weanDate)})` : 'Ready to wean';
-  openSheet(`<div class="lit-sheet"><button class="close-x" onclick="closeSheet()">&times;</button>
+  const nursing=r.status==='nursing';
+  const unweighed=kits.some(k=>!k.individualId);
+  const next = !nursing ? 'Weaned' : age<42 ? `Weaning in ${42-age} day${42-age===1?'':'s'}` : 'Ready to wean';
+  const primary = nursing && age>=42 ? '<button class="btn btn-primary lp-primary" id="lp-wean">Mark weaned</button>'
+    : '';
+  const dateLine=[r.weanDate?`Wean ${fmtDate(r.weanDate)}`:'', r.sellDate?`Ready to go ${fmtDate(r.sellDate)}`:''].filter(Boolean).join(' · ');
+  const pr=pairingResults(r);
+  const lostN=losses.length;
+  openSheet(`<div class="lit-sheet lp2"><button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>${esc(r.name)}'s litter</h2>
-    <div class="card-sub" style="margin:-4px 0 10px;">Mom: <button class="nn-link" id="lp-mom">${esc(r.name)}</button> &middot; Dad: ${sire?`<button class="nn-link" id="lp-dad">${esc(sire.name)}</button>`:esc(sireN||'?')}</div>
-    <div class="lit-card lit-alive"><div class="st-title">Born ${esc(fmtDate(r.litterBornDate))} &middot; ${esc(litterAgeText(r.litterBornDate))}</div>
-      <div class="nn-count" style="margin:4px 0 0;"><span class="nn-big" style="font-size:56px;">${kits.length}</span> in the litter</div></div>
-    ${next?`<div class="lit-card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><span class="lit-label">Next step</span><div style="font-weight:600;">${esc(next)}</div></div>${age>=42&&r.status==='nursing'?'<button class="btn btn-primary btn-sm" id="lp-wean">Mark weaned</button>':''}</div>`:''}
-    <div class="lit-card"><span class="lit-label">Kits</span>${kits.some(k=>!k.individualId)?'<button class="btn btn-secondary btn-sm" id="lp-weigh" style="float:right; margin-top:-4px;">Weigh the litter</button>':''}<div class="nn-tiles">${kits.length?kits.map((k,i)=>`<button class="nn-tile" data-kit="${i}"><b>#${k.num||i+1}</b><span>${k.sex==='buck'?'Buck':k.sex==='doe'?'Doe':'Sex?'}</span><span>${esc(k.color||'color?')}</span>${kitLastWeight(k)?`<span>${ozText(kitLastWeight(k).oz)}</span>`:''}${(k.tag||k.forSale)?`<em class="nn-tag">${esc(k.tag||'For sale')}</em>`:''}</button>`).join(''):'<div class="card-sub">No kits logged.</div>'}</div></div>
-    <div class="lit-card"><span class="lit-label">Losses</span>
-      ${losses.length?losses.map(l=>`<div class="st-row" style="padding:8px 0;"><div><b>${esc(l.tag)}</b><div class="card-sub">${fmtDate(l.date)}${l.notes?' &middot; '+esc(l.notes):''}</div></div><button class="btn btn-secondary btn-sm" data-editloss="${l.id}">Edit</button></div>`).join(''):'<div class="card-sub" style="margin-bottom:6px;">None recorded.</div>'}
-      <button class="btn btn-secondary btn-sm" id="lp-addloss" style="margin-top:6px;">+ Record a loss</button></div>
-    ${(()=>{ const pr=pairingResults(r); return pr?`<div class="lit-card"><span class="lit-label">This pairing</span><div class="card-sub">${esc(r.name)} × ${esc(litterSireName(r))}: ${pr.litters} litter${pr.litters===1?'':'s'}, ${pr.born} kits born (about ${pr.avg} per litter), ${pr.alive} still counted alive.</div></div>`:''; })()}
-    <div class="lit-card"><span class="lit-label">Dates</span>
-      ${rows.map(([k,l,d])=>`<div class="st-row" style="padding:8px 0;${k==='rebreed'?'opacity:.7;':''}"><div class="st-lbl" style="${k==='rebreed'?'font-weight:500;':''}">${l}</div><input type="date" data-lpdate="${k}" value="${esc(d)}" style="max-width:170px;"></div>`).join('')}</div>
-    <div class="lit-card"><span class="lit-label">Notes</span><textarea id="lp-notes" rows="3" placeholder="Notes about this litter">${esc(r.litterNotes||'')}</textarea></div>
-    <div class="sheet-actions"><button class="btn btn-secondary" id="lp-edit">Edit litter</button><button class="btn btn-secondary" id="lp-ped">Pedigree</button></div></div>`);
+    <div class="card-sub" style="margin:-8px 0 12px;">Mom: <button class="nn-link" id="lp-mom">${esc(r.name)}</button> &middot; Dad: ${sire?`<button class="nn-link" id="lp-dad">${esc(sire.name)}</button>`:esc(sireN||'not recorded')}</div>
+    <div class="lit-card lp-hero">
+      <div class="lp-count"><span class="nn-big" style="font-size:64px;">${kits.length}</span><div class="lp-count-l">${kits.length===1?'baby':'babies'}</div></div>
+      <div class="lp-age">${esc(litterAgeText(r.litterBornDate))}</div>
+      <div class="card-sub">Born ${esc(fmtDate(r.litterBornDate))}</div>
+      <div class="lp-next">${esc(next)}</div>
+      ${primary}
+      ${dateLine?`<button class="lp-dates" id="lp-dates">${esc(dateLine)} <span>Change</span></button>`:''}
+    </div>
+    <div class="lp-h">Babies${unweighed?' <button class="lp-weigh" id="lp-weigh">Weigh</button>':''}</div>
+    <div class="lp-babies">${kits.map((k,i)=>{
+      const lw=kitLastWeight(k), tg=k.individualId?'Junior':(k.tag||(k.forSale?'For sale':''));
+      const sex=k.sex==='buck'?'Buck':k.sex==='doe'?'Doe':'', col=k.color||'';
+      const title=(sex||col)?[sex,col].filter(Boolean).join(' · '):'Sex & color not set';
+      return `<button class="lp-baby" data-kit="${i}"><span class="lp-num ${k.sex==='buck'?'bk':k.sex==='doe'?'dn':''}">${k.num||i+1}</span>
+        <span class="lp-bmid"><b class="${(sex||col)?'':'lp-muted'}">${esc(title)}</b>${lw?`<small>${ozText(lw.oz)}</small>`:''}</span>
+        ${tg?`<em class="nn-tag ${k.individualId?'t-keep':tagClass(tg)}">${esc(tg)}</em>`:''}<span class="lp-chev">&rsaquo;</span></button>`;}).join('')}</div>
+    <details class="lp-fold" ${lostN?'open':''}><summary>Losses <span>${lostN||'none'}</span></summary>
+      ${losses.map(l=>`<div class="st-row" style="padding:8px 0;"><div><b>${esc(l.tag)}</b><div class="card-sub">${fmtDate(l.date)}${l.notes?' &middot; '+esc(l.notes):''}</div></div><button class="btn btn-secondary btn-sm" data-editloss="${l.id}">Edit</button></div>`).join('')}
+      <button class="btn btn-secondary btn-sm" id="lp-addloss" style="margin-top:6px;">+ Record a loss</button></details>
+    <details class="lp-fold" ${r.litterNotes?'open':''}><summary>Notes <span>${r.litterNotes?'added':'none'}</span></summary><textarea id="lp-notes" rows="3" placeholder="Anything worth remembering about this litter">${esc(r.litterNotes||'')}</textarea></details>
+    ${pr?`<details class="lp-fold"><summary>This pairing <span>${pr.litters} litter${pr.litters===1?'':'s'}</span></summary><div class="card-sub">${esc(r.name)} × ${esc(litterSireName(r))}: ${pr.litters} litter${pr.litters===1?'':'s'}, ${pr.born} born (about ${pr.avg} per litter), ${pr.alive} still counted alive.</div></details>`:''}
+    <div class="lp-foot"><button class="btn btn-secondary" id="lp-edit">Edit litter</button><button class="btn btn-secondary" id="lp-ped">Pedigree</button></div></div>`);
   const again=()=>openLitterPage(damId);
   document.getElementById('lp-mom').onclick=()=>{ closeSheet(); openRabbitProfile(r,'litters'); };
   const dad=document.getElementById('lp-dad'); if(dad) dad.onclick=()=>{ closeSheet(); openRabbitProfile(sire,'litters'); };
@@ -3100,12 +3173,8 @@ function openLitterPage(damId){
   document.querySelectorAll('[data-editloss]').forEach(b=>b.onclick=()=>openLossSheet(r,b.dataset.editloss,again));
   document.getElementById('lp-addloss').onclick=()=>openLossSheet(r,null,again);
   const wgb=document.getElementById('lp-weigh'); if(wgb) wgb.onclick=()=>openWeighSheet(r,again);
-  document.querySelectorAll('[data-lpdate]').forEach(inp=>inp.onchange=()=>{
-    const v=csvParseDate(inp.value); if(!v) return;
-    const k=inp.dataset.lpdate; if(k==='wean') r.weanDate=v; else if(k==='sell') r.sellDate=v; else r.rebreedDate=v;
-    syncLitterEntry(r); saveData(); render(); again();
-  });
-  document.getElementById('lp-notes').onblur=()=>{ const v=document.getElementById('lp-notes').value; if(v!==(r.litterNotes||'')){ r.litterNotes=v; saveData(); } };
+  const dt=document.getElementById('lp-dates'); if(dt) dt.onclick=()=>openLitterDatesSheet(r,again);
+  document.getElementById('lp-notes').onblur=()=>{ const v=document.getElementById('lp-notes').value; if(v!==(r.litterNotes||'')){ r.litterNotes=v; syncLitterEntry(r); saveData(); } };
   document.getElementById('lp-edit').onclick=()=>openKindledSheet(r,true);
   document.getElementById('lp-ped').onclick=()=>openLitterPedigreeSheet(r);
 }
@@ -3147,10 +3216,16 @@ function openKitTagSheet(damId, idx){
     ${kitPhotoOf(dam,k)?`<div style="text-align:center; margin-bottom:10px;"><img src="${kitPhotoOf(dam,k).dataUrl}" alt="" style="max-width:100%; max-height:200px; border-radius:12px;"></div>`:''}
     <div class="field"><label>Tag</label><div class="nn-chips" id="kt-chips"><button type="button" class="nn-chip" data-t="">None</button>${allKitTags().map(t=>`<button type="button" class="nn-chip" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div></div>
     <div class="field"><label>Markings</label><textarea id="kt-marks" rows="2" placeholder="e.g. white blaze, left ear tip">${esc(k.markings||'')}</textarea></div>
-    <div class="field"><label>Weights</label>${(k.weights||[]).length?(k.weights||[]).slice().sort((a,b)=>b.date.localeCompare(a.date)).map(w=>`<div class="card-sub">${fmtDate(w.date)} &middot; ${ozText(w.oz)}</div>`).join(''):'<div class="card-sub">None yet. Use “Weigh the litter” on the litter page.</div>'}</div>
+    <div class="field"><label>Weights</label>${(k.weights||[]).length?(k.weights||[]).slice().sort((a,b)=>b.date.localeCompare(a.date)).map(w=>`<div class="card-sub">${fmtDate(w.date)} &middot; ${ozText(w.oz)}</div>`).join(''):'<div class="card-sub">None yet. Use “Weigh” on the litter page.</div>'}</div>
     <div class="nn-chips" style="margin-bottom:12px;"><button type="button" class="nn-chip" id="kt-photo">${kitPhotoOf(dam,k)?'Replace photo':'+ Add photo'}</button>${kitPhotoOf(dam,k)?'<button type="button" class="nn-chip" id="kt-photo-del">Hide photo</button>':''}</div>
     <input type="file" accept="image/*" id="kt-file" style="display:none;">
-    <div class="sheet-actions"><button class="btn btn-secondary" id="kt-edit">Edit sex &amp; color</button><button class="btn btn-primary" id="kt-save">Save</button></div>`);
+    <div class="sheet-actions"><button class="btn btn-secondary" id="kt-edit">Edit sex &amp; color</button><button class="btn btn-primary" id="kt-save">Save</button></div>
+    ${k.individualId?'':'<button class="lit-delete" id="kt-remove">Added by mistake? Remove this baby</button>'}`);
+  const krm=document.getElementById('kt-remove');
+  if(krm) krm.onclick=()=>armConfirm(krm,'Tap again to confirm',()=>{
+    (dam.removedKits=dam.removedKits||[]).push({id:uid(), removedAt:todayStr(), litterBorn:dam.litterBornDate, kit:k});
+    dam.litterKits=dam.litterKits.filter(x=>x!==k); litterChanged(dam); closeSheet(); openLitterPage(damId); showToast('Removed — find it in Recently deleted to put it back');
+  });
   const saveMarks=()=>{ const v=document.getElementById('kt-marks').value.trim(); if(v!==(k.markings||'')){ k.markings=v; syncLitterEntry(dam); saveData(); } };
   document.getElementById('kt-photo').onclick=()=>document.getElementById('kt-file').click();
   document.getElementById('kt-file').onchange=async(e)=>{ const f=e.target.files[0]; e.target.value=''; if(!f) return; saveMarks(); if(await addKitPhoto(dam,k,f)){ openKitTagSheet(damId,idx); } };
@@ -4081,28 +4156,28 @@ function openKindledSheet(r, editing){
     <div class="lit-card"><div class="field"><label>Litter born</label><input type="date" id="f-born" value="${esc(st.born)}"></div>
     ${needsBuck?`<div class="field" style="margin-top:12px;"><label>Buck (optional)</label><input id="f-buck" placeholder="Type or pick a buck" autocomplete="off">
       <div class="lit-hint" id="f-bredhint"></div></div>`:''}</div>
-    <div class="st-block lit-card lit-alive">
+    ${(editing&&litterUiOn)?`<div class="lit-card"><div class="st-row" style="padding:0;"><div><b>${existing.length} ${existing.length===1?'baby':'babies'} in this litter</b><div class="card-sub">To record a loss, use the litter page.</div></div><button type="button" class="btn btn-secondary btn-sm" id="f-addkit">+ Add a baby</button></div></div>`:`<div class="st-block lit-card lit-alive">
       <div class="st-title">Babies born alive</div>
       ${stepper('alive',true)}
       ${linkedCount?`<div class="card-sub" style="text-align:center; margin-top:6px;">${linkedCount} ${linkedCount===1?'kit already has':'kits already have'} a profile page, so this can't go below ${linkedCount}.</div>`:''}
-    </div>
+    </div>`}
     ${(!editing && litterUiOn)?oldKitsNoticeHTML(r):''}
-    <div class="lit-card lit-lost"><span class="lit-label">Lost</span>
+    ${(editing&&litterUiOn)?'':`<details class="lp-fold" ${(st.doa||st.peanut||st.passed)?'open':''} style="margin-bottom:12px;"><summary>Any lost at birth? <span>optional</span></summary>
     <div class="st-lost">
       <div class="st-row"><div class="st-lbl">DOA</div>${stepper('doa')}</div>
       <div class="st-row"><div class="st-lbl">Peanut</div>${stepper('peanut')}</div>
       <div class="st-row"><div class="st-lbl">Passed</div>${stepper('passed')}</div>
-    </div></div>
+    </div></details>`}
     <div class="lit-card"><div class="field"><label>Rebreed date</label>
       <input type="date" id="f-rebreed-date" value="${esc(st.rebreed)}">
       <div class="lit-hint" id="f-rebreed-hint"></div></div></div>
-    <div class="lit-note">Sex and color can be filled in later from the litter &rarr; Manage kits.</div>
+    <div class="lit-note">${(editing&&litterUiOn)?'':'Sex and color can be filled in later from the litter page.'}</div>
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>
     ${editing?'<button class="lit-delete" id="f-deletelitter">Delete litter</button>':''}</div>`);
   const bornEl=document.getElementById('f-born'), rebEl=document.getElementById('f-rebreed-date');
   const weeksBetween=(a,b)=>{ const n=daysBetween(a,b); return n%7===0 ? (n/7)+' weeks from birth' : n+' days from birth'; };
   const refresh=()=>{
-    ['alive','doa','peanut','passed'].forEach(k=>{ document.getElementById('st-'+k).textContent=st[k]; });
+    ['alive','doa','peanut','passed'].forEach(k=>{ const el=document.getElementById('st-'+k); if(el) el.textContent=st[k]; });
     document.getElementById('f-rebreed-hint').textContent = (st.rebreed&&st.born)?'('+weeksBetween(st.born,st.rebreed)+')':'';
     const bh=document.getElementById('f-bredhint'); if(bh) bh.textContent='She wasn’t marked bred, so her bred date will be set to '+fmtDate(addDays(st.born,-31))+' (31 days before birth).';
   };
@@ -4115,6 +4190,7 @@ function openKindledSheet(r, editing){
   ['change','input','blur'].forEach(ev=>{ bornEl.addEventListener(ev,onBorn); rebEl.addEventListener(ev,onReb); });
   if(needsBuck) attachSuggest(document.getElementById('f-buck'), ()=>rabbits.filter(x=>x.sex==='buck'&&x.status!=='external').map(x=>x.name));
   refresh();
+  const akb=document.getElementById('f-addkit'); if(akb) akb.onclick=()=>{ onBorn(); onReb(); saveLitterNow(); addKitToLitter(r); openLitterPage(r.id); };
   const delLitterBtn = document.getElementById('f-deletelitter');
   if(delLitterBtn) delLitterBtn.onclick=()=>{
     armConfirm(delLitterBtn, 'Tap again to confirm', ()=>{
