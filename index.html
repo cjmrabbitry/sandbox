@@ -122,6 +122,12 @@
   .lp-age{ font-family:'Jost',system-ui,sans-serif; font-size:20px; font-weight:700; color:var(--navy); margin-top:8px; }
   .lp-next{ margin:10px 0 2px; font-weight:600; font-size:15px; }
   .lp-primary{ width:100%; margin-top:10px; min-height:50px; font-size:16px; }
+  .lp-agebar{ display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; font-size:15px; margin-top:4px; color:var(--ink-soft,#475569); }
+  .lp-bar{ height:6px; border-radius:3px; background:var(--line,#E7DDC6); margin:10px 18px 4px; overflow:hidden; }
+  .lp-bar div{ height:100%; border-radius:3px; background:var(--navy); }
+  [data-theme="dark"] .lp-bar div{ background:var(--gold-deep); }
+  .lp-agebar i{ width:4px; height:4px; border-radius:50%; background:var(--line-strong,#CABB95); }
+  .lp-agebar b{ color:var(--ink); }
   .lp-dates{ display:block; width:100%; margin-top:12px; background:none; border:none; border-top:1px solid var(--line); padding:12px 0 0; color:var(--ink); font-size:14px; cursor:pointer; }
   .lp-dates > span:last-child{ color:var(--navy); font-weight:700; text-decoration:underline; margin-left:6px; }
   .lp-h{ font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted,#6b7280); margin:6px 2px 0; }
@@ -3289,6 +3295,8 @@ function litterSireName(r){
   const he=(r.breedingHistory||[]).find(e=>e.outcome==='litter' && e.litterBornDate && e.litterBornDate===r.litterBornDate);
   return (he && he.partner) || r.partner || '';
 }
+// call name for titles: drops a leading herd prefix like "ANR's " (the full name is shown underneath)
+function shortName(n){ n=String(n||''); const m=n.match(/^.+?['\u2019]s\s+(.+)$/); return m?m[1]:n; }
 function litterAgeText(born){ return ageText(born); }
 // short date for the new litter screens: "Sep 15" (adds the year only when it isn't this year)
 function fmtShort(d){ if(!d) return ''; const dt=new Date(d+'T00:00:00'); const o={month:'short',day:'numeric'}; if(dt.getFullYear()!==new Date().getFullYear()) o.year='numeric'; return dt.toLocaleDateString('en-US',o); }
@@ -3484,13 +3492,13 @@ function openLitterPage(damId){
   const pr=pairingResults(r);
   const lostN=losses.length;
   openSheet(`<div class="lit-sheet lp2"><button class="close-x" onclick="closeSheet()">&times;</button>
-    <h2>${esc(r.name)}'s litter</h2>
+    <h2>${esc(shortName(r.name))}${sireN?' &times; '+esc(shortName(sireN)):''}&rsquo;s Litter</h2>
     <div class="card-sub" style="margin:-8px 0 12px;">Mom: <button class="nn-link" id="lp-mom">${esc(r.name)}</button> &middot; Dad: ${sire?`<button class="nn-link" id="lp-dad">${esc(sire.name)}</button>`:esc(sireN||'not recorded')}</div>
     <div class="lit-card lp-hero">
       <div class="lp-count"><span class="nn-big" style="font-size:64px;">${kits.length}</span><div class="lp-count-l">${kits.length===1?'kit':'kits'}</div></div>
-      <div class="lp-age">${esc(litterAgeText(r.litterBornDate))}</div>
-      <div class="card-sub">Born ${nb(esc(fmtShort(r.litterBornDate)))}</div>
+      <div class="lp-agebar"><span>Born ${nb(esc(fmtShort(r.litterBornDate)))}</span><i></i><b>${esc(litterAgeText(r.litterBornDate))} old</b></div>
       <div class="lp-next">${esc(next)}</div>
+      ${nursing?`<div class="lp-bar" aria-hidden="true"><div style="width:${Math.max(4,Math.min(100,Math.round(age/42*100)))}%"></div></div>`:''}
       ${primary}
       ${dateLine?`<button class="lp-dates" id="lp-dates">${dateLine} <span>Change</span></button>`:''}
     </div>
