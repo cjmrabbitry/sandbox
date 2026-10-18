@@ -215,6 +215,24 @@
   .card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
   .card-name{font-family:'Cormorant Garamond',serif; font-weight:600; font-size:19px; color:var(--navy); line-height:1.2;}
   .card-sub{font-size:12px; color:var(--ink-soft); opacity:.85; margin-top:2px;}
+  .pj-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;}
+  .pj-chip{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--gold-soft,#F3E7C8);color:var(--ink,#0C1830);border:0;}
+  .pj-chip.pj-ghost,.pj-add{background:none;border:1px dashed var(--line,#CABB95);color:var(--ink-soft,#475569);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;cursor:pointer;}
+  .pj-bar{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;}
+  .pj-fchip{white-space:nowrap;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line,#CABB95);background:var(--card,#FFFDF8);font-weight:600;font-size:13px;color:inherit;cursor:pointer;}
+  .pj-fchip span{opacity:.7}
+  .pj-fchip.on,.pj-opt.on{background:var(--navy,#142440);color:#fff;border-color:transparent;}
+  .pj-fchip.pj-ghost{border-style:dashed;}
+  .pj-pick{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+  .pj-opt{padding:10px 18px;border-radius:999px;border:1.5px solid var(--line,#CABB95);background:var(--card,#FFFDF8);font-weight:600;font-size:15px;color:inherit;cursor:pointer;}
+  .pj-opt.pj-new{border-style:dashed;font-weight:700;}
+  .pj-summary{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:2px 2px 10px;}
+  .pj-summary a{font-weight:700;text-decoration:underline;cursor:pointer;}
+  .pj-selrow{display:flex;gap:12px;align-items:center;padding:12px 14px;margin-bottom:8px;border-radius:14px;background:var(--card,#FFFDF8);border:1px solid var(--line,#E7DDC6);cursor:pointer;}
+  .pj-selrow.on{border:2px solid var(--navy,#142440);}
+  .pj-box{width:26px;height:26px;border-radius:8px;border:2px solid var(--line,#CABB95);display:flex;align-items:center;justify-content:center;font-weight:700;flex:0 0 auto;}
+  .pj-selrow.on .pj-box{background:var(--navy,#142440);color:#fff;border-color:transparent;}
+  .pj-selbar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--card,#FFFDF8);border-top:1px solid var(--line,#E7DDC6);padding:12px 16px calc(14px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;box-shadow:0 -6px 18px rgba(0,0,0,.12);}
   .badge{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.03em; padding:3px 8px; border-radius:20px; white-space:nowrap; flex:0 0 auto; }
   .b-preg{background:var(--gold-light); color:#0c1830;}
   .b-nurse{background:#dfe8dc; color:#37452f;}
@@ -1885,6 +1903,7 @@ function ensureRabbitFieldDefaults(){
     if(!r.wins) r.wins=[];
     if(r.graduatedDate===undefined) r.graduatedDate=null;
     if(r.juniorAckDone===undefined) r.juniorAckDone=false;
+    if(!Array.isArray(r.projects)) r.projects=[];
   });
 }
 async function loadData(){
@@ -1908,6 +1927,7 @@ async function loadData(){
   try{ litterUiOn = !!JSON.parse((await window.storage.get(LITTER_UI_KEY,false)).value).on; }catch(e){ litterUiOn = false; }
   waitlistSafe=false; try{ const wl = JSON.parse((await window.storage.get(WAITLIST_KEY,false)).value); waitlist = Array.isArray(wl)?wl:[]; waitlistSafe=Array.isArray(wl); }catch(e){ waitlist = []; waitlistSafe = /not found/i.test(String(e&&e.message)); }
   kitTagsSafe=false; try{ const kt = JSON.parse((await window.storage.get(KIT_TAGS_KEY,false)).value); customKitTags = Array.isArray(kt)?kt.filter(x=>typeof x==='string'):DEFAULT_CUSTOM_KIT_TAGS.slice(); kitTagsSafe=Array.isArray(kt); }catch(e){ customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); kitTagsSafe = /not found/i.test(String(e&&e.message)); }
+  projectsSafe=false; try{ const pj = JSON.parse((await window.storage.get(PROJECTS_KEY,false)).value); projects = Array.isArray(pj)?pj.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; projectsSafe=Array.isArray(pj); }catch(e){ projects = []; projectsSafe = /not found/i.test(String(e&&e.message)); }
   try{ const tv = JSON.parse((await window.storage.get(TRASH_KEY,false)).value); trash = Array.isArray(tv) ? tv : []; }catch(e){ trash = []; }
   await hydratePhotos();
   memoryOwner = accountMemoryId();
@@ -2143,7 +2163,7 @@ function wireRemovedLitterItems(main){
 function backupAccountId(){ return (currentUser && currentUser.id) ? String(currentUser.id) : 'local'; }
 function fullBackupObject(){
   return { app:'HerdNerd Pro', version:1, savedAt:new Date().toISOString(), accountId: backupAccountId(),
-    rabbits, planned, events:customEvents, shows, expenses, pedigreeSettings, trash, waitlist, kitTags:customKitTags };
+    rabbits, planned, events:customEvents, shows, expenses, pedigreeSettings, trash, waitlist, kitTags:customKitTags, projects };
 }
 function downloadFullBackup(){
   const blob = new Blob([JSON.stringify(fullBackupObject())], {type:'application/json'});
@@ -2171,7 +2191,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-18-stage2';
+const APP_VERSION = '2026-10-18-projects';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2195,9 +2215,125 @@ setTimeout(checkForNewVersion, 20000);
 setInterval(checkForNewVersion, 30*60*1000);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkForNewVersion(); });
 // ===== NEW VERSION NUDGE END =====
+
+// ===== PROJECTS START =====
+// User-made labels. A rabbit keeps a list of project ids in r.projects. Removing a project never edits or deletes a rabbit.
+const PROJECTS_KEY='projects_v1';
+const MAX_PROJECTS=12;
+let projectFilter='all', selectMode=false, selectedIds=new Set();
+async function saveProjects(){
+  if(!projectsSafe){ showToast("Your projects didn't load, so they can't be changed right now. Refresh and try again."); return false; }
+  try{ await window.storage.set(PROJECTS_KEY, JSON.stringify(projects), false); return true; }
+  catch(e){ showToast("Couldn't save — check your connection and try again."); return false; }
+}
+function projOf(r){ return (r.projects||[]).map(id=>projects.find(p=>p.id===id)).filter(Boolean); }
+function inProject(r,id){ return (r.projects||[]).includes(id); }
+function projChipsHTML(r){
+  const chips = projOf(r).map(p=>`<span class="pj-chip">${esc(p.name)}</span>`).join('');
+  return `<div class="pj-row">${chips}<button class="pj-add" data-pjtag="${r.id}">${chips?'Edit':'+ Project'}</button></div>`;
+}
+function addProjectFlow(done){
+  if(projects.length>=MAX_PROJECTS){ showToast('Up to '+MAX_PROJECTS+' projects'); return; }
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>New project</h2>
+    <div class="field"><label>Name</label><input id="pj-name" maxlength="24" placeholder="e.g. Vienna" autocomplete="off"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" id="pj-cancel">Cancel</button><button class="btn btn-primary" id="pj-save">Add project</button></div>`);
+  document.getElementById('pj-cancel').onclick=()=>{ closeSheet(); if(done) done(null); };
+  document.getElementById('pj-save').onclick=async()=>{
+    const v=document.getElementById('pj-name').value.trim(); if(!v) return;
+    if(projects.some(p=>p.name.toLowerCase()===v.toLowerCase())){ showToast('That project already exists'); return; }
+    const np={id:uid(), name:v}; projects.push(np);
+    if(!(await saveProjects())){ projects.pop(); return; }
+    closeSheet(); if(done) done(np); else render();
+  };
+}
+function openProjectTagSheet(rid){
+  const r=rabbits.find(x=>x.id===rid); if(!r) return;
+  const draw=()=>{
+    openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>${esc(r.name)}</h2>
+      <div class="card-sub" style="margin-bottom:8px;">${esc(subLine(r))}</div>
+      <div class="lit-label" style="margin-bottom:6px;">Projects</div>
+      <div class="pj-pick">${projects.map(p=>`<button class="pj-opt ${inProject(r,p.id)?'on':''}" data-pj="${p.id}">${inProject(r,p.id)?'&#10003; ':''}${esc(p.name)}</button>`).join('')}<button class="pj-opt pj-new" id="pj-new">+ New project</button></div>
+      <div class="card-sub" style="margin:8px 0 12px;">Tap to add or remove. A rabbit can be in as many projects as you like.</div>
+      <div class="sheet-actions"><button class="btn btn-primary" id="pj-done">Done</button></div>
+      <div style="text-align:center;margin-top:10px;"><a href="#" id="pj-manage" style="font-weight:700;">Manage projects</a></div>`);
+    document.querySelectorAll('[data-pj]').forEach(b=>b.onclick=()=>{
+      const id=b.dataset.pj; r.projects=r.projects||[];
+      if(r.projects.includes(id)) r.projects=r.projects.filter(x=>x!==id); else r.projects.push(id);
+      saveData(); draw();
+    });
+    document.getElementById('pj-new').onclick=()=>addProjectFlow(np=>{ if(np){ r.projects=r.projects||[]; r.projects.push(np.id); saveData(); } openProjectTagSheet(rid); });
+    document.getElementById('pj-done').onclick=()=>{ closeSheet(); render(); if(profileRabbitId) renderProfile(); };
+    document.getElementById('pj-manage').onclick=(e)=>{ e.preventDefault(); openProjectsManage(()=>openProjectTagSheet(rid)); };
+  };
+  draw();
+}
+function openProjectsManage(after){
+  const draw=()=>{
+    openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Projects</h2>
+      <div class="card-sub" style="margin-bottom:10px;">Removing a project only takes the label off. No rabbit is changed or deleted. Up to ${MAX_PROJECTS} projects.</div>
+      <div class="lit-card">${projects.length?projects.map(p=>`<div class="st-row" style="padding:6px 0;"><b>${esc(p.name)}</b> <span class="card-sub">${rabbits.filter(r=>inProject(r,p.id)).length}</span><span style="flex:1"></span><button class="btn btn-secondary btn-sm" data-pjren="${p.id}">Rename</button> <button class="btn btn-secondary btn-sm" data-pjrm="${p.id}">Remove</button></div>`).join(''):'<div class="card-sub">No projects yet.</div>'}</div>
+      <div class="sheet-actions"><button class="btn btn-secondary" id="pm-done">Done</button><button class="btn btn-primary" id="pm-add">+ New project</button></div>`);
+    document.getElementById('pm-done').onclick=()=>{ closeSheet(); if(after) after(); else render(); };
+    document.getElementById('pm-add').onclick=()=>addProjectFlow(()=>openProjectsManage(after));
+    document.querySelectorAll('[data-pjrm]').forEach(b=>b.onclick=async()=>{
+      const i=projects.findIndex(p=>p.id===b.dataset.pjrm); if(i<0) return;
+      const gone=projects.splice(i,1)[0];
+      if(!(await saveProjects())){ projects.splice(i,0,gone); return; }
+      if(projectFilter===gone.id) projectFilter='all';
+      draw();
+    });
+    document.querySelectorAll('[data-pjren]').forEach(b=>b.onclick=()=>{
+      const p=projects.find(x=>x.id===b.dataset.pjren); if(!p) return;
+      openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Rename project</h2>
+        <div class="field"><label>Name</label><input id="pj-rn" maxlength="24" value="${esc(p.name)}" autocomplete="off"></div>
+        <div class="sheet-actions"><button class="btn btn-secondary" id="pj-rc">Cancel</button><button class="btn btn-primary" id="pj-rs">Save</button></div>`);
+      document.getElementById('pj-rc').onclick=draw;
+      document.getElementById('pj-rs').onclick=async()=>{
+        const v=document.getElementById('pj-rn').value.trim(); if(!v) return;
+        if(projects.some(x=>x.id!==p.id&&x.name.toLowerCase()===v.toLowerCase())){ showToast('That project already exists'); return; }
+        const old=p.name; p.name=v; if(!(await saveProjects())){ p.name=old; return; }
+        draw();
+      };
+    });
+  };
+  draw();
+}
+function projectBar(list){
+  if(!projects.length) return `<div class="pj-bar"><button class="pj-chip pj-ghost" id="pj-first">+ Set up projects</button></div>`;
+  const chip=(id,l,n)=>`<button class="pj-fchip ${projectFilter===id?'on':''}" data-pjf="${id}">${esc(l)}${n==null?'':` <span>${n}</span>`}</button>`;
+  return `<div class="pj-bar">${chip('all','All')}${projects.map(p=>chip(p.id,p.name,list.filter(r=>inProject(r,p.id)).length)).join('')}<button class="pj-fchip pj-ghost" id="pj-manage-top">Manage</button></div>`;
+}
+function wireProjects(main, shown){
+  const f=document.getElementById('pj-first'); if(f) f.onclick=()=>openProjectsManage();
+  const m=document.getElementById('pj-manage-top'); if(m) m.onclick=()=>openProjectsManage();
+  document.querySelectorAll('[data-pjf]').forEach(b=>b.onclick=()=>{ projectFilter=b.dataset.pjf; selectedIds=new Set(); render(); });
+  const sel=document.getElementById('pj-select'); if(sel) sel.onclick=()=>{ selectMode=true; selectedIds=new Set(); render(); };
+  const can=document.getElementById('pj-cancel-sel'); if(can) can.onclick=()=>{ selectMode=false; selectedIds=new Set(); render(); };
+  const all=document.getElementById('pj-selall'); if(all) all.onclick=()=>{ shown.forEach(r=>selectedIds.add(r.id)); render(); };
+  document.querySelectorAll('[data-pjsel]').forEach(el=>el.onclick=()=>{ const id=el.dataset.pjsel; if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id); render(); });
+  document.querySelectorAll('[data-pjbulk]').forEach(b=>b.onclick=()=>{
+    const pid=b.dataset.pjbulk, remove=b.dataset.pjmode==='remove', ids=[...selectedIds]; if(!ids.length||!pid) return;
+    ids.forEach(id=>{ const r=rabbits.find(x=>x.id===id); if(!r) return; r.projects=r.projects||[];
+      if(remove) r.projects=r.projects.filter(x=>x!==pid); else if(!r.projects.includes(pid)) r.projects.push(pid); });
+    saveData(); const nm=(projects.find(p=>p.id===pid)||{}).name;
+    selectMode=false; selectedIds=new Set(); render(); showToast((remove?'Removed ':'Added ')+ids.length+(remove?' from ':' to ')+nm);
+  });
+}
+function selectRowsHTML(list){
+  return list.map(r=>`<div class="pj-selrow ${selectedIds.has(r.id)?'on':''}" data-pjsel="${r.id}"><span class="pj-box">${selectedIds.has(r.id)?'&#10003;':''}</span><span style="flex:1"><b class="card-name" style="font-size:18px;">${esc(r.name)}</b><div class="card-sub">${subLine(r)}</div></span>${projOf(r).map(p=>`<span class="pj-chip">${esc(p.name)}</span>`).join('')}</div>`).join('');
+}
+function selectBarHTML(){
+  const n=selectedIds.size, pid = (projectFilter!=='all'?projectFilter:(window.__pjTarget&&projects.find(p=>p.id===window.__pjTarget)?window.__pjTarget:''));
+  const nm=(projects.find(p=>p.id===pid)||{}).name;
+  return `<div class="pj-selbar"><div class="lit-label">Add to project</div><div class="pj-pick">${projects.map(p=>`<button class="pj-opt ${p.id===pid?'on':''}" data-pjtarget="${p.id}">${esc(p.name)}</button>`).join('')}</div>
+    <div style="display:flex;gap:8px;"><button class="btn btn-primary" style="flex:1" ${n&&pid?'':'disabled'} data-pjbulk="${pid}" data-pjmode="add">${pid?`Add ${n} to ${esc(nm)}`:'Pick a project'}</button><button class="btn btn-secondary" ${n&&pid?'':'disabled'} data-pjbulk="${pid}" data-pjmode="remove">Remove</button></div></div>`;
+}
+document.addEventListener('click',(ev)=>{ const b=ev.target.closest&&ev.target.closest('[data-pjtag]'); if(b){ ev.stopPropagation(); openProjectTagSheet(b.dataset.pjtag); } });
+// ===== PROJECTS END =====
+
 // ===== ACCOUNT SWITCH CLEAN-UP START =====
 function clearAccountMemory(){
-  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false;
+  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
   rabbits = []; planned = []; customEvents = []; shows = []; expenses = [];
   pedigreeSettings = defaultPedigreeSettings();
   trash = [];
@@ -2903,7 +3039,7 @@ function cardHTML(r, forceUrgent, origin){
   else a='';
   a+=`<button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button><button class="btn btn-secondary btn-sm" data-act="wins" data-id="${r.id}">Wins</button><button class="btn btn-secondary btn-sm" data-act="history" data-id="${r.id}">History</button><button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">Edit</button>`;
   return `<div class="card ${urgent?'urgent':''}" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${statusBadge(r)}</div>
-    <div class="card-detail">${detail}</div>${flag}<div class="card-actions">${a}</div></div>`;
+    <div class="card-detail">${detail}</div>${flag}${projChipsHTML(r)}<div class="card-actions">${a}</div></div>`;
 }
 function saleLine(r){
   const s=r.sale; if(!s) return '';
@@ -2920,7 +3056,7 @@ function buckCardHTML(r){
   const cov=bucksCoverage(r.name);
   const txt = cov.length?'Currently paired with: '+cov.map(d=>esc(d.name)).join(', ') : (r.sale?saleLine(r):((r.sireName||r.damName)?`Sire: ${esc(r.sireName||'?')} &middot; Dam: ${esc(r.damName||'?')}`:'Not currently paired with anyone'));
   return `<div class="card" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div></div>
-    <div class="card-detail">${txt}</div>
+    <div class="card-detail">${txt}</div>${projChipsHTML(r)}
     <div class="card-actions">
       <button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button>
       <button class="btn btn-secondary btn-sm" data-act="history" data-id="${r.id}">History</button>
@@ -2935,7 +3071,7 @@ function juniorCardHTML(r){
   else if(ready) d=`${ageText(r.dob)} old &middot; moving up to ${r.sex==='doe'?'Does':'Bucks'} automatically`;
   else { const left=daysBetween(todayStr(), sixMonthDate(r.dob)); d=`${ageText(r.dob)} old &middot; ready to breed in ${left} day${left===1?'':'s'} (${fmtDate(sixMonthDate(r.dob))})`; }
   return `<div class="card ${ready?'urgent':''}" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${statusBadge(r)}</div>
-    <div class="card-detail">${d}</div>${r.flag?`<div class="flag">${esc(r.flag)}</div>`:''}
+    <div class="card-detail">${d}</div>${r.flag?`<div class="flag">${esc(r.flag)}</div>`:''}${projChipsHTML(r)}
     <div class="card-actions">
       <button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button>
       <button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">Edit</button>
@@ -3418,7 +3554,7 @@ function openKitSaleSheet(kitId, after){
 
 // waitlist: its own data key, nothing is ever hard-deleted from the screen
 const WAITLIST_KEY='waitlist_v1';
-let waitlist=[], waitlistSafe=false, kitTagsSafe=false;   // saving is blocked unless the stored list was read successfully (or truly doesn't exist yet)
+let waitlist=[], waitlistSafe=false, kitTagsSafe=false, projects=[], projectsSafe=false;   // saving is blocked unless the stored list was read successfully (or truly doesn't exist yet)
 async function saveWaitlist(){
   if(!waitlistSafe){ showToast("The waitlist didn't load, so it can't be changed right now. Refresh and try again."); return false; }
   try{ await window.storage.set(WAITLIST_KEY, JSON.stringify(waitlist), false); return true; }
@@ -3576,6 +3712,7 @@ function convertLitterToIndividuals(damId){
 /* ---------- main render dispatcher ---------- */
 function renderMain(){
   const main=document.getElementById('main');
+  { const nv=document.getElementById('nav'); if(nv) nv.style.visibility = (selectMode && currentTab==='rabbits' && !searchQuery.trim()) ? 'hidden' : ''; if(currentTab!=='rabbits' && selectMode){ selectMode=false; selectedIds=new Set(); } }
   const gridTabs = ['rabbits','litters','planned','ancestors','archive','forsale'];
   main.classList.toggle('card-grid', !!searchQuery.trim() || gridTabs.includes(currentTab));
   if(searchMode==='relatives'){ renderRelativesSearch(main); return; }
@@ -3834,11 +3971,12 @@ function renderRabbits(main){
     <button data-rgroup="bucks" class="${rabbitsGroup==='bucks'?'on':''}">Bucks</button>
     <button data-rgroup="juniors" class="${rabbitsGroup==='juniors'?'on':''}">Juniors</button>
   </div></div>`;
-  let body='';
+  let body='', scopeList=[], shownList=[];
   if(rabbitsGroup==='does'){
     const rank = {pregnant:0, nursing:1, open:2, reserved:3};
     const labels = {pregnant:'BRED', nursing:'ON A LITTER', open:'OPEN', reserved:'RESERVED'};
-    const allDoes = rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r));
+    const baseDoes = rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r)); scopeList=baseDoes;
+    const allDoes = projectFilter==='all'?baseDoes:baseDoes.filter(r=>inProject(r,projectFilter));
     const totalsRow = `<div class="stats" style="padding:0; margin-bottom:12px;">${
       [['all','All'],['pregnant','Bred'],['nursing','On a litter'],['open','Open']].map(([k,l])=>
         `<div class="stat ${doesFilter===k?'active':''}" data-doesfilter="${k}"><div class="n">${k==='all'?allDoes.length:allDoes.filter(r=>r.status===k).length}</div><div class="l">${l}</div></div>`).join('')
@@ -3851,38 +3989,45 @@ function renderRabbits(main){
       return a.name.localeCompare(b.name);
     });
     if(doesFilter!=='all') it = it.filter(r=>r.status===doesFilter);
+    shownList=it;
     if(!it.length){ body=totalsRow+`<div class="empty">No does match this filter.</div>`; }
     else{
       let h='', lastGroup=null;
       it.forEach(r=>{
         const g = rank[r.status]!=null?r.status:'open';
         if(g!==lastGroup && doesFilter==='all'){ h+=`<div class="section-label">${labels[g]||g.toUpperCase()}</div>`; lastGroup=g; }
-        h+=cardHTML(r);
+        h+=selectMode?selectRowsHTML([r]):cardHTML(r);
       });
       body=totalsRow+h;
     }
   } else if(rabbitsGroup==='bucks'){
-    const it=rabbits.filter(r=>r.sex==='buck'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r)).sort((a,b)=>a.name.localeCompare(b.name));
-    body=`<div class="section-label">${it.length} TOTAL BUCK${it.length===1?'':'S'}</div>`+
-      (it.length?it.map(buckCardHTML).join(''):`<div class="empty">No bucks yet. Tap + Add a rabbit above.</div>`);
+    const baseBucks=rabbits.filter(r=>r.sex==='buck'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r)); scopeList=baseBucks;
+    const it=(projectFilter==='all'?baseBucks:baseBucks.filter(r=>inProject(r,projectFilter))).sort((a,b)=>a.name.localeCompare(b.name)); shownList=it;
+    body=`<div class="section-label">${it.length} ${projectFilter==='all'?'TOTAL ':''}BUCK${it.length===1?'':'S'}</div>`+
+      (it.length?(selectMode?selectRowsHTML(it):it.map(buckCardHTML).join('')):`<div class="empty">${projectFilter==='all'?'No bucks yet. Tap + Add a rabbit above.':'No bucks in this project yet.'}</div>`);
   } else if(rabbitsGroup==='juniors'){
-    const allJr=rabbits.filter(r=>r.status==='growing'||(r.status==='reserved'&&inJuniors(r))).sort((a,b)=>(a.dob||'9').localeCompare(b.dob||'9'));
+    const baseJr=rabbits.filter(r=>r.status==='growing'||(r.status==='reserved'&&inJuniors(r))).sort((a,b)=>(a.dob||'9').localeCompare(b.dob||'9')); scopeList=baseJr;
+    const allJr = projectFilter==='all'?baseJr:baseJr.filter(r=>inProject(r,projectFilter));
     const jrRow = allJr.length ? `<div class="stats" style="padding:0; margin-bottom:12px;">${
       [['all','All',allJr.length],['buck','Bucks',allJr.filter(r=>r.sex==='buck').length],['doe','Does',allJr.filter(r=>r.sex==='doe').length]].map(([k,l,n])=>
         `<div class="stat ${juniorsFilter===k?'active':''}" data-jrfilter="${k}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('')
     }</div>` : '';
-    const it = juniorsFilter==='all' ? allJr : allJr.filter(r=>r.sex===juniorsFilter);
+    const it = juniorsFilter==='all' ? allJr : allJr.filter(r=>r.sex===juniorsFilter); shownList=it;
     body = !allJr.length ? `<div class="empty">No juniors on file. They appear automatically after you log a litter.</div>`
-      : jrRow + (it.length ? it.map(juniorCardHTML).join('') : `<div class="empty">No junior ${juniorsFilter==='buck'?'bucks':'does'} right now.</div>`);
+      : jrRow + (it.length ? (selectMode?selectRowsHTML(it):it.map(juniorCardHTML).join('')) : `<div class="empty">No junior ${juniorsFilter==='buck'?'bucks':'does'} right now.</div>`);
   }
   const actionRow = rabbitsGroup==='does'
     ? `<div class="action-row" style="display:flex; gap:10px; margin:10px 0 14px;">
          <button class="btn btn-primary" style="flex:1;" id="herdRecordBreedingBtn">+ Record a breeding</button>
        </div>`
     : '';
-  main.innerHTML = groupTabs + actionRow + body;
+  if(projectFilter!=='all' && !projects.some(p=>p.id===projectFilter)) projectFilter='all';
+  const pjSummary = (projects.length && shownList.length) ? `<div class="pj-summary"><span style="font-weight:600">${projectFilter==='all'?'':`${shownList.length} in ${esc((projects.find(p=>p.id===projectFilter)||{}).name||'')}`}</span>${selectMode?`<span><a id="pj-selall">Select all</a> &nbsp; <a id="pj-cancel-sel">Cancel</a></span>`:`<a id="pj-select">Select several</a>`}</div>` : '';
+  main.innerHTML = groupTabs + projectBar(scopeList) + pjSummary + (selectMode?'':actionRow) + body + (selectMode?selectBarHTML()+'<div style="height:170px"></div>':'');
+  wireProjects(main, shownList);
+  document.querySelectorAll('[data-pjtarget]').forEach(b=>b.onclick=()=>{ window.__pjTarget=b.dataset.pjtarget; render(); });
   if(document.getElementById('herdRecordBreedingBtn')) document.getElementById('herdRecordBreedingBtn').onclick = openQuickBreedSheet;
-  document.querySelectorAll('[data-rgroup]').forEach(b=>b.onclick=()=>{ rabbitsGroup=b.dataset.rgroup; render(); window.scrollTo(0,0); });
+  document.querySelectorAll('[data-rgroup]').forEach(b=>b.onclick=()=>{ rabbitsGroup=b.dataset.rgroup; selectMode=false; selectedIds=new Set(); render(); window.scrollTo(0,0); });
   document.querySelectorAll('[data-doesfilter]').forEach(b=>b.onclick=()=>{ doesFilter=b.dataset.doesfilter; render(); });
   document.querySelectorAll('[data-jrfilter]').forEach(b=>b.onclick=()=>{ juniorsFilter=b.dataset.jrfilter; render(); });
 }
