@@ -88,6 +88,25 @@
   .stepper-lg{ gap:12px; }
   .stepper-lg button{ width:56px; height:56px; font-size:32px; border-radius:14px; }
   .stepper-lg .st-num{ min-width:84px; font-size:40px; padding:6px 8px; border-radius:14px; }
+  /* litter sheet polish: lining numbers (old-style numerals made 1 look like "I" and 0 like "o"), grouped cards */
+  .lit-sheet .st-num{ font-variant-numeric:lining-nums tabular-nums; font-family:'Jost',system-ui,sans-serif; font-weight:600; }
+  .lit-sheet h2{ margin-bottom:14px; }
+  .lit-card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:12px; }
+  .lit-card .field{ margin-bottom:0; }
+  .lit-card .field label, .lit-label{ font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted,#6b7280); }
+  .lit-alive{ text-align:center; padding:16px 12px 18px; }
+  .lit-alive .st-title{ font-family:'Jost',system-ui,sans-serif; font-size:12px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted,#6b7280); margin-bottom:10px; }
+  .lit-alive .stepper-lg .st-num{ background:transparent; border:none; font-size:52px; min-width:90px; line-height:1; color:var(--navy); }
+  .lit-alive .stepper-lg button{ width:48px; height:48px; border-radius:50%; font-size:26px; }
+  .lit-lost .lit-label{ display:block; margin-bottom:6px; }
+  .lit-lost .st-row{ padding:8px 0; border-top:1px solid var(--line); }
+  .lit-lost .st-row:first-of-type{ border-top:none; }
+  .lit-lost .st-lbl{ font-weight:600; font-size:15px; color:var(--ink); }
+  .lit-lost .stepper button{ width:38px; height:38px; border-radius:50%; font-size:20px; }
+  .lit-lost .stepper .st-num{ min-width:44px; font-size:20px; background:transparent; border:none; }
+  .lit-hint{ font-size:13px; color:var(--muted,#6b7280); margin-top:6px; }
+  .lit-note{ font-size:13px; color:var(--muted,#6b7280); text-align:center; margin:2px 4px 14px; }
+  .lit-delete{ display:block; width:100%; background:none; border:none; color:#a24a32; font-weight:600; font-size:14px; padding:12px; margin-top:4px; cursor:pointer; }
   [data-theme="dark"] .stepper button{ background:var(--gold-deep); color:#0c1830; }
   .kit-num{ font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; color:var(--ink-soft); min-width:22px; }
   .kit-chip{ border:1px solid var(--line-strong); background:var(--card); color:var(--ink); border-radius:999px; padding:7px 12px; min-height:34px; font-family:'Jost',sans-serif; font-size:13px; font-weight:600; cursor:pointer; touch-action:manipulation; }
@@ -2124,8 +2143,8 @@ async function doSaveData(opts){
         if(rv.ok && !rv.rev && lastRev){ revCheckBroken = true; }                          // we stamped before but the server shows none: the check can't be trusted here, so stand down
         else if(rv.ok){
           const newRev = uid();
-          await window.storage.set(REV_KEY, newRev, false);
-          lastRev = newRev;
+          try{ await window.storage.set(REV_KEY, newRev, false); lastRev = newRev; }
+          catch(re){ revCheckBroken = true; console.warn('Version stamp could not be written; the stale-screen check is standing down so your save still goes through.', re); }
         }
       }
     }
@@ -3470,28 +3489,28 @@ function openKindledSheet(r, editing){
       <button type="button" data-st="${key}" data-d="-1" aria-label="Fewer">&minus;</button>
       <div class="st-num" id="st-${key}">${st[key]}</div>
       <button type="button" data-st="${key}" data-d="1" aria-label="More">+</button></div>`;
-  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+  openSheet(`<div class="lit-sheet"><button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>${esc(r.name)} — ${editing?'edit litter':'record litter'}</h2>
-    <div class="field"><label>Litter born</label><input type="date" id="f-born" value="${esc(st.born)}"></div>
-    ${needsBuck?`<div class="field"><label>Buck (optional)</label><input id="f-buck" placeholder="Type or pick a buck" autocomplete="off">
-      <div class="card-sub" style="margin-top:4px;" id="f-bredhint"></div></div>`:''}
-    <div class="st-block">
+    <div class="lit-card"><div class="field"><label>Litter born</label><input type="date" id="f-born" value="${esc(st.born)}"></div>
+    ${needsBuck?`<div class="field" style="margin-top:12px;"><label>Buck (optional)</label><input id="f-buck" placeholder="Type or pick a buck" autocomplete="off">
+      <div class="lit-hint" id="f-bredhint"></div></div>`:''}</div>
+    <div class="st-block lit-card lit-alive">
       <div class="st-title">Babies born alive</div>
       ${stepper('alive',true)}
       ${linkedCount?`<div class="card-sub" style="text-align:center; margin-top:6px;">${linkedCount} ${linkedCount===1?'kit already has':'kits already have'} a profile page, so this can't go below ${linkedCount}.</div>`:''}
     </div>
-    <div class="st-title" style="margin-top:14px;">Lost</div>
+    <div class="lit-card lit-lost"><span class="lit-label">Lost</span>
     <div class="st-lost">
       <div class="st-row"><div class="st-lbl">DOA</div>${stepper('doa')}</div>
       <div class="st-row"><div class="st-lbl">Peanut</div>${stepper('peanut')}</div>
       <div class="st-row"><div class="st-lbl">Passed</div>${stepper('passed')}</div>
-    </div>
-    <div class="field" style="margin-top:14px;"><label>Rebreed date</label>
+    </div></div>
+    <div class="lit-card"><div class="field"><label>Rebreed date</label>
       <input type="date" id="f-rebreed-date" value="${esc(st.rebreed)}">
-      <div class="card-sub" style="margin-top:4px;" id="f-rebreed-hint"></div></div>
-    <div class="relate-box" style="margin-top:4px;">Sex and color can be filled in later from the litter &rarr; Manage kits.</div>
+      <div class="lit-hint" id="f-rebreed-hint"></div></div></div>
+    <div class="lit-note">Sex and color can be filled in later from the litter &rarr; Manage kits.</div>
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>
-    ${editing?'<div class="sheet-actions"><button class="btn btn-danger" id="f-deletelitter" style="flex:1;">Delete litter</button></div>':''}`);
+    ${editing?'<button class="lit-delete" id="f-deletelitter">Delete litter</button>':''}</div>`);
   const bornEl=document.getElementById('f-born'), rebEl=document.getElementById('f-rebreed-date');
   const weeksBetween=(a,b)=>{ const n=daysBetween(a,b); return n%7===0 ? (n/7)+' weeks from birth' : n+' days from birth'; };
   const refresh=()=>{
@@ -3503,8 +3522,9 @@ function openKindledSheet(r, editing){
     const k=b.dataset.st, min = k==='alive'?linkedCount:0;
     st[k]=Math.max(min, st[k]+(+b.dataset.d)); refresh();
   });
-  bornEl.onchange=()=>{ const v=csvParseDate(bornEl.value); if(!v) return; st.born=v; if(!st.touched){ st.rebreed=addDays(v,28); rebEl.value=st.rebreed; } refresh(); };
-  rebEl.onchange=()=>{ const v=csvParseDate(rebEl.value); if(v){ st.rebreed=v; st.touched=true; refresh(); } };
+  const onBorn=()=>{ const v=csvParseDate(bornEl.value); if(!v) return; st.born=v; if(!st.touched){ st.rebreed=addDays(v,28); rebEl.value=st.rebreed; } refresh(); };
+  const onReb=()=>{ const v=csvParseDate(rebEl.value); if(v){ st.rebreed=v; st.touched=true; refresh(); } };
+  ['change','input','blur'].forEach(ev=>{ bornEl.addEventListener(ev,onBorn); rebEl.addEventListener(ev,onReb); });
   if(needsBuck) attachSuggest(document.getElementById('f-buck'), ()=>rabbits.filter(x=>x.sex==='buck'&&x.status!=='external').map(x=>x.name));
   refresh();
   const delLitterBtn = document.getElementById('f-deletelitter');
@@ -3525,6 +3545,10 @@ function openKindledSheet(r, editing){
     });
   };
   document.getElementById('f-save').onclick=()=>{
+    // read what is actually showing in the date boxes, so what you see is what gets saved
+    onBorn(); onReb();
+    const yr=+String(st.born||'').slice(0,4), thisYr=new Date().getFullYear();
+    if(!st.born || yr<thisYr-15 || yr>thisYr+1){ showToast('Check the litter born date — it says '+(st.born?fmtDate(st.born):'nothing')+'. Fix it, then Save.'); return; }
     const born=st.born||todayStr();
     const wasEditing = editing;
     // kits: new litters start blank; editing adds blanks or drops unlinked kits from the end
