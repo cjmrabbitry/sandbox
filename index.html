@@ -103,8 +103,10 @@
   .nn-age{ font-weight:700; color:var(--navy); font-size:15px; white-space:nowrap; }
   .nn-count{ font-size:16px; margin:12px 0 4px; color:var(--ink); }
   .nn-big{ font-family:'Jost',system-ui,sans-serif; font-variant-numeric:lining-nums; font-weight:700; font-size:38px; line-height:1; margin-right:4px; color:var(--navy); }
+  .nn-age{ display:flex; align-items:center; gap:8px; }
+  .nn-chev{ font-size:30px; line-height:.8; color:var(--ink-soft,#6b7280); font-weight:400; }
   .nn-actions{ display:flex; gap:8px; margin-top:12px; }
-  .nn-actions .btn-primary{ flex:1; }
+  .nn-actions .btn{ flex:1; }
   .nn-more{ width:48px; flex:none; font-size:22px; line-height:1; padding:0; }
   .nn-toggle{ display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px; margin-bottom:12px; grid-column:1/-1; }
   .nn-sw{ flex:none; width:52px; height:30px; border-radius:999px; border:none; background:#c9c2b0; position:relative; cursor:pointer; padding:0; transition:background .15s; }
@@ -160,6 +162,7 @@
   .lp-num{ flex:none; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Jost',system-ui,sans-serif; font-weight:700; font-size:16px; background:var(--page); border:1.5px solid var(--line-strong,var(--line)); color:var(--navy); }
   .lp-num.bk{ background:#dbe6f7; border-color:#a9c0e6; } .lp-num.dn{ background:#f9e0e6; border-color:#e8b5c2; }
   .lp-bmid{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+  .lp-wt{ color:var(--ink-soft,#475569); font-size:14px; font-weight:600; white-space:nowrap; }
   .lp-bmid b{ font-weight:600; } .lp-bmid small{ color:var(--muted,#6b7280); font-size:13px; }
   .lp-muted{ color:var(--muted,#6b7280) !important; font-weight:500 !important; }
   .lp-chev{ color:var(--muted,#6b7280); font-size:22px; line-height:1; }
@@ -1943,8 +1946,10 @@ async function loadData(){
   kitTagsSafe=false; try{ const kt = JSON.parse((await window.storage.get(KIT_TAGS_KEY,false)).value); customKitTags = Array.isArray(kt)?kt.filter(x=>typeof x==='string'):DEFAULT_CUSTOM_KIT_TAGS.slice(); kitTagsSafe=Array.isArray(kt); }catch(e){ customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); kitTagsSafe = /not found/i.test(String(e&&e.message)); }
   projectsSafe=false; try{ const pj = JSON.parse((await window.storage.get(PROJECTS_KEY,false)).value); projects = Array.isArray(pj)?pj.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; projectsSafe=Array.isArray(pj); }catch(e){ projects = []; projectsSafe = /not found/i.test(String(e&&e.message)); }
   traitsSafe=false; try{ const tr = JSON.parse((await window.storage.get(TRAITS_KEY,false)).value); traits = Array.isArray(tr)?tr.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; traitsSafe=Array.isArray(tr); }catch(e){ traits = []; traitsSafe = /not found/i.test(String(e&&e.message)); }
+  quickPicksSafe=false; try{ const qp = JSON.parse((await window.storage.get(QUICKPICKS_KEY,false)).value); quickPicks = Array.isArray(qp)?qp.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; quickPicksSafe=Array.isArray(qp); }catch(e){ quickPicks = []; quickPicksSafe = /not found/i.test(String(e&&e.message)); }
   try{ const tv = JSON.parse((await window.storage.get(TRASH_KEY,false)).value); trash = Array.isArray(tv) ? tv : []; }catch(e){ trash = []; }
   await hydratePhotos();
+  if(!viewingAsCustomer){ try{ backfillKitHistory(); }catch(e){ console.error(e); } }   // never touches a customer's account while viewing it
   memoryOwner = accountMemoryId();
   saveBaseline = dataFootprint();
   try{ lastRev = (await window.storage.get(REV_KEY,false)).value || null; }catch(e){ lastRev = null; }
@@ -2178,7 +2183,7 @@ function wireRemovedLitterItems(main){
 function backupAccountId(){ return (currentUser && currentUser.id) ? String(currentUser.id) : 'local'; }
 function fullBackupObject(){
   return { app:'HerdNerd Pro', version:1, savedAt:new Date().toISOString(), accountId: backupAccountId(),
-    rabbits, planned, events:customEvents, shows, expenses, pedigreeSettings, trash, waitlist, kitTags:customKitTags, projects, traits };
+    rabbits, planned, events:customEvents, shows, expenses, pedigreeSettings, trash, waitlist, kitTags:customKitTags, projects, traits, quickPicks };
 }
 function downloadFullBackup(){
   const blob = new Blob([JSON.stringify(fullBackupObject())], {type:'application/json'});
@@ -2206,7 +2211,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-18-warnings';
+const APP_VERSION = '2026-10-18-hint';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2270,7 +2275,7 @@ function openProjectTagSheet(rid){
       <div class="pj-pick">${projects.map(p=>`<button class="pj-opt ${inProject(r,p.id)?'on':''}" data-pj="${p.id}">${inProject(r,p.id)?'&#10003; ':''}${esc(p.name)}</button>`).join('')}<button class="pj-opt pj-new" id="pj-new">+ New project</button></div>
       <div class="card-sub" style="margin:8px 0 12px;">Tap to add or remove. A rabbit can be in as many projects as you like.</div>
       <div class="lit-label" style="margin:6px 0;">Carries</div>
-      ${traits.length?traits.map(t=>`<div style="margin-bottom:8px;"><div style="font-weight:700;font-size:14px;margin-bottom:4px;">${esc(t.name)}</div><div class="cy-seg">${[['yes','Carries'],['no',"Doesn't"],['unknown','Unknown']].map(([k,l])=>`<button class="${carryState(r,t.id)===k?'on':''}" data-cy="${t.id}" data-cyv="${k}">${l}</button>`).join('')}</div></div>`).join(''):'<div class="card-sub" style="margin-bottom:6px;">No traits yet. Add ones like Shaded or Chocolate.</div>'}
+      ${traits.length?traits.map(t=>`<div style="margin-bottom:8px;"><div style="font-weight:700;font-size:14px;margin-bottom:4px;">${esc(t.name)}</div>${carryState(r,t.id)!=='yes'&&carriesHint(r,t)?`<div class="card-sub" style="margin-bottom:4px;">${carriesHint(r,t)}</div>`:''}<div class="cy-seg">${[['yes','Carries'],['no',"Doesn't"],['unknown','Unknown']].map(([k,l])=>`<button class="${carryState(r,t.id)===k?'on':''}" data-cy="${t.id}" data-cyv="${k}">${l}</button>`).join('')}</div></div>`).join(''):'<div class="card-sub" style="margin-bottom:6px;">No traits yet. Add ones like Shaded or Chocolate.</div>'}
       <div class="pj-pick"><button class="pj-opt pj-new" id="tr-new">+ New trait</button></div>
       <div class="sheet-actions"><button class="btn btn-primary" id="pj-done">Done</button></div>
       <div style="text-align:center;margin-top:10px;"><a href="#" id="pj-manage" style="font-weight:700;">Manage projects</a> &nbsp;&middot;&nbsp; <a href="#" id="tr-manage" style="font-weight:700;">Manage traits</a></div>`);
@@ -2439,6 +2444,177 @@ function openTraitsManage(after){
 }
 // ===== CARRIES END =====
 
+// ===== KIT HISTORY FOLLOWS THE RABBIT START =====
+// When a kit gets its own profile, its weights and photo are COPIED to it (the litter keeps its own copy). Nothing is moved or removed.
+function weightsOf(r){ return (r.weightLog||[]).filter(w=>w&&w.date&&isFinite(Number(w.oz))).slice().sort((a,b)=>b.date.localeCompare(a.date)); }
+function carryKitHistory(dam, k, rabbit){
+  if(!dam||!k||!rabbit) return false;
+  let changed=false;
+  rabbit.weightLog = rabbit.weightLog||[];
+  (k.weights||[]).forEach(w=>{
+    if(!w||!w.date||!isFinite(Number(w.oz))) return;
+    if(rabbit.weightLog.some(x=>x.fromKit===k.id && x.date===w.date && Number(x.oz)===Number(w.oz))) return;
+    rabbit.weightLog.push({id:uid(), date:w.date, oz:Number(w.oz), source:'litter', fromKit:k.id}); changed=true;
+  });
+  const kp=kitPhotoOf(dam,k);
+  rabbit.photos = rabbit.photos||[];
+  if(kp && kp.dataUrl && !rabbit.photos.some(x=>x.fromKit===k.id) && !rabbitMainPhoto(rabbit)){
+    rabbit.photos.push({id:uid(), category:'Primary', dataUrl:kp.dataUrl, addedAt:kp.addedAt||todayStr(), fromKit:k.id}); changed=true;
+  }
+  return changed;
+}
+// one-time catch-up for kits that already became juniors before this existed; runs once per rabbit, then marks it done
+function backfillKitHistory(){
+  let any=false;
+  rabbits.forEach(d=>(d.litterKits||[]).forEach(k=>{
+    if(!k.individualId) return;
+    const kr=rabbits.find(x=>x.id===k.individualId); if(!kr || kr.kitHistoryCopied) return;
+    if(carryKitHistory(d,k,kr)) any=true;
+    kr.kitHistoryCopied=true;
+  }));
+  return any;
+}
+function weightsCardHTML(r){
+  const ws=weightsOf(r);
+  return `<div class="lit-card" style="margin-top:12px;"><span class="lit-label">Weights</span>${ws.length?ws.map(w=>`<div class="st-row" style="padding:6px 0;"><span>${nb(esc(fmtShort(w.date)))}${ageText(r.dob,w.date)?` <span class="card-sub">&middot; ${esc(ageText(r.dob,w.date))} old</span>`:''}</span><b>${esc(ozText(w.oz))}</b></div>`).join(''):'<div class="card-sub">No weights yet.</div>'}
+    <button class="btn btn-secondary btn-sm" data-pa="addweight" style="margin-top:8px;">+ Add weight</button></div>`;
+}
+function openAddWeightSheet(r){
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Add weight</h2>
+    <div class="card-sub" style="margin-bottom:8px;">${esc(r.name)}</div>
+    <div class="field"><label>Date</label><input type="date" id="aw-date" value="${esc(todayStr())}"></div>
+    <div class="field"><label>Weight</label><input id="aw-val" inputmode="decimal" placeholder="e.g. 14 or 3.5" autocomplete="off"></div>
+    <div class="seg" style="margin-bottom:12px;"><button type="button" class="on" data-awu="oz">oz</button><button type="button" data-awu="lb">lb</button></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" id="aw-cancel">Cancel</button><button class="btn btn-primary" id="aw-save">Save</button></div>`);
+  let unit='oz';
+  document.querySelectorAll('[data-awu]').forEach(b=>b.onclick=()=>{ unit=b.dataset.awu; document.querySelectorAll('[data-awu]').forEach(x=>x.classList.toggle('on',x===b)); });
+  document.getElementById('aw-cancel').onclick=closeSheet;
+  document.getElementById('aw-save').onclick=()=>{
+    const v=parseFloat(document.getElementById('aw-val').value), date=document.getElementById('aw-date').value||todayStr();
+    if(!isFinite(v)||v<=0){ showToast('Enter a weight'); return; }
+    r.weightLog=r.weightLog||[]; r.weightLog.push({id:uid(), date, oz:Math.round((unit==='lb'?v*16:v)*10)/10, source:'manual'});
+    saveData(); closeSheet(); if(profileRabbitId) renderProfile(); showToast('Weight saved');
+  };
+}
+// ===== KIT HISTORY FOLLOWS THE RABBIT END =====
+
+// ===== CARRIES HINT START =====
+// A suggestion only: counts offspring whose typed color contains the trait's name. It never changes anything.
+function offspringColors(r){
+  const out=new Map();   // kitId or rabbitId -> color
+  const add=(id,c)=>{ if(id && !out.has(id)) out.set(id,c||''); };
+  const fromKits=(kits)=>(kits||[]).forEach(k=>{ const lk=k.individualId?rabbits.find(x=>x.id===k.individualId):null; add(lk?lk.id:(k.id||uid()), (lk&&lk.color)||k.color||''); });
+  if(r.sex==='doe'){
+    fromKits(r.litterKits); (r.breedingHistory||[]).forEach(e=>fromKits(e.litterKits));
+    rabbits.forEach(x=>{ if(x.id!==r.id && x.damName && nameKey(x.damName)===nameKey(r.name)) add(x.id,x.color); });
+  } else {
+    rabbits.forEach(d=>{
+      if(d.sex!=='doe') return;
+      (d.breedingHistory||[]).forEach(e=>{ if(e.partner && nameKey(e.partner)===nameKey(r.name)) fromKits(e.litterKits); });
+      if(d.litterKits && d.partner && nameKey(d.partner)===nameKey(r.name) && !(d.breedingHistory||[]).some(e=>e.litterKits===d.litterKits)) fromKits(d.litterKits);
+    });
+    rabbits.forEach(x=>{ if(x.id!==r.id && x.sireName && nameKey(x.sireName)===nameKey(r.name)) add(x.id,x.color); });
+  }
+  return [...out.values()];
+}
+function carriesHint(r, trait){
+  const cols=offspringColors(r).filter(c=>String(c).trim());
+  const key=trait.name.trim().toLowerCase(); if(!key||!cols.length) return '';
+  const n=cols.filter(c=>String(c).toLowerCase().includes(key)).length;
+  if(!n) return '';
+  return `Hint: ${n} of ${cols.length} kit${cols.length===1?'':'s'} with a color listed ${n===1?'was':'were'} listed as ${esc(trait.name)}. Only you can mark Carries.`;
+}
+// ===== CARRIES HINT END =====
+
+
+
+// ===== QUICK PICKS START =====
+// Saved Herd views: a tab (does/bucks/juniors) + optional project + optional trait filter. Only stores ids; never touches rabbit data.
+const QUICKPICKS_KEY='quickpicks_v1';
+const MAX_QUICKPICKS=10;
+async function saveQuickPicks(){
+  if(!quickPicksSafe){ showToast("Your quick picks didn't load, so they can't be changed right now. Refresh and try again."); return false; }
+  try{ await window.storage.set(QUICKPICKS_KEY, JSON.stringify(quickPicks), false); return true; }
+  catch(e){ showToast("Couldn't save — check your connection and try again."); return false; }
+}
+function currentViewIsFiltered(){ return projectFilter!=='all' || !!(traitFilter && traits.some(t=>t.id===traitFilter.id)); }
+function suggestPickName(){
+  const g={does:'Does',bucks:'Bucks',juniors:'Juniors'}[rabbitsGroup]||'';
+  const pr=projects.find(x=>x.id===projectFilter), tr=traitFilter&&traits.find(t=>t.id===traitFilter.id);
+  const st={yes:'carry',no:"don't carry",unknown:'unknown'};
+  return [pr?pr.name:'', g, tr?`${st[traitFilter.state]} ${tr.name}`:''].filter(Boolean).join(' ').slice(0,28);
+}
+function applyQuickPick(q){
+  const pr = q.project ? projects.find(x=>x.id===q.project) : null;
+  const tr = q.trait ? traits.find(x=>x.id===q.trait.id) : null;
+  if((q.project&&!pr) || (q.trait&&!tr)){ showToast('Part of this quick pick (a project or trait) was removed, so it was applied without it.'); }
+  currentTab='rabbits'; rabbitsGroup=q.group||'bucks'; projectFilter=pr?pr.id:'all';
+  traitFilter=tr?{id:tr.id,state:q.trait.state}:null; selectMode=false; selectedIds=new Set();
+  if(q.group==='does') doesFilter='all';
+  render(); window.scrollTo(0,0);
+}
+function openSaveQuickPick(){
+  if(quickPicks.length>=MAX_QUICKPICKS){ showToast('Up to '+MAX_QUICKPICKS+' quick picks. Remove one to add another.'); return; }
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Save this view</h2>
+    <div class="card-sub" style="margin-bottom:10px;">Saves the tab, project and trait filter you have on now as a one-tap chip.</div>
+    <div class="field"><label>Name</label><input id="qp-name" maxlength="28" value="${esc(suggestPickName())}" autocomplete="off"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" id="qp-cancel">Cancel</button><button class="btn btn-primary" id="qp-save">Save</button></div>`);
+  document.getElementById('qp-cancel').onclick=closeSheet;
+  document.getElementById('qp-save').onclick=async()=>{
+    const v=document.getElementById('qp-name').value.trim(); if(!v) return;
+    if(quickPicks.some(q=>q.name.toLowerCase()===v.toLowerCase())){ showToast('You already have one with that name'); return; }
+    const tr=traitFilter&&traits.find(t=>t.id===traitFilter.id);
+    const q={id:uid(), name:v, group:rabbitsGroup, project:projectFilter!=='all'?projectFilter:null, trait:tr?{id:tr.id,state:traitFilter.state}:null};
+    quickPicks.push(q);
+    if(!(await saveQuickPicks())){ quickPicks.pop(); return; }
+    closeSheet(); render(); showToast('Saved');
+  };
+}
+function openQuickPicksManage(){
+  const draw=()=>{
+    openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Quick picks</h2>
+      <div class="card-sub" style="margin-bottom:10px;">Removing a quick pick only removes the shortcut. No rabbit is changed. Up to ${MAX_QUICKPICKS}.</div>
+      <div class="lit-card">${quickPicks.length?quickPicks.map(q=>`<div class="st-row" style="padding:6px 0;"><b>${esc(q.name)}</b><span style="flex:1"></span><button class="btn btn-secondary btn-sm" data-qpren="${q.id}">Rename</button> <button class="btn btn-secondary btn-sm" data-qprm="${q.id}">Remove</button></div>`).join(''):'<div class="card-sub">None yet. Set up a view on the Herd page, then tap Save this view.</div>'}</div>
+      <div class="sheet-actions"><button class="btn btn-primary" id="qm-done">Done</button></div>`);
+    document.getElementById('qm-done').onclick=()=>{ closeSheet(); render(); };
+    document.querySelectorAll('[data-qprm]').forEach(b=>b.onclick=async()=>{
+      const i=quickPicks.findIndex(q=>q.id===b.dataset.qprm); if(i<0) return;
+      const gone=quickPicks.splice(i,1)[0];
+      if(!(await saveQuickPicks())){ quickPicks.splice(i,0,gone); return; }
+      draw();
+    });
+    document.querySelectorAll('[data-qpren]').forEach(b=>b.onclick=()=>{
+      const q=quickPicks.find(x=>x.id===b.dataset.qpren); if(!q) return;
+      openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Rename</h2>
+        <div class="field"><label>Name</label><input id="qp-rn" maxlength="28" value="${esc(q.name)}" autocomplete="off"></div>
+        <div class="sheet-actions"><button class="btn btn-secondary" id="qp-rc">Cancel</button><button class="btn btn-primary" id="qp-rs">Save</button></div>`);
+      document.getElementById('qp-rc').onclick=draw;
+      document.getElementById('qp-rs').onclick=async()=>{
+        const v=document.getElementById('qp-rn').value.trim(); if(!v) return;
+        if(quickPicks.some(x=>x.id!==q.id&&x.name.toLowerCase()===v.toLowerCase())){ showToast('You already have one with that name'); return; }
+        const old=q.name; q.name=v; if(!(await saveQuickPicks())){ q.name=old; return; }
+        draw();
+      };
+    });
+  };
+  draw();
+}
+function quickPickActive(q){
+  const tr = traitFilter && traits.some(t=>t.id===traitFilter.id) ? traitFilter : null;
+  return (q.group||'bucks')===rabbitsGroup && (q.project||'all')===projectFilter
+    && ((q.trait&&q.trait.id)||null)===(tr?tr.id:null) && ((q.trait&&q.trait.state)||null)===(tr?tr.state:null);
+}
+function quickPickBar(){
+  if(!quickPicks.length && !currentViewIsFiltered()) return '';
+  return `<div class="pj-bar">${quickPicks.length?'<span class="card-sub" style="align-self:center;white-space:nowrap;">Quick picks</span>':''}${quickPicks.map(q=>`<button class="pj-fchip ${quickPickActive(q)?'on':''}" data-qp="${q.id}">${esc(q.name)}</button>`).join('')}${currentViewIsFiltered()?'<button class="pj-fchip pj-ghost" id="qp-save-btn">+ Save this view</button>':''}${quickPicks.length?'<button class="pj-fchip pj-ghost" id="qp-manage">Edit</button>':''}</div>`;
+}
+function wireQuickPicks(){
+  document.querySelectorAll('[data-qp]').forEach(b=>b.onclick=()=>{ const q=quickPicks.find(x=>x.id===b.dataset.qp); if(q) applyQuickPick(q); });
+  const sv=document.getElementById('qp-save-btn'); if(sv) sv.onclick=openSaveQuickPick;
+  const mg=document.getElementById('qp-manage'); if(mg) mg.onclick=openQuickPicksManage;
+}
+// ===== QUICK PICKS END =====
+
 // ===== PROJECT WARNINGS START =====
 // Each project can list traits it wants to be told about (p.warn = [traitId]). Shown as plain facts, never blocking, never red.
 function watchProjectsFor(r,traitId){ return projOf(r).filter(p=>(p.warn||[]).includes(traitId)); }
@@ -2481,7 +2657,7 @@ function openProjectWarnSheet(pid){
 
 // ===== ACCOUNT SWITCH CLEAN-UP START =====
 function clearAccountMemory(){
-  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
+  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; quickPicks = []; quickPicksSafe = false; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
   rabbits = []; planned = []; customEvents = []; shows = []; expenses = [];
   pedigreeSettings = defaultPedigreeSettings();
   trash = [];
@@ -3306,17 +3482,13 @@ function newNurseryCardHTML(r){
   const age=litterAgeDays(r);
   const lost=r.litterDead?((r.litterDead.DOA||0)+(r.litterDead.peanut||0)+(r.litterDead.passed||0)):0;
   const forSale=kits.filter(k=>k.tag==='For sale'||(!k.tag&&k.forSale)).length, reserved=kits.filter(k=>k.tag==='Reserved').length;
-  const mainBtn = r.status!=='nursing'
-    ? `<button class="btn btn-primary" data-nnopenbtn="${r.id}">Open litter</button>`
-    : age>=42
-    ? `<button class="btn btn-primary" data-nnwean="${r.id}">Mark weaned</button>`
-    : `<button class="btn btn-primary" data-nnopenbtn="${r.id}">Open litter</button>`;
-  return `<div class="card nn-card" data-nnopen="${r.id}" style="cursor:pointer;"><div class="nn-top"><div><div class="card-name">${esc(r.name)}'s litter</div>
-      ${litterSireName(r)?`<div class="card-sub">Sired by ${esc(litterSireName(r))}</div>`:''}<div class="card-sub">Born ${nb(fmtShort(r.litterBornDate))}</div></div>
-      <div class="nn-age">${esc(litterAgeText(r.litterBornDate))}</div></div>
-    <div class="nn-row"><span class="nn-num">${n} ${n===1?'kit':'kits'}</span>${forSale?`<em class="nn-tag t-sale">${forSale} for sale</em>`:''}${reserved?`<em class="nn-tag t-res">${reserved} reserved</em>`:''}${lost?`<em class="nn-tag t-sold">${lost} lost</em>`:''}${r.status==='nursing'?'':'<em class="nn-tag t-keep">Weaned</em>'}</div>
+  const wean = r.status==='nursing' ? `<button class="btn ${age>=42?'btn-primary':'btn-secondary'}" data-nnwean="${r.id}">Wean litter</button>` : '';
+  const actions = wean+`<button class="btn btn-secondary" data-nnped="${r.id}">Pedigree</button>`;
+  return `<div class="card nn-card" data-nnopen="${r.id}" style="cursor:pointer;"><div class="nn-top"><div><div class="card-name">${esc(shortName(r.name))}${litterSireName(r)?' &times; '+esc(shortName(litterSireName(r))):''}&rsquo;s Litter</div><div class="card-sub">Born ${nb(fmtShort(r.litterBornDate))}</div></div>
+      <div class="nn-age">${esc(litterAgeText(r.litterBornDate))} old<span class="nn-chev" aria-hidden="true">&rsaquo;</span></div></div>
+    <div class="nn-row"><span class="nn-num">${n} ${n===1?'kit':'kits'}</span>${forSale?`<em class="nn-tag t-sale">${forSale} for sale</em>`:''}${reserved?`<em class="nn-tag t-res">${reserved} reserved</em>`:''}${r.status==='nursing'?'':'<em class="nn-tag t-keep">Weaned</em>'}</div>
     <div class="card-sub">Wean ${nb(fmtShort(r.weanDate))} &middot; Ready to go ${nb(fmtShort(r.sellDate))}</div>
-    <div class="nn-actions">${mainBtn}<button class="btn btn-secondary nn-more" data-nnmore="${r.id}" aria-label="More options">&#8943;</button></div></div>`;
+    <div class="nn-actions">${actions}</div></div>`;
 }
 function openNurseryMore(r){
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>${esc(r.name)}'s litter</h2>
@@ -3354,8 +3526,7 @@ function renderNewNursery(main){
   main.querySelectorAll('[data-nntab]').forEach(b=>b.onclick=()=>{ nurseryTab=b.dataset.nntab; render(); });
   main.querySelectorAll('[data-nnopen]').forEach(c=>c.onclick=(ev)=>{ if(ev.target.closest('button')) return; openLitterPage(c.dataset.nnopen); });
   main.querySelectorAll('[data-nnwean]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const r=rabbits.find(x=>x.id===b.dataset.nnwean); if(r) openWeanPlanSheet(r); });
-  main.querySelectorAll('[data-nnopenbtn]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); openLitterPage(b.dataset.nnopenbtn); });
-  main.querySelectorAll('[data-nnmore]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const r=rabbits.find(x=>x.id===b.dataset.nnmore); if(r) openNurseryMore(r); });
+  main.querySelectorAll('[data-nnped]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const r=rabbits.find(x=>x.id===b.dataset.nnped); if(r) openLitterPedigreeSheet(r); });
   bindLitterToggle(main);
 }
 
@@ -3463,7 +3634,7 @@ function babyRowInner(k,i){
   const sex=k.sex==='buck'?'Buck':k.sex==='doe'?'Doe':'', col=k.color||'';
   const title=(sex||col)?[sex,col].filter(Boolean).join(' · '):'Tap to set sex & color';
   return `<span class="lp-num ${k.sex==='buck'?'bk':k.sex==='doe'?'dn':''}">${k.num||i+1}</span>
-    <span class="lp-bmid"><b class="${(sex||col)?'':'lp-muted'}">${esc(title)}</b>${lw?`<small>${ozText(lw.oz)}</small>`:''}</span>
+    <span class="lp-bmid"><b class="${(sex||col)?'':'lp-muted'}">${esc(title)}</b></span>${lw?`<span class="lp-wt">${esc(ozText(lw.oz))}</span>`:''}
     ${tg?`<em class="nn-tag ${k.individualId?'t-keep':tagClass(tg)}">${esc(tg)}</em>`:''}<span class="lp-chev">&rsaquo;</span>`;
 }
 function babyEditorHTML(k,i){
@@ -3481,7 +3652,7 @@ function babyEditorHTML(k,i){
 function openLitterPage(damId){
   const r=rabbits.find(x=>x.id===damId); if(!r) return;
   const kits=r.litterKits||[], losses=r.litterLosses||[];
-  const sireN=litterSireName(r); const sire=sireN?rabbits.find(x=>nameKey(x.name)===nameKey(sireN)):null;
+  const sireN=litterSireName(r); const sire=sireN?findByName(sireN):null;
   const age=litterAgeDays(r);
   const nursing=r.status==='nursing';
   const unweighed=kits.some(k=>!k.individualId);
@@ -3511,8 +3682,8 @@ function openLitterPage(damId){
     ${pr?`<details class="lp-fold"><summary>This pairing <span>${pr.litters} litter${pr.litters===1?'':'s'}</span></summary><div class="card-sub">${esc(r.name)} × ${esc(litterSireName(r))}: ${pr.litters} litter${pr.litters===1?'':'s'}, ${pr.born} born (about ${pr.avg} per litter), ${pr.alive} still counted alive.</div></details>`:''}
     <div class="lp-foot"><button class="btn btn-secondary" id="lp-edit">Edit litter</button><button class="btn btn-secondary" id="lp-ped">Pedigree</button></div></div>`);
   const again=()=>openLitterPage(damId);
-  document.getElementById('lp-mom').onclick=()=>{ closeSheet(); openRabbitProfile(r,'litters'); };
-  const dad=document.getElementById('lp-dad'); if(dad) dad.onclick=()=>{ closeSheet(); openRabbitProfile(sire,'litters'); };
+  document.getElementById('lp-mom').onclick=()=>{ closeSheet(); openRabbitProfile(r); };
+  const dad=document.getElementById('lp-dad'); if(dad) dad.onclick=()=>{ closeSheet(); openRabbitProfile(sire); };
   const w=document.getElementById('lp-wean'); if(w) w.onclick=()=>openWeanPlanSheet(r);
   const commitBaby=(i,w)=>{ syncLitterEntry(r); r.lastLitterSummary=litterSummaryText(r); saveData(); w.querySelector('.lp-baby').innerHTML=babyRowInner(kits[i],i); render(); };
   document.querySelectorAll('.lp-bw').forEach((w,i)=>{
@@ -3643,7 +3814,7 @@ function openWeanPlanSheet(r){
         if(x.choice==='Keeping'){
           x.k.sex=x.sex;
           const kit=blankRabbit({ name:x.name.trim(), sex:x.sex, breed:r.breed, color:x.k.color||'', dob:r.litterBornDate, sireName:litterSireName(r), damName:r.name, status:'growing' });
-          rabbits.push(kit); x.k.individualId=kit.id; setKitTag(x.k,'Keeping');
+          rabbits.push(kit); x.k.individualId=kit.id; carryKitHistory(r,x.k,kit); kit.kitHistoryCopied=true; setKitTag(x.k,'Keeping');
         } else if(x.choice==='For sale' || x.choice==='Reserved'){ setKitTag(x.k,x.choice); }
       });
       r.status='open'; r.litterKits=kits; syncLitterEntry(r);
@@ -3663,7 +3834,7 @@ function convertOldKitsToJuniors(r, sexes){
     if(rabbits.some(z=>nameKey(z.name)===nameKey(name))) name+=` (${r.litterBornDate})`;
     x.k.sex=sx;
     const kit=blankRabbit({ name, sex:sx, breed:r.breed, color:x.k.color||'', dob:r.litterBornDate, sireName:litterSireName(r), damName:r.name, status:'growing', forSale:(x.k.tag==='For sale') });
-    rabbits.push(kit); x.k.individualId=kit.id; made++;
+    rabbits.push(kit); x.k.individualId=kit.id; carryKitHistory(r,x.k,kit); kit.kitHistoryCopied=true; made++;
   });
   if(made){ syncLitterEntry(r); showToast(made+' kit'+(made===1?'':'s')+' from the last litter became juniors'); }
 }
@@ -3719,7 +3890,7 @@ function openKitSaleSheet(kitId, after){
 
 // waitlist: its own data key, nothing is ever hard-deleted from the screen
 const WAITLIST_KEY='waitlist_v1';
-let waitlist=[], waitlistSafe=false, kitTagsSafe=false, projects=[], projectsSafe=false, traits=[], traitsSafe=false;   // saving is blocked unless the stored list was read successfully (or truly doesn't exist yet)
+let waitlist=[], waitlistSafe=false, kitTagsSafe=false, projects=[], projectsSafe=false, traits=[], traitsSafe=false, quickPicks=[], quickPicksSafe=false;   // saving is blocked unless the stored list was read successfully (or truly doesn't exist yet)
 async function saveWaitlist(){
   if(!waitlistSafe){ showToast("The waitlist didn't load, so it can't be changed right now. Refresh and try again."); return false; }
   try{ await window.storage.set(WAITLIST_KEY, JSON.stringify(waitlist), false); return true; }
@@ -3868,7 +4039,7 @@ function convertLitterToIndividuals(damId){
     if(k.sex!=='buck' && k.sex!=='doe'){ skipped++; return; }   // never create a rabbit with no sex
     const kit=blankRabbit({ name:`${dam.name} x ${dam.partner||'?'} — ${k.sex==='buck'?'Buck':'Doe'} ${i+1}`,
       sex:k.sex, breed:dam.breed, color:k.color||'', dob:dam.litterBornDate, sireName:dam.partner||'', damName:dam.name, status:'growing' });
-    rabbits.push(kit); k.individualId=kit.id; count++;
+    rabbits.push(kit); k.individualId=kit.id; carryKitHistory(dam,k,kit); kit.kitHistoryCopied=true; count++;
   });
   saveData(); render();
   showToast(count+' individual page'+(count===1?'':'s')+' created'+(skipped?` · ${skipped} skipped (sex not set)`:''));
@@ -4188,8 +4359,8 @@ function renderRabbits(main){
     : '';
   if(projectFilter!=='all' && !projects.some(p=>p.id===projectFilter)) projectFilter='all';
   const pjSummary = (projects.length && (shownList.length||projectFilter!=='all'||traitFilter)) ? `<div class="pj-summary"><span style="font-weight:600">${selectMode?(projectFilter==='all'?'Tap the rabbits to include':'Tap rabbits to add to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'')):projectFilter==='all'?'':`${shownList.length} in ${esc((projects.find(p=>p.id===projectFilter)||{}).name||'')}`}</span>${selectMode?`<span><a id="pj-selall">Select all</a> &nbsp; <a id="pj-cancel-sel">Cancel</a></span>`:`<a id="pj-select">${projectFilter==='all'?'Select several':'Add rabbits'}</a>`}</div>` : '';
-  main.innerHTML = groupTabs + projectBar(scopeList) + (selectMode?'':traitBar(scopeList)) + pjSummary + (selectMode?'':actionRow) + body + (selectMode?selectBarHTML()+'<div style="height:170px"></div>':'');
-  wireProjects(main, shownList); wireTraits();
+  main.innerHTML = groupTabs + (selectMode?'':quickPickBar()) + projectBar(scopeList) + (selectMode?'':traitBar(scopeList)) + pjSummary + (selectMode?'':actionRow) + body + (selectMode?selectBarHTML()+'<div style="height:170px"></div>':'');
+  wireProjects(main, shownList); wireTraits(); wireQuickPicks();
   document.querySelectorAll('[data-pjtarget]').forEach(b=>b.onclick=()=>{ window.__pjTarget=b.dataset.pjtarget; render(); });
   if(document.getElementById('herdRecordBreedingBtn')) document.getElementById('herdRecordBreedingBtn').onclick = openQuickBreedSheet;
   document.querySelectorAll('[data-rgroup]').forEach(b=>b.onclick=()=>{ rabbitsGroup=b.dataset.rgroup; selectMode=false; selectedIds=new Set(); render(); window.scrollTo(0,0); });
@@ -6580,7 +6751,7 @@ function keepKitForBreeding(damId, idx){
   if(k.sex!=='buck' && k.sex!=='doe'){ showToast('Set this kit\u2019s sex first (tap Edit).'); return; }
   const kit=blankRabbit({ name:`${dam.name} x ${dam.partner||'?'} — ${k.sex==='buck'?'Buck':'Doe'} ${idx+1}`,
     sex:k.sex, breed:dam.breed, color:k.color||'', dob:dam.litterBornDate, sireName:dam.partner||'', damName:dam.name, status:'growing' });
-  rabbits.push(kit); k.individualId=kit.id;
+  rabbits.push(kit); k.individualId=kit.id; carryKitHistory(dam,k,kit); kit.kitHistoryCopied=true;
   saveData(); render(); showToast(kit.name+' — profile created');
 }
 function toggleKitForSale(damId, idx){
@@ -7591,7 +7762,8 @@ function overviewTabHTML(r){
     ${acts.length?`<div class="qa-row">${acts.map(([a,l])=>`<button class="btn btn-secondary btn-sm" data-pa="${a}">${l}</button>`).join('')}</div>`:''}
     ${r.flag?`<div class="flag">${esc(r.flag)}</div>`:''}
     <div class="overview-grid">${rows.map(([l,v])=>`<div class="ov-cell"><div class="ov-label">${l.toUpperCase()}</div><div class="ov-val">${esc(v)}</div></div>`).join('')}</div>
-    <button class="btn btn-secondary" style="width:100%;" data-pa="edit">Edit details</button>`;
+    ${weightsCardHTML(r)}
+    <button class="btn btn-secondary" style="width:100%;margin-top:12px;" data-pa="edit">Edit details</button>`;
 }
 function breedingTabHTML(r){
   let cur='';
@@ -7662,6 +7834,7 @@ function wireProfileTab(r){
       else if(a==='unarchive') openUnarchive(r);
       else if(a==='edit') openEditSheet(r, renderProfile);
       else if(a==='pedigree'){ profileTab='pedigree'; renderProfile(); }
+      else if(a==='addweight'){ openAddWeightSheet(r); }
       else if(a==='addphoto'){ profileTab='photos'; renderProfile(); }
       else if(a==='addnote'){ profileTab='notes'; renderProfile(); }
       else if(a==='litters'){ profileTab='litters'; renderProfile(); }
