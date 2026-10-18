@@ -74,6 +74,11 @@
   .rel-arrow{ color:var(--gold-deep); font-weight:700; }
   .searchrow{ display:flex; gap:8px; align-items:flex-start; }
   .searchrow .searchwrap{ flex:1; min-width:0; }
+  .add-btn{ flex:0 0 auto; width:50px; height:46px; border-radius:11px; border:none; background:var(--navy); color:var(--page); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
+  .add-btn svg{ width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:2.6; stroke-linecap:round; }
+  [data-theme="dark"] .add-btn{ background:var(--gold-deep); color:#0c1830; }
+  .search-mode{ margin-top:8px; }
+  .search-mode button{ min-height:34px !important; padding-top:4px !important; padding-bottom:4px !important; font-size:13px !important; }
   .rel-btn{ flex:0 0 auto; display:flex; align-items:center; gap:6px; min-height:46px; padding:0 12px; border-radius:9px; border:2px solid var(--gold-deep); background:var(--card); color:var(--ink); font-family:'Jost',sans-serif; font-size:13px; font-weight:600; cursor:pointer; }
   .rel-btn svg{ width:18px; height:18px; stroke:var(--gold-deep); fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
   .st-block{ text-align:center; padding:6px 0 2px; }
@@ -573,8 +578,9 @@
     <input type="search" id="searchInput" placeholder="Search by name, ear #, color, or breed">
     <button id="searchClear" aria-label="Clear search" style="display:none;">&times;</button>
   </div>
-  <button class="rel-btn" id="relativesBtn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="19" r="2.4"/><circle cx="19" cy="19" r="2.4"/><path d="M12 7.4v4.2M12 11.6L6.2 17M12 11.6l5.8 5.4"/></svg>Relatives</button>
+  <button class="add-btn" id="addRabbitTopBtn" type="button" aria-label="Add a rabbit" title="Add a rabbit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
+  <div class="seg search-mode" id="searchModeSeg"><button type="button" data-smode="herd" class="on">Herd</button><button type="button" data-smode="relatives">Relatives</button></div>
   <button class="btn btn-secondary quickbred" id="quickBredBtn">+ Record a breeding</button>
 </div>
 
@@ -1741,6 +1747,7 @@ let rabbits = [], planned = [], customEvents = [], shows = [], expenses = [], cu
 let profileRabbitId = null, profileTab = 'overview', photoActiveCategory = 'Primary';
 let expandedLitters = new Set();
 let calWeekStart = null, calSelectedDate = null;
+let searchMode = 'herd';   // 'herd' or 'relatives': what the one search bar looks for
 
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function addDays(d,n){ const x=new Date(d+'T00:00:00'); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10); }
@@ -1851,8 +1858,8 @@ async function loadData(){
     ensureRabbitFieldDefaults();
   }
   try{ litterUiOn = !!JSON.parse((await window.storage.get(LITTER_UI_KEY,false)).value).on; }catch(e){ litterUiOn = false; }
-  try{ const wl = JSON.parse((await window.storage.get(WAITLIST_KEY,false)).value); waitlist = Array.isArray(wl)?wl:[]; }catch(e){ waitlist = []; }
-  try{ const kt = JSON.parse((await window.storage.get(KIT_TAGS_KEY,false)).value); customKitTags = Array.isArray(kt)?kt.filter(x=>typeof x==='string'):DEFAULT_CUSTOM_KIT_TAGS.slice(); }catch(e){ customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); }
+  waitlistSafe=false; try{ const wl = JSON.parse((await window.storage.get(WAITLIST_KEY,false)).value); waitlist = Array.isArray(wl)?wl:[]; waitlistSafe=Array.isArray(wl); }catch(e){ waitlist = []; waitlistSafe = /not found/i.test(String(e&&e.message)); }
+  kitTagsSafe=false; try{ const kt = JSON.parse((await window.storage.get(KIT_TAGS_KEY,false)).value); customKitTags = Array.isArray(kt)?kt.filter(x=>typeof x==='string'):DEFAULT_CUSTOM_KIT_TAGS.slice(); kitTagsSafe=Array.isArray(kt); }catch(e){ customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); kitTagsSafe = /not found/i.test(String(e&&e.message)); }
   try{ const tv = JSON.parse((await window.storage.get(TRASH_KEY,false)).value); trash = Array.isArray(tv) ? tv : []; }catch(e){ trash = []; }
   await hydratePhotos();
   memoryOwner = accountMemoryId();
@@ -2023,12 +2030,61 @@ function renderTrash(main){
         return `<div class="card no-tap"><div class="card-top"><div><div class="card-name">${esc(r.name||'Unnamed rabbit')}</div><div class="card-sub">${esc([r.sex,r.breed,r.color].filter(Boolean).join(' · '))}</div></div></div>
           <div class="card-detail">Deleted ${esc(t.deletedAt||'')} &middot; ${left} day${left===1?'':'s'} left</div>
           <div class="card-actions"><button class="btn btn-primary btn-sm" data-restore="${esc(t.id)}">Restore</button></div></div>`;
-      }).join('') : `<div class="empty">Nothing deleted recently.</div>`);
+      }).join('') : `<div class="empty">Nothing deleted recently.</div>`)
+    + removedLitterItemsHTML();
+  wireRemovedLitterItems(main);
   main.querySelectorAll('[data-restore]').forEach(b=>b.onclick=async ()=>{
     b.disabled = true; b.textContent = 'Restoring…';
     const ok = await restoreFromTrash(b.dataset.restore);
     showToast(ok ? 'Restored' : 'Could not restore — check your connection and try again');
     renderTrash(main);
+  });
+}
+function archiveEntryLitter(dam, entry){
+  if(!entry || entry.outcome!=='litter' || !entry.litterBornDate) return;
+  const c=JSON.parse(JSON.stringify(entry));
+  (dam.removedLitters=dam.removedLitters||[]).push({id:uid(), removedAt:todayStr(), litterBornDate:c.litterBornDate, litterKits:c.litterKits||[], litterDead:c.litterDead||null, litterLosses:c.litterLosses||[], litterNotes:c.litterNotes||'', weanDate:c.weanDate, sellDate:c.sellDate, rebreedDate:null, partner:c.partner, bredDate:c.bredDate, entry:c});
+}
+// A photo that is deleted or replaced is kept on the rabbit's record (never purged) and can be put back.
+function archivePhoto(r, p){ if(!p) return; (r.removedPhotos=r.removedPhotos||[]).push({removedAt:todayStr(), photo:p}); }
+// Litters and kits taken out of a doe's record are kept on her record (never purged) and can be put back here.
+function removedLitterItems(){
+  const out=[];
+  rabbits.forEach(r=>{
+    (r.removedLitters||[]).forEach(x=>out.push({kind:'litter', dam:r, x}));
+    (r.removedKits||[]).forEach(x=>out.push({kind:'kit', dam:r, x}));
+    (r.removedPhotos||[]).forEach((x,i)=>out.push({kind:'photo', dam:r, x:Object.assign({id:'ph'+i},x)}));
+  });
+  return out.sort((a,b)=>(b.x.removedAt||'').localeCompare(a.x.removedAt||''));
+}
+function removedLitterItemsHTML(){
+  const it=removedLitterItems(); if(!it.length) return '';
+  return `<div class="section-label" style="margin-top:16px;">REMOVED LITTERS, KITS AND PHOTOS</div><div class="card-sub" style="margin-bottom:10px;">These stay saved on the doe's record. Nothing here expires.</div>`+it.map(({kind,dam,x})=>
+    `<div class="card no-tap"><div class="card-name">${esc(dam.name)} &mdash; ${kind==='photo'?'a removed photo':kind==='litter'?'litter born '+fmtDate(x.litterBornDate)+' ('+((x.litterKits||[]).length)+' kits)':'one kit from the litter born '+fmtDate(x.litterBorn)}</div><div class="card-sub">Removed ${esc(x.removedAt||'')}</div>${kind==='photo'&&x.photo&&x.photo.dataUrl?`<img src="${x.photo.dataUrl}" alt="" style="max-width:120px; max-height:120px; border-radius:10px; margin-top:6px;">`:''}
+     <div class="card-actions"><button class="btn btn-primary btn-sm" data-putback="${kind}:${dam.id}:${x.id}">Put back</button></div></div>`).join('');
+}
+function wireRemovedLitterItems(main){
+  main.querySelectorAll('[data-putback]').forEach(b=>b.onclick=()=>{
+    const [kind,damId,id]=b.dataset.putback.split(':'); const dam=rabbits.find(r=>r.id===damId); if(!dam) return;
+    if(kind==='photo'){
+      const i=+id.slice(2); const x=(dam.removedPhotos||[])[i]; if(!x) return;
+      const ph=x.photo; if(rabbitMainPhoto(dam) && ph.category!=='Kit' && ph.category!=='Pedigree Photo') ph.category='Other';
+      (dam.photos=dam.photos||[]).push(ph); dam.removedPhotos.splice(i,1);
+      saveData(); showToast('Photo put back'); renderTrash(main); return;
+    }
+    if(kind==='kit'){
+      const i=(dam.removedKits||[]).findIndex(z=>z.id===id); if(i<0) return;
+      if(dam.litterBornDate!==dam.removedKits[i].litterBorn){ showToast('That kit belongs to the litter born '+fmtDate(dam.removedKits[i].litterBorn)+', which is not her current litter.'); return; }
+      (dam.litterKits=dam.litterKits||[]).push(dam.removedKits[i].kit); dam.removedKits.splice(i,1);
+    } else {
+      const i=(dam.removedLitters||[]).findIndex(z=>z.id===id); if(i<0) return; const x=dam.removedLitters[i];
+      if(dam.litterBornDate || (dam.litterKits||[]).length){ showToast(dam.name+' already has a litter recorded. Only one litter can be put back at a time.'); return; }
+      dam.litterBornDate=x.litterBornDate; dam.litterKits=x.litterKits||[]; dam.litterDead=x.litterDead; dam.litterLosses=x.litterLosses||[]; dam.litterNotes=x.litterNotes||'';
+      dam.weanDate=x.weanDate; dam.sellDate=x.sellDate; dam.rebreedDate=x.rebreedDate; dam.status='nursing';
+      if(x.entry){ const ex=(dam.breedingHistory||[]).find(h=>h.id===x.entry.id); if(ex) Object.assign(ex, JSON.parse(JSON.stringify(x.entry))); else (dam.breedingHistory=dam.breedingHistory||[]).push(JSON.parse(JSON.stringify(x.entry))); }
+      dam.removedLitters.splice(i,1); dam.lastLitterSummary=litterSummaryText(dam);
+    }
+    syncLitterEntry(dam); saveData(); showToast('Put back'); renderTrash(main);
   });
 }
 // ===== RECENTLY DELETED END =====
@@ -2093,7 +2149,7 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState=
 // ===== NEW VERSION NUDGE END =====
 // ===== ACCOUNT SWITCH CLEAN-UP START =====
 function clearAccountMemory(){
-  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = [];
+  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false;
   rabbits = []; planned = []; customEvents = []; shows = []; expenses = [];
   pedigreeSettings = defaultPedigreeSettings();
   trash = [];
@@ -2305,10 +2361,12 @@ async function addPhotoToRabbit(r, file, category, opts){
   }catch(e){ console.error(e); showToast("Couldn't read that photo. Try a JPG or PNG."); return false; }
   const prior = r.photos||[];
   const photo = {id:uid(), category, dataUrl, addedAt:todayStr()};
+  if(replaceId) archivePhoto(r, prior.find(p=>p.id===replaceId));
   r.photos = (replaceId ? prior.filter(p=>p.id!==replaceId) : prior.slice()).concat([photo]);
   const ok = await saveData();
   if(!ok){
     r.photos = prior;   // nothing was saved: put things back exactly as they were
+    if(replaceId && r.removedPhotos) r.removedPhotos.pop();
     showToast("The photo wasn't saved, so it wasn't added. See the red message for details.");
     return false;
   }
@@ -2725,6 +2783,7 @@ function renderNav(){
       searchQuery = '';
       const inp = document.getElementById('searchInput'); if(inp) inp.value='';
       document.getElementById('searchClear').style.display='none';
+      if(searchMode!=='herd'){ searchMode='herd'; document.querySelectorAll('#searchModeSeg button').forEach(x=>x.classList.toggle('on', x.dataset.smode==='herd')); if(inp) inp.placeholder='Search by name, ear #, color, or breed'; }
       currentTab = b.dataset.nav; render(); window.scrollTo(0,0);
     };
   });
@@ -2885,6 +2944,10 @@ function litterToggleHTML(){
     <button type="button" class="nn-sw ${litterUiOn?'on':''}" role="switch" aria-checked="${litterUiOn}" id="nnToggle" aria-label="New litter view"><span></span></button></div>`;
 }
 function bindLitterToggle(main){ const t=main.querySelector('#nnToggle'); if(t) t.onclick=()=>setLitterUi(!litterUiOn); }
+function litterSireName(r){
+  const he=(r.breedingHistory||[]).find(e=>e.outcome==='litter' && e.litterBornDate && e.litterBornDate===r.litterBornDate);
+  return (he && he.partner) || r.partner || '';
+}
 function litterAgeText(born){ return ageText(born); }
 function newNurseryCardHTML(r){
   const kits=r.litterKits||[], n=kits.length;
@@ -2897,7 +2960,7 @@ function newNurseryCardHTML(r){
     ? `<button class="btn btn-primary" data-nnwean="${r.id}">Mark weaned</button>`
     : `<button class="btn btn-primary" data-act="editlitter" data-id="${r.id}">Edit litter</button>`;
   return `<div class="card nn-card" data-nnopen="${r.id}" style="cursor:pointer;"><div class="nn-top"><div><div class="card-name">${esc(r.name)}'s litter</div>
-      <div class="card-sub">${esc(r.partner?'Sired by '+r.partner+' · ':'')}born ${fmtDate(r.litterBornDate)}</div></div>
+      <div class="card-sub">${esc(litterSireName(r)?'Sired by '+litterSireName(r)+' · ':'')}born ${fmtDate(r.litterBornDate)}</div></div>
       <div class="nn-age">${esc(litterAgeText(r.litterBornDate))}</div></div>
     <div class="nn-count"><span class="nn-big">${n}</span> in the litter</div>
     <div class="card-sub">${lost?lost+' lost · ':''}${forSale?forSale+' for sale · ':''}${reserved?reserved+' reserved · ':''}${r.status==='nursing'?'':'Weaned · '}Wean ${fmtDate(r.weanDate)} · 8 weeks ${fmtDate(r.sellDate)}</div>
@@ -2949,7 +3012,7 @@ const LOSS_TAGS = ['Fader','Peanut','DOA','Unknown'];
 function lossBucket(tag){ return tag==='DOA'?'DOA':tag==='Peanut'?'peanut':'passed'; }
 function syncLitterEntry(r){
   const e=(r.breedingHistory||[]).find(x=>x.outcome==='litter' && x.litterBornDate===r.litterBornDate);
-  if(e){ e.litterKits=r.litterKits; e.litterDead=r.litterDead; e.weanDate=r.weanDate; e.sellDate=r.sellDate; e.litterLosses=r.litterLosses; }
+  if(e){ e.litterKits=r.litterKits; e.litterDead=r.litterDead; e.weanDate=r.weanDate; e.sellDate=r.sellDate; e.litterLosses=r.litterLosses; e.litterNotes=r.litterNotes; }
 }
 function bumpDead(r, tag, by){
   r.litterDead = r.litterDead || {DOA:0,peanut:0,passed:0};
@@ -3010,13 +3073,13 @@ function litterDateRows(r){
 function openLitterPage(damId){
   const r=rabbits.find(x=>x.id===damId); if(!r) return;
   const kits=r.litterKits||[], losses=r.litterLosses||[];
-  const sire=r.partner?rabbits.find(x=>nameKey(x.name)===nameKey(r.partner)):null;
+  const sireN=litterSireName(r); const sire=sireN?rabbits.find(x=>nameKey(x.name)===nameKey(sireN)):null;
   const age=litterAgeDays(r);
   const rows=litterDateRows(r);
   const next = r.status!=='nursing' ? 'Weaned' : age<42 ? `Weaning in ${42-age} day${42-age===1?'':'s'} (${fmtDate(r.weanDate)})` : 'Ready to wean';
   openSheet(`<div class="lit-sheet"><button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>${esc(r.name)}'s litter</h2>
-    <div class="card-sub" style="margin:-4px 0 10px;">Mom: <button class="nn-link" id="lp-mom">${esc(r.name)}</button> &middot; Dad: ${sire?`<button class="nn-link" id="lp-dad">${esc(sire.name)}</button>`:esc(r.partner||'?')}</div>
+    <div class="card-sub" style="margin:-4px 0 10px;">Mom: <button class="nn-link" id="lp-mom">${esc(r.name)}</button> &middot; Dad: ${sire?`<button class="nn-link" id="lp-dad">${esc(sire.name)}</button>`:esc(sireN||'?')}</div>
     <div class="lit-card lit-alive"><div class="st-title">Born ${esc(fmtDate(r.litterBornDate))} &middot; ${esc(litterAgeText(r.litterBornDate))}</div>
       <div class="nn-count" style="margin:4px 0 0;"><span class="nn-big" style="font-size:56px;">${kits.length}</span> in the litter</div></div>
     ${next?`<div class="lit-card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><span class="lit-label">Next step</span><div style="font-weight:600;">${esc(next)}</div></div>${age>=42&&r.status==='nursing'?'<button class="btn btn-primary btn-sm" id="lp-wean">Mark weaned</button>':''}</div>`:''}
@@ -3024,7 +3087,7 @@ function openLitterPage(damId){
     <div class="lit-card"><span class="lit-label">Losses</span>
       ${losses.length?losses.map(l=>`<div class="st-row" style="padding:8px 0;"><div><b>${esc(l.tag)}</b><div class="card-sub">${fmtDate(l.date)}${l.notes?' &middot; '+esc(l.notes):''}</div></div><button class="btn btn-secondary btn-sm" data-editloss="${l.id}">Edit</button></div>`).join(''):'<div class="card-sub" style="margin-bottom:6px;">None recorded.</div>'}
       <button class="btn btn-secondary btn-sm" id="lp-addloss" style="margin-top:6px;">+ Record a loss</button></div>
-    ${(()=>{ const pr=pairingResults(r); return pr?`<div class="lit-card"><span class="lit-label">This pairing</span><div class="card-sub">${esc(r.name)} × ${esc(r.partner)}: ${pr.litters} litter${pr.litters===1?'':'s'}, ${pr.born} kits born (about ${pr.avg} per litter), ${pr.alive} still counted alive.</div></div>`:''; })()}
+    ${(()=>{ const pr=pairingResults(r); return pr?`<div class="lit-card"><span class="lit-label">This pairing</span><div class="card-sub">${esc(r.name)} × ${esc(litterSireName(r))}: ${pr.litters} litter${pr.litters===1?'':'s'}, ${pr.born} kits born (about ${pr.avg} per litter), ${pr.alive} still counted alive.</div></div>`:''; })()}
     <div class="lit-card"><span class="lit-label">Dates</span>
       ${rows.map(([k,l,d])=>`<div class="st-row" style="padding:8px 0;${k==='rebreed'?'opacity:.7;':''}"><div class="st-lbl" style="${k==='rebreed'?'font-weight:500;':''}">${l}</div><input type="date" data-lpdate="${k}" value="${esc(d)}" style="max-width:170px;"></div>`).join('')}</div>
     <div class="lit-card"><span class="lit-label">Notes</span><textarea id="lp-notes" rows="3" placeholder="Notes about this litter">${esc(r.litterNotes||'')}</textarea></div>
@@ -3055,6 +3118,7 @@ let customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice();
 function allKitTags(){ return BUILTIN_KIT_TAGS.concat(customKitTags); }
 function setKitTag(k, tag){ k.tag = tag||''; k.forSale = (tag==='For sale'); }
 async function saveKitTags(){
+  if(!kitTagsSafe){ showToast("Your kit tags didn't load, so they can't be changed right now. Refresh and try again."); return false; }
   try{ await window.storage.set(KIT_TAGS_KEY, JSON.stringify(customKitTags), false); return true; }
   catch(e){ showToast("Couldn't save — check your connection and try again."); return false; }
 }
@@ -3084,13 +3148,13 @@ function openKitTagSheet(damId, idx){
     <div class="field"><label>Tag</label><div class="nn-chips" id="kt-chips"><button type="button" class="nn-chip" data-t="">None</button>${allKitTags().map(t=>`<button type="button" class="nn-chip" data-t="${esc(t)}">${esc(t)}</button>`).join('')}</div></div>
     <div class="field"><label>Markings</label><textarea id="kt-marks" rows="2" placeholder="e.g. white blaze, left ear tip">${esc(k.markings||'')}</textarea></div>
     <div class="field"><label>Weights</label>${(k.weights||[]).length?(k.weights||[]).slice().sort((a,b)=>b.date.localeCompare(a.date)).map(w=>`<div class="card-sub">${fmtDate(w.date)} &middot; ${ozText(w.oz)}</div>`).join(''):'<div class="card-sub">None yet. Use “Weigh the litter” on the litter page.</div>'}</div>
-    <div class="nn-chips" style="margin-bottom:12px;"><button type="button" class="nn-chip" id="kt-photo">${kitPhotoOf(dam,k)?'Replace photo':'+ Add photo'}</button>${kitPhotoOf(dam,k)?'<button type="button" class="nn-chip" id="kt-photo-del">Remove photo</button>':''}</div>
+    <div class="nn-chips" style="margin-bottom:12px;"><button type="button" class="nn-chip" id="kt-photo">${kitPhotoOf(dam,k)?'Replace photo':'+ Add photo'}</button>${kitPhotoOf(dam,k)?'<button type="button" class="nn-chip" id="kt-photo-del">Hide photo</button>':''}</div>
     <input type="file" accept="image/*" id="kt-file" style="display:none;">
     <div class="sheet-actions"><button class="btn btn-secondary" id="kt-edit">Edit sex &amp; color</button><button class="btn btn-primary" id="kt-save">Save</button></div>`);
   const saveMarks=()=>{ const v=document.getElementById('kt-marks').value.trim(); if(v!==(k.markings||'')){ k.markings=v; syncLitterEntry(dam); saveData(); } };
   document.getElementById('kt-photo').onclick=()=>document.getElementById('kt-file').click();
   document.getElementById('kt-file').onchange=async(e)=>{ const f=e.target.files[0]; e.target.value=''; if(!f) return; saveMarks(); if(await addKitPhoto(dam,k,f)){ openKitTagSheet(damId,idx); } };
-  const pd=document.getElementById('kt-photo-del'); if(pd) pd.onclick=()=>armConfirm(pd,'Tap again to remove',()=>{ dam.photos=(dam.photos||[]).filter(p=>!(p.category==='Kit'&&p.kitId===k.id)); saveData(); openKitTagSheet(damId,idx); });
+  const pd=document.getElementById('kt-photo-del'); if(pd) pd.onclick=()=>armConfirm(pd,'Tap again to hide',()=>{ dam.photos=(dam.photos||[]).map(p=>(p.category==='Kit'&&p.kitId===k.id&&!p.removed)?Object.assign({},p,{removed:true}):p); saveData(); openKitTagSheet(damId,idx); });
   const paint=()=>document.querySelectorAll('#kt-chips .nn-chip').forEach(b=>b.classList.toggle('on', b.dataset.t===tag));
   document.querySelectorAll('#kt-chips .nn-chip').forEach(b=>b.onclick=()=>{ tag=b.dataset.t; paint(); });
   paint();
@@ -3131,7 +3195,7 @@ function openWeanPlanSheet(r){
       open.forEach(x=>{
         if(x.choice==='Keeping'){
           x.k.sex=x.sex;
-          const kit=blankRabbit({ name:x.name.trim(), sex:x.sex, breed:r.breed, color:x.k.color||'', dob:r.litterBornDate, sireName:r.partner||'', damName:r.name, status:'growing' });
+          const kit=blankRabbit({ name:x.name.trim(), sex:x.sex, breed:r.breed, color:x.k.color||'', dob:r.litterBornDate, sireName:litterSireName(r), damName:r.name, status:'growing' });
           rabbits.push(kit); x.k.individualId=kit.id; setKitTag(x.k,'Keeping');
         } else if(x.choice==='For sale' || x.choice==='Reserved'){ setKitTag(x.k,x.choice); }
       });
@@ -3148,10 +3212,10 @@ function convertOldKitsToJuniors(r, sexes){
   const pend=unplacedKits(r); let made=0;
   pend.forEach(x=>{
     const sx=(x.k.sex==='buck'||x.k.sex==='doe')?x.k.sex:(sexes[x.i]||'doe');
-    let name=`${r.name} x ${r.partner||'?'} — ${sx==='buck'?'Buck':'Doe'} ${x.k.num||x.i+1}`;
+    let name=`${r.name} x ${litterSireName(r)||'?'} — ${sx==='buck'?'Buck':'Doe'} ${x.k.num||x.i+1}`;
     if(rabbits.some(z=>nameKey(z.name)===nameKey(name))) name+=` (${r.litterBornDate})`;
     x.k.sex=sx;
-    const kit=blankRabbit({ name, sex:sx, breed:r.breed, color:x.k.color||'', dob:r.litterBornDate, sireName:r.partner||'', damName:r.name, status:'growing', forSale:(x.k.tag==='For sale') });
+    const kit=blankRabbit({ name, sex:sx, breed:r.breed, color:x.k.color||'', dob:r.litterBornDate, sireName:litterSireName(r), damName:r.name, status:'growing', forSale:(x.k.tag==='For sale') });
     rabbits.push(kit); x.k.individualId=kit.id; made++;
   });
   if(made){ syncLitterEntry(r); showToast(made+' kit'+(made===1?'':'s')+' from the last litter became juniors'); }
@@ -3208,8 +3272,9 @@ function openKitSaleSheet(kitId, after){
 
 // waitlist: its own data key, nothing is ever hard-deleted from the screen
 const WAITLIST_KEY='waitlist_v1';
-let waitlist=[];
+let waitlist=[], waitlistSafe=false, kitTagsSafe=false;   // saving is blocked unless the stored list was read successfully (or truly doesn't exist yet)
 async function saveWaitlist(){
+  if(!waitlistSafe){ showToast("The waitlist didn't load, so it can't be changed right now. Refresh and try again."); return false; }
   try{ await window.storage.set(WAITLIST_KEY, JSON.stringify(waitlist), false); return true; }
   catch(e){ showToast("Couldn't save — check your connection and try again."); return false; }
 }
@@ -3286,8 +3351,8 @@ function openWeighSheet(r, after){
   };
 }
 function pairingResults(dam){
-  if(!dam.partner) return null;
-  const key=nameKey(dam.partner);
+  const sn=litterSireName(dam); if(!sn) return null;
+  const key=nameKey(sn);
   const lit=(dam.breedingHistory||[]).filter(e=>e.outcome==='litter' && e.litterBornDate && nameKey(e.partner||'')===key);
   if(!lit.length) return null;
   const born=lit.reduce((n,e)=>n+((e.litterKits||[]).length+((e.litterDead&&((e.litterDead.DOA||0)+(e.litterDead.peanut||0)+(e.litterDead.passed||0))||0))),0);
@@ -3299,12 +3364,13 @@ async function addKitPhoto(dam, kit, file){
   let dataUrl; try{ dataUrl=await shrinkImageFile(file); }catch(e){ showToast("Couldn't read that photo. Try a JPG or PNG."); return false; }
   const prior=dam.photos||[];
   const photo={id:uid(), category:'Kit', kitId:kit.id, dataUrl, addedAt:todayStr()};
-  dam.photos=prior.filter(p=>!(p.category==='Kit'&&p.kitId===kit.id)).concat([photo]);   // one photo per kit: a new one replaces the old
+  // one photo shows per kit; an older one is hidden but kept, never deleted
+  dam.photos=prior.map(p=>(p.category==='Kit'&&p.kitId===kit.id&&!p.removed)?Object.assign({},p,{removed:true}):p).concat([photo]);
   const ok=await saveData();
   if(!ok){ dam.photos=prior; showToast("The photo wasn't saved, so it wasn't added."); return false; }
   showToast('Photo added'); return true;
 }
-function kitPhotoOf(dam,kit){ return (dam.photos||[]).find(p=>p.category==='Kit'&&p.kitId===kit.id)||null; }
+function kitPhotoOf(dam,kit){ return (dam.photos||[]).find(p=>p.category==='Kit'&&p.kitId===kit.id&&!p.removed)||null; }
 // ===== NEW LITTER VIEW (opt-in) END =====
 function nurseryCardHTML(r){
   const age=litterAgeDays(r), kits=r.litterKits||[];
@@ -3366,6 +3432,7 @@ function renderMain(){
   const main=document.getElementById('main');
   const gridTabs = ['rabbits','litters','planned','ancestors','archive','forsale'];
   main.classList.toggle('card-grid', !!searchQuery.trim() || gridTabs.includes(currentTab));
+  if(searchMode==='relatives'){ renderRelativesSearch(main); return; }
   if(searchQuery.trim()){ renderSearch(main); return; }
   if(currentTab==='home'){ renderHome(main); }
   else if(currentTab==='rabbits'){ renderRabbits(main); }
@@ -3665,11 +3732,9 @@ function renderRabbits(main){
   const actionRow = rabbitsGroup==='does'
     ? `<div class="action-row" style="display:flex; gap:10px; margin:10px 0 14px;">
          <button class="btn btn-primary" style="flex:1;" id="herdRecordBreedingBtn">+ Record a breeding</button>
-         <button class="btn btn-secondary" style="flex:1;" id="herdAddRabbitBtn">+ Add a rabbit</button>
        </div>`
-    : `<button class="btn btn-secondary" style="width:100%; margin:10px 0 14px;" id="herdAddRabbitBtn">+ Add a rabbit</button>`;
+    : '';
   main.innerHTML = groupTabs + actionRow + body;
-  document.getElementById('herdAddRabbitBtn').onclick = openAddSheet;
   if(document.getElementById('herdRecordBreedingBtn')) document.getElementById('herdRecordBreedingBtn').onclick = openQuickBreedSheet;
   document.querySelectorAll('[data-rgroup]').forEach(b=>b.onclick=()=>{ rabbitsGroup=b.dataset.rgroup; render(); window.scrollTo(0,0); });
   document.querySelectorAll('[data-doesfilter]').forEach(b=>b.onclick=()=>{ doesFilter=b.dataset.doesfilter; render(); });
@@ -3796,6 +3861,26 @@ function openAddEventSheet(defaultDate){
   };
 }
 
+function renderRelativesSearch(main){
+  main.classList.add('card-grid');
+  const q=nameKey(searchQuery);
+  if(!q){ main.innerHTML=`<div class="empty" style="grid-column:1/-1;">Type any rabbit or ancestor in the search bar to see everyone related to it, and how.</div>`; return; }
+  const hits=rabbits.filter(r=>nameKey(r.name).includes(q) || (r.alias&&nameKey(r.alias).includes(q)) || (r.earNumber&&nameKey(r.earNumber)===q))
+    .sort((a,b)=>{ const as=nameKey(a.name).startsWith(q)?0:1, bs=nameKey(b.name).startsWith(q)?0:1; return as-bs || a.name.localeCompare(b.name); }).slice(0,25);
+  if(!hits.length){ main.innerHTML=`<div class="empty" style="grid-column:1/-1;">No rabbit matches "${esc(searchQuery)}".</div>`; return; }
+  main.innerHTML=`<div class="section-label" style="grid-column:1/-1;">TAP A RABBIT TO SEE ITS RELATIVES</div>`+hits.map(r=>
+    `<div class="card no-tap" data-relpick="${r.id}" style="cursor:pointer;"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${statusBadge(r)}</div></div>`).join('');
+  main.querySelectorAll('[data-relpick]').forEach(c=>c.onclick=()=>openRelativesSheet(rabbits.find(x=>x.id===c.dataset.relpick)));
+}
+function setSearchMode(m){
+  searchMode=m;
+  document.querySelectorAll('#searchModeSeg button').forEach(b=>b.classList.toggle('on', b.dataset.smode===m));
+  const inp=document.getElementById('searchInput');
+  inp.placeholder = m==='relatives' ? 'Type a rabbit or ancestor to see its relatives' : 'Search by name, ear #, color, or breed';
+  render(); window.scrollTo(0,0);
+}
+document.querySelectorAll('#searchModeSeg button').forEach(b=>b.onclick=()=>setSearchMode(b.dataset.smode));
+document.getElementById('addRabbitTopBtn').onclick=()=>openAddSheet();
 function renderSearch(main){
   const q=nameKey(searchQuery);
   const scored = rabbits.map(r=>{
@@ -4033,9 +4118,13 @@ function openKindledSheet(r, editing){
   const delLitterBtn = document.getElementById('f-deletelitter');
   if(delLitterBtn) delLitterBtn.onclick=()=>{
     armConfirm(delLitterBtn, 'Tap again to confirm', ()=>{
+      const delBorn=r.litterBornDate;
+      // keep a full copy first, so a deleted litter can be put back from Recently deleted
+      (r.removedLitters=r.removedLitters||[]).push({id:uid(), removedAt:todayStr(), litterBornDate:r.litterBornDate, litterKits:r.litterKits, litterDead:r.litterDead, litterLosses:r.litterLosses||[], litterNotes:r.litterNotes||'', weanDate:r.weanDate, sellDate:r.sellDate, rebreedDate:r.rebreedDate, partner:r.partner, bredDate:r.bredDate, entry:(()=>{ const e=(r.breedingHistory||[]).find(x=>x.outcome==='litter'&&x.litterBornDate===r.litterBornDate); return e?JSON.parse(JSON.stringify(e)):null; })()});
+      r.litterLosses=[]; r.litterNotes='';
       r.litterBornDate=null; r.litterKits=[]; r.litterDead=null; r.weanDate=null; r.sellDate=null; r.rebreedDate=null; r.lastLitterSummary='';
       const hist = r.breedingHistory||[];
-      const entry = hist[hist.length-1];
+      const entry = hist.find(x=>x.outcome==='litter' && x.litterBornDate===delBorn) || hist[hist.length-1];
       if(entry && entry.outcome==='litter' && entry.autoBred){
         // this breeding only existed because the litter was logged directly, so remove it too
         hist.pop(); r.status='open'; r.dueDate=null; r.bredDate=null; r.partner=null; r.activeBreedingId=null;
@@ -4057,9 +4146,9 @@ function openKindledSheet(r, editing){
     // kits: new litters start blank; editing adds blanks or drops unlinked kits from the end
     let kits;
     if(editing){
-      kits = existing.map(k=>({id:k.id||uid(), sex:k.sex||'', color:k.color||'', forSale:!!k.forSale, individualId:k.individualId||null}));
+      kits = existing.map(k=>Object.assign({}, k, {id:k.id||uid(), sex:k.sex||'', color:k.color||'', forSale:!!k.forSale, individualId:k.individualId||null}));   // keeps tags, weights, sale, markings and numbers
       while(kits.length<st.alive) kits.push(blankKit());
-      for(let i=kits.length-1; i>=0 && kits.length>st.alive; i--){ if(!kits[i].individualId) kits.splice(i,1); }
+      for(let i=kits.length-1; i>=0 && kits.length>st.alive; i--){ if(!kits[i].individualId){ (r.removedKits=r.removedKits||[]).push({id:uid(), removedAt:todayStr(), litterBorn:r.litterBornDate, kit:kits[i]}); kits.splice(i,1); } }
     } else {
       kits = Array.from({length:st.alive}, blankKit);
     }
@@ -4074,6 +4163,11 @@ function openKindledSheet(r, editing){
       r.breedingHistory.push(e0); r.activeBreedingId=e0.id;
     }
     const oldBorn = r.litterBornDate;
+    if(!wasEditing && oldBorn && (r.litterKits||[]).length && !(r.breedingHistory||[]).some(e=>e.outcome==='litter' && e.litterBornDate===oldBorn)){
+      // the previous litter has no copy in her breeding history: keep one so it is never lost
+      (r.removedLitters=r.removedLitters||[]).push({id:uid(), removedAt:todayStr(), litterBornDate:oldBorn, litterKits:r.litterKits, litterDead:r.litterDead, litterLosses:r.litterLosses||[], litterNotes:r.litterNotes||'', weanDate:r.weanDate, sellDate:r.sellDate, rebreedDate:r.rebreedDate, partner:r.partner, bredDate:null, entry:null});
+    }
+    if(!wasEditing){ syncLitterEntry(r); r.litterLosses=[]; r.litterNotes=''; }
     r.status='nursing'; r.litterBornDate=born; r.litterKits=kits;
     r.litterDead={DOA:st.doa,peanut:st.peanut,passed:st.passed}; r.weanDate=addDays(born,42); r.sellDate=addDays(born,56);
     r.rebreedDate=st.rebreed||addDays(born,28); r.dueDate=null; r.flag='';
@@ -4173,8 +4267,17 @@ function openBreedSheet(r, presetBuck, onDone){
   };
 }
 function commitBreed(r, buck, bred, onDone){
+  // make sure the finished litter is saved in her history before anything on her record changes
+  if(r.litterBornDate && (r.litterKits||[]).length){
+    syncLitterEntry(r);
+    if(!(r.breedingHistory||[]).some(e=>e.outcome==='litter' && e.litterBornDate===r.litterBornDate)){
+      (r.removedLitters=r.removedLitters||[]).push({id:uid(), removedAt:todayStr(), litterBornDate:r.litterBornDate, litterKits:r.litterKits, litterDead:r.litterDead, litterLosses:r.litterLosses||[], litterNotes:r.litterNotes||'', weanDate:r.weanDate, sellDate:r.sellDate, rebreedDate:r.rebreedDate, partner:r.partner, bredDate:null, entry:null});
+    }
+  }
+  const keepOldKits = litterUiOn && unplacedKits(r).length>0;   // new view: unplaced kits stay visible until the next litter is recorded
   r.status='pregnant'; r.partner=buck||null; r.bredDate=bred; r.dueDate=addDays(bred,31);
-  r.litterBornDate=null; r.litterKits=null; r.litterDead=null; r.flag='';
+  if(!keepOldKits){ r.litterBornDate=null; r.litterKits=null; r.litterDead=null; }
+  r.flag='';
   r.breedingHistory = r.breedingHistory||[];
   const entry = {id:uid(), bredDate:bred, partner:buck||'', dueDate:r.dueDate, outcome:'pending', litterBornDate:null, litterKits:null, litterDead:null, weanDate:null, sellDate:null};
   r.breedingHistory.push(entry); r.activeBreedingId = entry.id;
@@ -4197,7 +4300,6 @@ function openQuickBreedSheet(){
   };
 }
 document.getElementById('quickBredBtn').onclick=openQuickBreedSheet;
-document.getElementById('relativesBtn').onclick=()=>openRelativesPicker('');
 
 function openSaleSheet(r){
   const s=r.sale||{};
@@ -4267,7 +4369,7 @@ const MERGE_FIELDS = [
   ['gcNumber','GC #'],['sireName','Sire'],['damName','Dam'],['notes','Notes']
 ];
 const MERGE_STATUS_KEYS = ['status','external','partner','bredDate','dueDate','rebreedDate','activeBreedingId','prevStatus','presaleFlag','forSale','sale','graduatedDate','juniorAckDone','nestBoxAckDate','litterConvertAckDate'];
-const MERGE_LITTER_KEYS = ['litterBornDate','litterKits','litterDead','weanDate','sellDate','lastLitterSummary'];
+const MERGE_LITTER_KEYS = ['litterBornDate','litterKits','litterDead','weanDate','sellDate','lastLitterSummary','litterLosses','litterNotes'];
 
 function mgNorm(s){ return nameKey(s); }
 function mgEmpty(v){ return v===null || v===undefined || (typeof v==='string' && !v.trim()) || (Array.isArray(v) && !v.length); }
@@ -4793,10 +4895,11 @@ function openHistoryEditSheet(dam, entry, back){
   document.querySelectorAll('#f-outcome button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#f-outcome button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); outcome=b.dataset.v; });
   document.getElementById('f-histsave').onclick=()=>{
     entry.outcome=outcome;
-    if(outcome!=='litter'){ entry.litterBornDate=null; entry.litterKits=null; entry.litterDead=null; }
+    if(outcome!=='litter'){ archiveEntryLitter(dam, Object.assign({},entry,{outcome:'litter'})); entry.litterBornDate=null; entry.litterKits=null; entry.litterDead=null; }
     saveData(); back();
   };
   document.getElementById('f-histdelete').onclick=(e)=>{ armConfirm(e.target, 'Tap again to confirm', ()=>{
+    archiveEntryLitter(dam, entry);
     dam.breedingHistory = dam.breedingHistory.filter(x=>x.id!==entry.id);
     if(dam.activeBreedingId===entry.id) dam.activeBreedingId=null;
     saveData(); back();
@@ -7137,7 +7240,7 @@ function wireProfileTab(r){
     };
     document.querySelectorAll('[data-pdel]').forEach(b=>b.onclick=(ev)=>{
       ev.stopPropagation();
-      armConfirm(b,'Tap again',()=>{ r.photos=(r.photos||[]).filter(p=>p.id!==b.dataset.pdel); saveData(); renderProfile(); });
+      armConfirm(b,'Tap again',()=>{ archivePhoto(r,(r.photos||[]).find(p=>p.id===b.dataset.pdel)); r.photos=(r.photos||[]).filter(p=>p.id!==b.dataset.pdel); saveData(); renderProfile(); });
     });
     document.querySelectorAll('[data-popen]').forEach(el=>el.onclick=(ev)=>{
       if(ev.target.closest('[data-pdel]')) return;
@@ -7208,7 +7311,7 @@ function wirePhotoViewer(r, photo){
   const delBtn = document.getElementById('pvDelete');
   delBtn.onclick = ()=>{
     armConfirm(delBtn, 'Tap again to delete', ()=>{
-      r.photos = (r.photos||[]).filter(p=>p.id!==photo.id);
+      archivePhoto(r,photo); r.photos = (r.photos||[]).filter(p=>p.id!==photo.id);
       saveData(); closePhotoViewer(); renderProfile(); showToast('Photo deleted');
     });
   };
