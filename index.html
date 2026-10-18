@@ -77,8 +77,10 @@
   .add-btn{ flex:0 0 auto; width:50px; height:46px; border-radius:11px; border:none; background:var(--navy); color:var(--page); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
   .add-btn svg{ width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:2.6; stroke-linecap:round; }
   [data-theme="dark"] .add-btn{ background:var(--gold-deep); color:#0c1830; }
-  .search-mode{ margin-top:8px; }
-  .search-mode button{ min-height:34px !important; padding-top:4px !important; padding-bottom:4px !important; font-size:13px !important; }
+  .search-mode{ flex:0 0 auto; flex-direction:column; gap:3px; padding:3px; width:64px; height:46px; box-sizing:border-box; border-radius:12px; border:1.5px solid var(--line,#CABB95); background:var(--card,#FFFDF8); }
+  .search-mode button{ display:flex; align-items:center; justify-content:center; flex:1 1 0; width:100%; height:auto; align-self:stretch; min-height:0 !important; padding:0 !important; font-size:11px !important; font-weight:700 !important; line-height:1; letter-spacing:.01em; border-radius:8px !important; border:0 !important; background:transparent !important; color:var(--ink-soft,#475569) !important; white-space:nowrap; transition:background .15s,color .15s; }
+  .search-mode button.on{ background:var(--navy) !important; color:var(--page,#F7F2E6) !important; }
+  [data-theme="dark"] .search-mode button.on{ background:var(--gold-deep) !important; color:#0c1830 !important; }
   .rel-btn{ flex:0 0 auto; display:flex; align-items:center; gap:6px; min-height:46px; padding:0 12px; border-radius:9px; border:2px solid var(--gold-deep); background:var(--card); color:var(--ink); font-family:'Jost',sans-serif; font-size:13px; font-weight:600; cursor:pointer; }
   .rel-btn svg{ width:18px; height:18px; stroke:var(--gold-deep); fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
   .st-block{ text-align:center; padding:6px 0 2px; }
@@ -193,7 +195,8 @@
 
   .toolbar{ padding:10px 14px 4px; }
   .searchwrap{ position:relative; margin-bottom:8px; }
-  .searchwrap input{ width:100%; padding:12px 34px 12px 34px; border-radius:9px; border:1px solid var(--line-strong); font-size:16px; background:var(--card); color:var(--ink); font-family:'Public Sans',sans-serif; }
+  .searchwrap input::placeholder{ font-size:12px; text-overflow:ellipsis; }
+  .searchwrap input{ width:100%; padding:12px 26px 12px 32px; border-radius:9px; border:1px solid var(--line-strong); font-size:16px; background:var(--card); color:var(--ink); font-family:'Public Sans',sans-serif; }
   .searchwrap svg{ position:absolute; left:10px; top:13px; width:16px; height:16px; stroke:var(--ink-soft); opacity:.6; }
   #searchClear{ position:absolute; right:6px; top:4px; width:32px; height:32px; border:none; background:var(--line); color:var(--ink); border-radius:50%; font-size:18px; line-height:1; cursor:pointer; }
   .quickbred{ width:100%; }
@@ -215,6 +218,10 @@
   .card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
   .card-name{font-family:'Cormorant Garamond',serif; font-weight:600; font-size:19px; color:var(--navy); line-height:1.2;}
   .card-sub{font-size:12px; color:var(--ink-soft); opacity:.85; margin-top:2px;}
+  .cy-chip{background:#E3E8F2;color:#2A3F6B;}
+  .cy-seg{display:flex;gap:4px;}
+  .cy-seg button{flex:1;padding:8px 4px;border-radius:9px;border:1.5px solid var(--line,#CABB95);background:var(--card,#FFFDF8);font-size:12.5px;font-weight:600;color:inherit;cursor:pointer;}
+  .cy-seg button.on{background:var(--navy,#142440);color:#fff;border-color:transparent;}
   .pj-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center;}
   .pj-chip{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--gold-soft,#F3E7C8);color:var(--ink,#0C1830);border:0;}
   .pj-chip.pj-ghost,.pj-add{background:none;border:1px dashed var(--line,#CABB95);color:var(--ink-soft,#475569);font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;cursor:pointer;}
@@ -641,12 +648,12 @@
   <div class="searchrow">
   <div class="searchwrap">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-    <input type="search" id="searchInput" placeholder="Search by name, ear #, color, or breed">
+    <input type="search" id="searchInput" placeholder="Name, ear #, color, breed">
     <button id="searchClear" aria-label="Clear search" style="display:none;">&times;</button>
   </div>
+  <div class="seg search-mode" id="searchModeSeg"><button type="button" data-smode="herd" class="on">Herd</button><button type="button" data-smode="relatives">All</button></div>
   <button class="add-btn" id="addRabbitTopBtn" type="button" aria-label="Add a rabbit" title="Add a rabbit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
-  <div class="seg search-mode" id="searchModeSeg"><button type="button" data-smode="herd" class="on">Herd</button><button type="button" data-smode="relatives">Relatives</button></div>
   <button class="btn btn-secondary quickbred" id="quickBredBtn">+ Record a breeding</button>
 </div>
 
@@ -1904,6 +1911,7 @@ function ensureRabbitFieldDefaults(){
     if(r.graduatedDate===undefined) r.graduatedDate=null;
     if(r.juniorAckDone===undefined) r.juniorAckDone=false;
     if(!Array.isArray(r.projects)) r.projects=[];
+    if(!r.carries || typeof r.carries!=='object') r.carries={};
   });
 }
 async function loadData(){
@@ -1928,6 +1936,7 @@ async function loadData(){
   waitlistSafe=false; try{ const wl = JSON.parse((await window.storage.get(WAITLIST_KEY,false)).value); waitlist = Array.isArray(wl)?wl:[]; waitlistSafe=Array.isArray(wl); }catch(e){ waitlist = []; waitlistSafe = /not found/i.test(String(e&&e.message)); }
   kitTagsSafe=false; try{ const kt = JSON.parse((await window.storage.get(KIT_TAGS_KEY,false)).value); customKitTags = Array.isArray(kt)?kt.filter(x=>typeof x==='string'):DEFAULT_CUSTOM_KIT_TAGS.slice(); kitTagsSafe=Array.isArray(kt); }catch(e){ customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); kitTagsSafe = /not found/i.test(String(e&&e.message)); }
   projectsSafe=false; try{ const pj = JSON.parse((await window.storage.get(PROJECTS_KEY,false)).value); projects = Array.isArray(pj)?pj.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; projectsSafe=Array.isArray(pj); }catch(e){ projects = []; projectsSafe = /not found/i.test(String(e&&e.message)); }
+  traitsSafe=false; try{ const tr = JSON.parse((await window.storage.get(TRAITS_KEY,false)).value); traits = Array.isArray(tr)?tr.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; traitsSafe=Array.isArray(tr); }catch(e){ traits = []; traitsSafe = /not found/i.test(String(e&&e.message)); }
   try{ const tv = JSON.parse((await window.storage.get(TRASH_KEY,false)).value); trash = Array.isArray(tv) ? tv : []; }catch(e){ trash = []; }
   await hydratePhotos();
   memoryOwner = accountMemoryId();
@@ -2163,7 +2172,7 @@ function wireRemovedLitterItems(main){
 function backupAccountId(){ return (currentUser && currentUser.id) ? String(currentUser.id) : 'local'; }
 function fullBackupObject(){
   return { app:'HerdNerd Pro', version:1, savedAt:new Date().toISOString(), accountId: backupAccountId(),
-    rabbits, planned, events:customEvents, shows, expenses, pedigreeSettings, trash, waitlist, kitTags:customKitTags, projects };
+    rabbits, planned, events:customEvents, shows, expenses, pedigreeSettings, trash, waitlist, kitTags:customKitTags, projects, traits };
 }
 function downloadFullBackup(){
   const blob = new Blob([JSON.stringify(fullBackupObject())], {type:'application/json'});
@@ -2191,7 +2200,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-18-projects';
+const APP_VERSION = '2026-10-18-warnings';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2230,7 +2239,7 @@ function projOf(r){ return (r.projects||[]).map(id=>projects.find(p=>p.id===id))
 function inProject(r,id){ return (r.projects||[]).includes(id); }
 function projChipsHTML(r){
   const chips = projOf(r).map(p=>`<span class="pj-chip">${esc(p.name)}</span>`).join('');
-  return `<div class="pj-row">${chips}<button class="pj-add" data-pjtag="${r.id}">${chips?'Edit':'+ Project'}</button></div>`;
+  return `<div class="pj-row">${chips}<button class="pj-add" data-pjtag="${r.id}">${chips?'Edit':'+ Project'}</button></div>`+carryChipsHTML(r);
 }
 function addProjectFlow(done){
   if(projects.length>=MAX_PROJECTS){ showToast('Up to '+MAX_PROJECTS+' projects'); return; }
@@ -2254,8 +2263,18 @@ function openProjectTagSheet(rid){
       <div class="lit-label" style="margin-bottom:6px;">Projects</div>
       <div class="pj-pick">${projects.map(p=>`<button class="pj-opt ${inProject(r,p.id)?'on':''}" data-pj="${p.id}">${inProject(r,p.id)?'&#10003; ':''}${esc(p.name)}</button>`).join('')}<button class="pj-opt pj-new" id="pj-new">+ New project</button></div>
       <div class="card-sub" style="margin:8px 0 12px;">Tap to add or remove. A rabbit can be in as many projects as you like.</div>
+      <div class="lit-label" style="margin:6px 0;">Carries</div>
+      ${traits.length?traits.map(t=>`<div style="margin-bottom:8px;"><div style="font-weight:700;font-size:14px;margin-bottom:4px;">${esc(t.name)}</div><div class="cy-seg">${[['yes','Carries'],['no',"Doesn't"],['unknown','Unknown']].map(([k,l])=>`<button class="${carryState(r,t.id)===k?'on':''}" data-cy="${t.id}" data-cyv="${k}">${l}</button>`).join('')}</div></div>`).join(''):'<div class="card-sub" style="margin-bottom:6px;">No traits yet. Add ones like Shaded or Chocolate.</div>'}
+      <div class="pj-pick"><button class="pj-opt pj-new" id="tr-new">+ New trait</button></div>
       <div class="sheet-actions"><button class="btn btn-primary" id="pj-done">Done</button></div>
-      <div style="text-align:center;margin-top:10px;"><a href="#" id="pj-manage" style="font-weight:700;">Manage projects</a></div>`);
+      <div style="text-align:center;margin-top:10px;"><a href="#" id="pj-manage" style="font-weight:700;">Manage projects</a> &nbsp;&middot;&nbsp; <a href="#" id="tr-manage" style="font-weight:700;">Manage traits</a></div>`);
+    document.querySelectorAll('[data-cy]').forEach(b=>b.onclick=()=>{
+      r.carries = (r.carries&&typeof r.carries==='object')?r.carries:{};
+      if(b.dataset.cyv==='unknown') delete r.carries[b.dataset.cy]; else r.carries[b.dataset.cy]=b.dataset.cyv;
+      saveData(); draw();
+    });
+    document.getElementById('tr-new').onclick=()=>addTraitFlow(()=>openProjectTagSheet(rid));
+    document.getElementById('tr-manage').onclick=(e)=>{ e.preventDefault(); openTraitsManage(()=>openProjectTagSheet(rid)); };
     document.querySelectorAll('[data-pj]').forEach(b=>b.onclick=()=>{
       const id=b.dataset.pj; r.projects=r.projects||[];
       if(r.projects.includes(id)) r.projects=r.projects.filter(x=>x!==id); else r.projects.push(id);
@@ -2271,10 +2290,11 @@ function openProjectsManage(after){
   const draw=()=>{
     openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Projects</h2>
       <div class="card-sub" style="margin-bottom:10px;">Removing a project only takes the label off. No rabbit is changed or deleted. Up to ${MAX_PROJECTS} projects.</div>
-      <div class="lit-card">${projects.length?projects.map(p=>`<div class="st-row" style="padding:6px 0;"><b>${esc(p.name)}</b> <span class="card-sub">${rabbits.filter(r=>inProject(r,p.id)).length}</span><span style="flex:1"></span><button class="btn btn-secondary btn-sm" data-pjren="${p.id}">Rename</button> <button class="btn btn-secondary btn-sm" data-pjrm="${p.id}">Remove</button></div>`).join(''):'<div class="card-sub">No projects yet.</div>'}</div>
+      <div class="lit-card">${projects.length?projects.map(p=>`<div class="st-row" style="padding:6px 0;"><b>${esc(p.name)}</b> <span class="card-sub">${rabbits.filter(r=>inProject(r,p.id)).length}</span><span style="flex:1"></span><button class="btn btn-secondary btn-sm" data-pjwarn="${p.id}">Tell me about${(p.warn||[]).length?' ('+p.warn.length+')':''}</button> <button class="btn btn-secondary btn-sm" data-pjren="${p.id}">Rename</button> <button class="btn btn-secondary btn-sm" data-pjrm="${p.id}">Remove</button></div>`).join(''):'<div class="card-sub">No projects yet.</div>'}</div>
       <div class="sheet-actions"><button class="btn btn-secondary" id="pm-done">Done</button><button class="btn btn-primary" id="pm-add">+ New project</button></div>`);
     document.getElementById('pm-done').onclick=()=>{ closeSheet(); if(after) after(); else render(); };
     document.getElementById('pm-add').onclick=()=>addProjectFlow(()=>openProjectsManage(after));
+    document.querySelectorAll('[data-pjwarn]').forEach(b=>b.onclick=()=>openProjectWarnSheet(b.dataset.pjwarn));
     document.querySelectorAll('[data-pjrm]').forEach(b=>b.onclick=async()=>{
       const i=projects.findIndex(p=>p.id===b.dataset.pjrm); if(i<0) return;
       const gone=projects.splice(i,1)[0];
@@ -2331,9 +2351,131 @@ function selectBarHTML(){
 document.addEventListener('click',(ev)=>{ const b=ev.target.closest&&ev.target.closest('[data-pjtag]'); if(b){ ev.stopPropagation(); openProjectTagSheet(b.dataset.pjtag); } });
 // ===== PROJECTS END =====
 
+
+// ===== CARRIES START =====
+// User-made traits (e.g. Shaded, Chocolate). r.carries = {traitId:'yes'|'no'}; a missing entry means Unknown. Nothing is ever set automatically.
+const TRAITS_KEY='traits_v1';
+const MAX_TRAITS=16;
+let traitFilter=null;   // {id, state:'yes'|'no'|'unknown'} or null
+async function saveTraits(){
+  if(!traitsSafe){ showToast("Your traits didn't load, so they can't be changed right now. Refresh and try again."); return false; }
+  try{ await window.storage.set(TRAITS_KEY, JSON.stringify(traits), false); return true; }
+  catch(e){ showToast("Couldn't save — check your connection and try again."); return false; }
+}
+function carryState(r,id){ const v=(r.carries||{})[id]; return v==='yes'||v==='no'?v:'unknown'; }
+function carryChipsHTML(r){
+  const c=traits.filter(t=>carryState(r,t.id)==='yes').map(t=>{ const w=watchProjectsFor(r,t.id); return `<span class="pj-chip cy-chip">Carries ${esc(t.name)}${w.length?' &middot; '+esc(w.map(p=>p.name).join(', ')):''}</span>`; }).join('');
+  return c?`<div class="pj-row" style="margin-top:6px;">${c}</div>`:'';
+}
+function herdFilter(list){
+  if(selectMode) return list;
+  let out=list;
+  if(projectFilter!=='all') out=out.filter(r=>inProject(r,projectFilter));
+  if(traitFilter && traits.some(t=>t.id===traitFilter.id)) out=out.filter(r=>carryState(r,traitFilter.id)===traitFilter.state);
+  return out;
+}
+function traitBar(list){
+  if(!traits.length) return '';
+  const on=traitFilter&&traits.find(t=>t.id===traitFilter.id);
+  const stLabel={yes:'Carries',no:"Doesn't carry",unknown:'Unknown'};
+  return `<div class="pj-bar"><span class="card-sub" style="align-self:center;white-space:nowrap;">Carries</span>${traits.map(t=>`<button class="pj-fchip ${on&&on.id===t.id?'on':''}" data-trf="${t.id}">${esc(t.name)}</button>`).join('')}</div>`
+   + (on?`<div class="pj-bar" style="padding-top:0;">${['yes','no','unknown'].map(k=>`<button class="pj-fchip ${traitFilter.state===k?'on':''}" data-trs="${k}">${stLabel[k]} <span>${list.filter(r=>carryState(r,on.id)===k).length}</span></button>`).join('')}<button class="pj-fchip pj-ghost" id="trf-clear">Clear</button></div>`:'');
+}
+function wireTraits(){
+  document.querySelectorAll('[data-trf]').forEach(b=>b.onclick=()=>{ const id=b.dataset.trf; traitFilter=(traitFilter&&traitFilter.id===id)?null:{id,state:'yes'}; render(); });
+  document.querySelectorAll('[data-trs]').forEach(b=>b.onclick=()=>{ if(traitFilter){ traitFilter.state=b.dataset.trs; render(); } });
+  const c=document.getElementById('trf-clear'); if(c) c.onclick=()=>{ traitFilter=null; render(); };
+}
+function addTraitFlow(done){
+  if(traits.length>=MAX_TRAITS){ showToast('Up to '+MAX_TRAITS+' traits'); return; }
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>New trait</h2>
+    <div class="field"><label>Name</label><input id="tr-name" maxlength="24" placeholder="e.g. Shaded" autocomplete="off"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" id="tr-cancel">Cancel</button><button class="btn btn-primary" id="tr-save">Add trait</button></div>`);
+  document.getElementById('tr-cancel').onclick=()=>{ closeSheet(); if(done) done(null); };
+  document.getElementById('tr-save').onclick=async()=>{
+    const v=document.getElementById('tr-name').value.trim(); if(!v) return;
+    if(traits.some(t=>t.name.toLowerCase()===v.toLowerCase())){ showToast('That trait already exists'); return; }
+    const nt={id:uid(), name:v}; traits.push(nt);
+    if(!(await saveTraits())){ traits.pop(); return; }
+    closeSheet(); if(done) done(nt); else render();
+  };
+}
+function openTraitsManage(after){
+  const draw=()=>{
+    openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Traits</h2>
+      <div class="card-sub" style="margin-bottom:10px;">Things a rabbit might carry, like Shaded or Chocolate. Removing a trait only takes the label off. No rabbit is changed or deleted. Up to ${MAX_TRAITS}.</div>
+      <div class="lit-card">${traits.length?traits.map(t=>`<div class="st-row" style="padding:6px 0;"><b>${esc(t.name)}</b> <span class="card-sub">${rabbits.filter(r=>carryState(r,t.id)==='yes').length} carry</span><span style="flex:1"></span><button class="btn btn-secondary btn-sm" data-trren="${t.id}">Rename</button> <button class="btn btn-secondary btn-sm" data-trrm="${t.id}">Remove</button></div>`).join(''):'<div class="card-sub">No traits yet.</div>'}</div>
+      <div class="sheet-actions"><button class="btn btn-secondary" id="tm-done">Done</button><button class="btn btn-primary" id="tm-add">+ New trait</button></div>`);
+    document.getElementById('tm-done').onclick=()=>{ closeSheet(); if(after) after(); else render(); };
+    document.getElementById('tm-add').onclick=()=>addTraitFlow(()=>openTraitsManage(after));
+    document.querySelectorAll('[data-trrm]').forEach(b=>b.onclick=async()=>{
+      const i=traits.findIndex(t=>t.id===b.dataset.trrm); if(i<0) return;
+      const gone=traits.splice(i,1)[0];
+      if(!(await saveTraits())){ traits.splice(i,0,gone); return; }
+      if(traitFilter&&traitFilter.id===gone.id) traitFilter=null;
+      draw();
+    });
+    document.querySelectorAll('[data-trren]').forEach(b=>b.onclick=()=>{
+      const t=traits.find(x=>x.id===b.dataset.trren); if(!t) return;
+      openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Rename trait</h2>
+        <div class="field"><label>Name</label><input id="tr-rn" maxlength="24" value="${esc(t.name)}" autocomplete="off"></div>
+        <div class="sheet-actions"><button class="btn btn-secondary" id="tr-rc">Cancel</button><button class="btn btn-primary" id="tr-rs">Save</button></div>`);
+      document.getElementById('tr-rc').onclick=draw;
+      document.getElementById('tr-rs').onclick=async()=>{
+        const v=document.getElementById('tr-rn').value.trim(); if(!v) return;
+        if(traits.some(x=>x.id!==t.id&&x.name.toLowerCase()===v.toLowerCase())){ showToast('That trait already exists'); return; }
+        const old=t.name; t.name=v; if(!(await saveTraits())){ t.name=old; return; }
+        draw();
+      };
+    });
+  };
+  draw();
+}
+// ===== CARRIES END =====
+
+// ===== PROJECT WARNINGS START =====
+// Each project can list traits it wants to be told about (p.warn = [traitId]). Shown as plain facts, never blocking, never red.
+function watchProjectsFor(r,traitId){ return projOf(r).filter(p=>(p.warn||[]).includes(traitId)); }
+function warnBoxHTML(doe, buck){
+  if(!doe||!buck||!projects.length||!traits.length) return '';
+  const out=[];
+  projects.forEach(p=>{
+    const watch=(p.warn||[]).map(id=>traits.find(t=>t.id===id)).filter(Boolean);
+    if(!watch.length) return;
+    if(!inProject(doe,p.id) && !inProject(buck,p.id)) return;
+    watch.forEach(t=>{
+      const a=carryState(doe,t.id), b=carryState(buck,t.id);
+      if(a==='no'&&b==='no') return;
+      const w=x=>x==='yes'?'carries':x==='no'?"doesn't carry":'unknown';
+      out.push(`${esc(p.name)} &mdash; ${esc(t.name)}: ${esc(doe.name)} ${w(a)}, ${esc(buck.name)} ${w(b)}`);
+    });
+  });
+  return out.length?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line,#E7DDC6);"><b>Project notes:</b><br>${out.map(l=>'&bull; '+l).join('<br>')}</div>`:'';
+}
+function openProjectWarnSheet(pid){
+  const p=projects.find(x=>x.id===pid); if(!p) return;
+  const draw=()=>{
+    const w=p.warn||[];
+    openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>${esc(p.name)}: tell me about</h2>
+      <div class="card-sub" style="margin-bottom:10px;">Pick traits to see on this project's rabbits and on the breeding screen. It only shows facts you've entered. It never blocks anything.</div>
+      ${traits.length?`<div class="pj-pick">${traits.map(t=>`<button class="pj-opt ${w.includes(t.id)?'on':''}" data-pw="${t.id}">${w.includes(t.id)?'&#10003; ':''}${esc(t.name)}</button>`).join('')}</div>`:'<div class="card-sub">Add traits first (open any rabbit\'s + Project, then + New trait).</div>'}
+      <div class="sheet-actions"><button class="btn btn-primary" id="pw-done">Done</button></div>`);
+    document.getElementById('pw-done').onclick=()=>openProjectsManage();
+    document.querySelectorAll('[data-pw]').forEach(b=>b.onclick=async()=>{
+      const id=b.dataset.pw, old=(p.warn||[]).slice();
+      p.warn = old.includes(id)?old.filter(x=>x!==id):old.concat(id);
+      if(!(await saveProjects())){ p.warn=old; return; }
+      draw();
+    });
+  };
+  draw();
+}
+// ===== PROJECT WARNINGS END =====
+
+
 // ===== ACCOUNT SWITCH CLEAN-UP START =====
 function clearAccountMemory(){
-  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
+  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
   rabbits = []; planned = []; customEvents = []; shows = []; expenses = [];
   pedigreeSettings = defaultPedigreeSettings();
   trash = [];
@@ -2758,21 +2900,36 @@ function getAncestorMap(name, maxD){
   })(name,0);
   return map;
 }
+function genWord(n){ return n===1?'parent':n===2?'grandparent':n===3?'great-grandparent':'great-great-grandparent'; }
 function relatednessSummary(doeName, buckName){
   if(!doeName||!buckName) return {close:false, any:false, closeness:'', lines:[], text:'Select both a doe and a buck to check relatedness.'};
   const dm=getAncestorMap(doeName,4), bm=getAncestorMap(buckName,4);
+  const lines=[];
+  // direct line: one is on the other's pedigree
+  if(dm.has(nameKey(buckName))) lines.push(`${buckName} is ${genWord(dm.get(nameKey(buckName)).depth)} of ${doeName}`);
+  if(bm.has(nameKey(doeName))) lines.push(`${doeName} is ${genWord(bm.get(nameKey(doeName)).depth)} of ${buckName}`);
   dm.delete(nameKey(doeName)); bm.delete(nameKey(buckName));
   const shared=[];
   dm.forEach((info,k)=>{ if(bm.has(k)) shared.push({name:info.name, dd:info.depth, bd:bm.get(k).depth}); });
-  if(!shared.length) return {close:false, any:false, closeness:'', lines:[], text:'No common ancestors found within 4 generations on file. (Pedigree data may be incomplete.)'};
-  const min = Math.min(...shared.map(s=>s.dd+s.bd));
-  const closeness = min<=2?'Closely related':min===3?'Moderately related':'Distantly related';
-  const lines = shared.map(s=>`${s.name} — ${s.dd} gen from doe, ${s.bd} gen from buck`);
-  return {close:min<=2, any:true, closeness, lines, text:closeness+' — shared ancestor(s): '+lines.join('; ')};
+  if(!shared.length && !lines.length) return {close:false, any:false, closeness:'', lines:[], text:'No shared ancestors found within 4 generations on file. (Pedigree data may be incomplete.)'};
+  // same sire / same dam / both
+  const dr=findByName(doeName), br=findByName(buckName);
+  const same=(a,b)=>a&&b&&nameKey(a)===nameKey(b);
+  if(dr&&br){
+    const ss=same(dr.sireName,br.sireName), sd=same(dr.damName,br.damName);
+    if(ss&&sd) lines.push(`Same sire and dam (${dr.sireName} and ${dr.damName})`);
+    else if(ss) lines.push(`Same sire (${dr.sireName})`);
+    else if(sd) lines.push(`Same dam (${dr.damName})`);
+  }
+  shared.sort((a,b)=>(a.dd+a.bd)-(b.dd+b.bd)).forEach(s2=>{
+    if(s2.dd===1&&s2.bd===1) return;   // already stated above as same sire / same dam
+    lines.push(`${s2.name} is ${genWord(s2.dd)} of ${doeName} and ${genWord(s2.bd)} of ${buckName}`);
+  });
+  return {close:false, any:true, closeness:'', lines, text:'Shared ancestry on file: '+lines.join('; ')};
 }
 function relateBoxHTML(rel){
   if(!rel.any) return esc(rel.text);
-  return `<b>${esc(rel.closeness)}</b> — shared ancestor${rel.lines.length===1?'':'s'}:<br>`+rel.lines.map(l=>`&bull; ${esc(l)}`).join('<br>');
+  return `<b>On file:</b><br>`+rel.lines.map(l=>`&bull; ${esc(l)}`).join('<br>');
 }
 
 /* ---------------- RELATIVES ----------------
@@ -2967,7 +3124,7 @@ function renderNav(){
       searchQuery = '';
       const inp = document.getElementById('searchInput'); if(inp) inp.value='';
       document.getElementById('searchClear').style.display='none';
-      if(searchMode!=='herd'){ searchMode='herd'; document.querySelectorAll('#searchModeSeg button').forEach(x=>x.classList.toggle('on', x.dataset.smode==='herd')); if(inp) inp.placeholder='Search by name, ear #, color, or breed'; }
+      if(searchMode!=='herd'){ searchMode='herd'; document.querySelectorAll('#searchModeSeg button').forEach(x=>x.classList.toggle('on', x.dataset.smode==='herd')); if(inp) inp.placeholder='Name, ear #, color, breed'; }
       currentTab = b.dataset.nav; render(); window.scrollTo(0,0);
     };
   });
@@ -3554,7 +3711,7 @@ function openKitSaleSheet(kitId, after){
 
 // waitlist: its own data key, nothing is ever hard-deleted from the screen
 const WAITLIST_KEY='waitlist_v1';
-let waitlist=[], waitlistSafe=false, kitTagsSafe=false, projects=[], projectsSafe=false;   // saving is blocked unless the stored list was read successfully (or truly doesn't exist yet)
+let waitlist=[], waitlistSafe=false, kitTagsSafe=false, projects=[], projectsSafe=false, traits=[], traitsSafe=false;   // saving is blocked unless the stored list was read successfully (or truly doesn't exist yet)
 async function saveWaitlist(){
   if(!waitlistSafe){ showToast("The waitlist didn't load, so it can't be changed right now. Refresh and try again."); return false; }
   try{ await window.storage.set(WAITLIST_KEY, JSON.stringify(waitlist), false); return true; }
@@ -3684,7 +3841,7 @@ function plannedCardHTML(p){
   const dn=doe?doe.name:p.doeName, bn=buck?buck.name:p.buckName;
   const rel=relatednessSummary(dn,bn);
   return `<div class="card no-tap"><div class="card-top"><div><div class="card-name">${esc(dn)} &times; ${esc(bn)}</div><div class="card-sub">Target: ${fmtDate(p.targetDate)}${doe?' · doe is '+doe.status:''}</div></div></div>
-    <div class="relate-box ${rel.close?'close':''}">${relateBoxHTML(rel)}</div>
+    <div class="relate-box">${relateBoxHTML(rel)}${warnBoxHTML(doe||findByName(dn)||{name:dn}, buck||findByName(bn)||{name:bn})}</div>
     ${p.notes?`<div class="card-detail">${esc(p.notes)}</div>`:''}
     <div class="card-actions"><button class="btn btn-primary" data-act="executePlanned" data-id="${p.id}">Execute now</button><button class="btn btn-danger btn-sm" data-act="deletePlanned" data-id="${p.id}">Delete</button></div></div>`;
 }
@@ -3976,7 +4133,7 @@ function renderRabbits(main){
     const rank = {pregnant:0, nursing:1, open:2, reserved:3};
     const labels = {pregnant:'BRED', nursing:'ON A LITTER', open:'OPEN', reserved:'RESERVED'};
     const baseDoes = rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r)); scopeList=baseDoes;
-    const allDoes = projectFilter==='all'?baseDoes:baseDoes.filter(r=>inProject(r,projectFilter));
+    const allDoes = herdFilter(baseDoes);
     const totalsRow = `<div class="stats" style="padding:0; margin-bottom:12px;">${
       [['all','All'],['pregnant','Bred'],['nursing','On a litter'],['open','Open']].map(([k,l])=>
         `<div class="stat ${doesFilter===k?'active':''}" data-doesfilter="${k}"><div class="n">${k==='all'?allDoes.length:allDoes.filter(r=>r.status===k).length}</div><div class="l">${l}</div></div>`).join('')
@@ -4002,12 +4159,12 @@ function renderRabbits(main){
     }
   } else if(rabbitsGroup==='bucks'){
     const baseBucks=rabbits.filter(r=>r.sex==='buck'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r)); scopeList=baseBucks;
-    const it=(projectFilter==='all'?baseBucks:baseBucks.filter(r=>inProject(r,projectFilter))).sort((a,b)=>a.name.localeCompare(b.name)); shownList=it;
+    const it=herdFilter(baseBucks).sort((a,b)=>a.name.localeCompare(b.name)); shownList=it;
     body=`<div class="section-label">${it.length} ${projectFilter==='all'?'TOTAL ':''}BUCK${it.length===1?'':'S'}</div>`+
       (it.length?(selectMode?selectRowsHTML(it):it.map(buckCardHTML).join('')):`<div class="empty">${projectFilter==='all'?'No bucks yet. Tap + Add a rabbit above.':'No bucks in this project yet.'}</div>`);
   } else if(rabbitsGroup==='juniors'){
     const baseJr=rabbits.filter(r=>r.status==='growing'||(r.status==='reserved'&&inJuniors(r))).sort((a,b)=>(a.dob||'9').localeCompare(b.dob||'9')); scopeList=baseJr;
-    const allJr = projectFilter==='all'?baseJr:baseJr.filter(r=>inProject(r,projectFilter));
+    const allJr = herdFilter(baseJr);
     const jrRow = allJr.length ? `<div class="stats" style="padding:0; margin-bottom:12px;">${
       [['all','All',allJr.length],['buck','Bucks',allJr.filter(r=>r.sex==='buck').length],['doe','Does',allJr.filter(r=>r.sex==='doe').length]].map(([k,l,n])=>
         `<div class="stat ${juniorsFilter===k?'active':''}" data-jrfilter="${k}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('')
@@ -4022,9 +4179,9 @@ function renderRabbits(main){
        </div>`
     : '';
   if(projectFilter!=='all' && !projects.some(p=>p.id===projectFilter)) projectFilter='all';
-  const pjSummary = (projects.length && shownList.length) ? `<div class="pj-summary"><span style="font-weight:600">${projectFilter==='all'?'':`${shownList.length} in ${esc((projects.find(p=>p.id===projectFilter)||{}).name||'')}`}</span>${selectMode?`<span><a id="pj-selall">Select all</a> &nbsp; <a id="pj-cancel-sel">Cancel</a></span>`:`<a id="pj-select">Select several</a>`}</div>` : '';
-  main.innerHTML = groupTabs + projectBar(scopeList) + pjSummary + (selectMode?'':actionRow) + body + (selectMode?selectBarHTML()+'<div style="height:170px"></div>':'');
-  wireProjects(main, shownList);
+  const pjSummary = (projects.length && (shownList.length||projectFilter!=='all'||traitFilter)) ? `<div class="pj-summary"><span style="font-weight:600">${selectMode?(projectFilter==='all'?'Tap the rabbits to include':'Tap rabbits to add to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'')):projectFilter==='all'?'':`${shownList.length} in ${esc((projects.find(p=>p.id===projectFilter)||{}).name||'')}`}</span>${selectMode?`<span><a id="pj-selall">Select all</a> &nbsp; <a id="pj-cancel-sel">Cancel</a></span>`:`<a id="pj-select">${projectFilter==='all'?'Select several':'Add rabbits'}</a>`}</div>` : '';
+  main.innerHTML = groupTabs + projectBar(scopeList) + (selectMode?'':traitBar(scopeList)) + pjSummary + (selectMode?'':actionRow) + body + (selectMode?selectBarHTML()+'<div style="height:170px"></div>':'');
+  wireProjects(main, shownList); wireTraits();
   document.querySelectorAll('[data-pjtarget]').forEach(b=>b.onclick=()=>{ window.__pjTarget=b.dataset.pjtarget; render(); });
   if(document.getElementById('herdRecordBreedingBtn')) document.getElementById('herdRecordBreedingBtn').onclick = openQuickBreedSheet;
   document.querySelectorAll('[data-rgroup]').forEach(b=>b.onclick=()=>{ rabbitsGroup=b.dataset.rgroup; selectMode=false; selectedIds=new Set(); render(); window.scrollTo(0,0); });
@@ -4167,7 +4324,7 @@ function setSearchMode(m){
   searchMode=m;
   document.querySelectorAll('#searchModeSeg button').forEach(b=>b.classList.toggle('on', b.dataset.smode===m));
   const inp=document.getElementById('searchInput');
-  inp.placeholder = m==='relatives' ? 'Type a rabbit or ancestor to see its relatives' : 'Search by name, ear #, color, or breed';
+  inp.placeholder = 'Name, ear #, color, breed';
   render(); window.scrollTo(0,0);
 }
 document.querySelectorAll('#searchModeSeg button').forEach(b=>b.onclick=()=>setSearchMode(b.dataset.smode));
@@ -4544,8 +4701,8 @@ function openBreedSheet(r, presetBuck, onDone){
     const b=buckInput.value.trim();
     if(!b){ box.className='relate-box'; box.textContent='Pick a buck to check relatedness.'; saveBtn.textContent='Save'; return; }
     const rel=relatednessSummary(r.name,b);
-    box.className='relate-box'+(rel.close?' close':''); box.innerHTML=relateBoxHTML(rel);
-    saveBtn.textContent = rel.any?'Save anyway':'Save';
+    box.className='relate-box'; box.innerHTML=relateBoxHTML(rel)+warnBoxHTML(r, findByName(b)||{name:b});
+    saveBtn.textContent = 'Save';
   }
   buckInput.addEventListener('input',upd); upd();
   saveBtn.onclick=()=>{
@@ -6471,7 +6628,7 @@ function openAddPlannedSheet(presetDoeId){
     const d=does.find(x=>x.id===document.getElementById('f-doe').value), b=bucks.find(x=>x.id===document.getElementById('f-buck').value);
     const box=document.getElementById('f-relate');
     if(!d||!b){ box.className='relate-box'; box.textContent='Select both a doe and a buck to check relatedness.'; return; }
-    const rel=relatednessSummary(d.name,b.name); box.className='relate-box'+(rel.close?' close':''); box.innerHTML=relateBoxHTML(rel);
+    const rel=relatednessSummary(d.name,b.name); box.className='relate-box'; box.innerHTML=relateBoxHTML(rel)+warnBoxHTML(d,b);
   }
   document.getElementById('f-doe').onchange=upd; document.getElementById('f-buck').onchange=upd;
   if(presetDoeId) upd();
