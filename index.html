@@ -340,6 +340,35 @@
   .comingup-row{ display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid var(--line); font-size:13.5px; }
   .comingup-row:last-child{ border-bottom:none; }
   .comingup-date{ opacity:.75; font-size:12.5px; flex:0 0 auto; padding-left:10px; }
+  .todo-row.roomy{ align-items:flex-start; }
+  .swipe-wrap{ position:relative; overflow:hidden; border-radius:10px; margin-bottom:9px; touch-action:pan-y; }
+  .swipe-wrap > .todo-row{ margin-bottom:0; position:relative; transition:transform .18s ease; }
+  .swipe-wrap.dragging > .todo-row{ transition:none; }
+  .sw-done{ position:absolute; inset:0; background:var(--marsh); color:#fff; display:flex; align-items:center; padding-left:18px; font-family:'Jost',sans-serif; font-weight:600; font-size:15px; }
+  .sw-acts{ position:absolute; right:0; top:0; bottom:0; width:160px; display:flex; }
+  .sw-acts button{ flex:1; border:none; color:#fff; font-family:'Jost',sans-serif; font-weight:600; font-size:14px; cursor:pointer; }
+  .sw-acts .sw-snz{ background:var(--gold-deep); } .sw-acts .sw-dis{ background:var(--ink-soft); }
+  .todo-row.roomy[data-openrow], .cu-row[data-openrow]{ cursor:pointer; }
+  .todo-main{ flex:1; min-width:0; }
+  .todo-top{ display:flex; align-items:flex-start; gap:8px; }
+  .todo-acts{ display:flex; gap:8px; margin-top:10px; }
+  .todo-acts .btn{ flex:1; min-height:44px; }
+  .home-sum{ font-family:'Jost',sans-serif; font-size:14px; color:var(--ink-soft); margin:0 2px 10px; }
+  .home-sum b{ color:var(--navy); }
+  .home-tiles.stats{ padding:0; margin-bottom:12px; }
+  .cu-day{ font-family:'Jost',sans-serif; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold-deep); font-weight:600; margin:12px 2px 6px; }
+  .cu-row{ display:flex; align-items:center; gap:12px; min-height:44px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 12px; margin-bottom:6px; }
+  .cu-dd{ flex:0 0 40px; text-align:center; line-height:1.05; }
+  .cu-dd .w{ font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold-deep); font-weight:600; }
+  .cu-dd .n{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:23px; color:var(--navy); }
+  .cu-main{ flex:1; min-width:0; }
+  .cu-name{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:17px; line-height:1.15; color:var(--navy); }
+  .cu-pill{ display:inline-block; font-family:'Jost',sans-serif; font-size:10px; letter-spacing:.06em; text-transform:uppercase; font-weight:600; color:var(--navy); background:var(--line); border-radius:6px; padding:2px 6px; margin-right:6px; vertical-align:2px; }
+  .cu-det{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .cu-chev{ color:var(--gold-deep); font-size:20px; }
+  .done-row{ display:flex; align-items:center; gap:8px; padding:2px 12px; background:var(--card); border:1px solid var(--line); border-radius:10px; margin-bottom:6px; font-size:13px; }
+  .done-row .t{ flex:1; }
+  .done-row button{ min-height:44px; padding:0 10px; background:none; border:none; color:var(--gold-deep); font-weight:600; font-size:13px; cursor:pointer; }
 
   /* Admin support-view banner */
   .admin-view-banner{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 10px; background:var(--rust); color:#fffdf8; padding:9px 16px; font-family:'Jost',sans-serif; font-size:12.5px; font-weight:600; line-height:1.3; }
@@ -385,6 +414,41 @@
   .ped-box .pn{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:14.5px; color:var(--navy); }
   .ped-box .pc{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
   .ped-box.unknown{opacity:.55;}
+  /* Phone pedigree: nested list, each generation sits under its child; great-grandparents open with a tap */
+  .pdn-row{ display:flex; align-items:center; gap:10px; padding:9px 12px; background:var(--card); border:1px solid var(--line); border-radius:10px; cursor:pointer; }
+  .pdn-row.anc{ background:var(--page); }
+  .pdn-row.unknown{ border-style:dashed; opacity:.75; }
+  .pdn-row.unknown .pn{ font-size:14px; font-weight:600; color:var(--ink-soft); }
+  .pdn-role{ width:78px; flex:0 0 78px; white-space:nowrap; font-family:'Jost',sans-serif; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold-deep); font-weight:600; }
+  .pdn-row .pn{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:16.5px; color:var(--navy); line-height:1.15; }
+  .pdn-row .pc{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .pdn-grow{ flex:1; min-width:0; }
+  .pdn-nest{ margin:6px 0 0 12px; padding-left:10px; border-left:2px solid var(--line-strong); display:flex; flex-direction:column; gap:6px; }
+  .pdn-tg{ display:flex; align-items:center; justify-content:space-between; width:100%; box-sizing:border-box; margin-top:6px; padding:7px 12px; background:transparent; border:1px dashed var(--line-strong); border-radius:10px; font-family:'Public Sans',sans-serif; font-size:12.5px; font-style:italic; color:var(--ink-soft); cursor:pointer; text-align:left; }
+  .pdn-tg b{ font-style:normal; font-weight:600; color:var(--gold-deep); font-size:15px; }
+  .pdn-more{ display:none; }
+  .pdn-more.on{ display:flex; }
+  /* Herd cards (same look as the Nursery card) */
+  .hc-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+  .hc-chev{ font-size:26px; line-height:1; color:var(--navy); padding:0 2px; }
+  .hc-chips{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:8px; }
+  .hc-chips .pj-row{ display:contents; }
+  .hc-chips .carry-row, .hc-chips .pj-carry{ display:contents; }
+  .card.hc .card-detail{ margin-top:8px; }
+  .card.hc .card-actions{ display:flex; gap:8px; margin-top:10px; }
+  .card.hc .card-actions .btn{ flex:1; white-space:nowrap; }
+  .card.hc .card-actions .btn-primary{ flex:1.7; }
+  /* Breeding tab timeline */
+  .tl{ display:flex; margin:14px 0 6px; }
+  .tl-stop{ flex:1; text-align:center; position:relative; min-width:0; }
+  .tl-stop::before{ content:''; position:absolute; top:6px; left:-50%; width:100%; height:2px; background:var(--line-strong); }
+  .tl-stop:first-child::before{ display:none; }
+  .tl-stop.past::before{ background:var(--navy); }
+  .tl-dot{ width:14px; height:14px; border-radius:50%; margin:0 auto; background:var(--card); border:2px solid var(--line-strong); position:relative; z-index:1; box-sizing:border-box; }
+  .tl-stop.past .tl-dot{ background:var(--navy); border-color:var(--navy); }
+  .tl-l{ font-size:11px; font-weight:600; color:var(--navy); margin-top:5px; }
+  .tl-d{ font-size:11px; color:var(--ink-soft); }
+  .bt-again{ margin-top:8px; }
 
   #printPedigree{display:none;}
   #printPedigree.active{display:block;}
@@ -1969,6 +2033,7 @@ async function loadData(){
   projectsSafe=false; try{ const pj = JSON.parse((await window.storage.get(PROJECTS_KEY,false)).value); projects = Array.isArray(pj)?pj.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; projectsSafe=Array.isArray(pj); }catch(e){ projects = []; projectsSafe = /not found/i.test(String(e&&e.message)); }
   traitsSafe=false; try{ const tr = JSON.parse((await window.storage.get(TRAITS_KEY,false)).value); traits = Array.isArray(tr)?tr.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; traitsSafe=Array.isArray(tr); }catch(e){ traits = []; traitsSafe = /not found/i.test(String(e&&e.message)); }
   alertsSafe=false; try{ const ap = JSON.parse((await window.storage.get(ALERTS_KEY,false)).value); if(ap && typeof ap==='object' && !Array.isArray(ap)){ alertPrefs={off:(ap.off&&typeof ap.off==='object')?ap.off:{},nestDays:ap.nestDays,palpateDays:ap.palpateDays}; alertsSafe=true; } else { alertPrefs={off:{},nestDays:3,palpateDays:14}; } }catch(e){ alertPrefs={off:{},nestDays:3,palpateDays:14}; alertsSafe = /not found/i.test(String(e&&e.message)); }
+  remindersSafe=false; try{ const cr = JSON.parse((await window.storage.get(REMINDERS_KEY,false)).value); customReminders = Array.isArray(cr)?cr.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'&&typeof x.date==='string'):[]; remindersSafe=Array.isArray(cr); }catch(e){ customReminders = []; remindersSafe = /not found/i.test(String(e&&e.message)); }
   quickPicksSafe=false; try{ const qp = JSON.parse((await window.storage.get(QUICKPICKS_KEY,false)).value); quickPicks = Array.isArray(qp)?qp.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; quickPicksSafe=Array.isArray(qp); }catch(e){ quickPicks = []; quickPicksSafe = /not found/i.test(String(e&&e.message)); }
   try{ const tv = JSON.parse((await window.storage.get(TRASH_KEY,false)).value); trash = Array.isArray(tv) ? tv : []; }catch(e){ trash = []; }
   await hydratePhotos();
@@ -2206,7 +2271,7 @@ function wireRemovedLitterItems(main){
 function backupAccountId(){ return (currentUser && currentUser.id) ? String(currentUser.id) : 'local'; }
 function fullBackupObject(){
   return { app:'HerdNerd Pro', version:1, savedAt:new Date().toISOString(), accountId: backupAccountId(),
-    rabbits, planned, events:customEvents, shows, expenses, pedigreeSettings, trash, waitlist, kitTags:customKitTags, projects, traits, quickPicks, alertPrefs };
+    rabbits, planned, events:customEvents, shows, expenses, pedigreeSettings, trash, waitlist, kitTags:customKitTags, projects, traits, quickPicks, alertPrefs, reminders:customReminders };
 }
 function downloadFullBackup(){
   const blob = new Blob([JSON.stringify(fullBackupObject())], {type:'application/json'});
@@ -2225,8 +2290,8 @@ function addBackFromBackup(text){
   const addMissing = (arr,list)=>{ const ids=new Set(list.map(x=>x.id)); let n=0; (Array.isArray(arr)?arr:[]).forEach(x=>{ if(x && x.id && !ids.has(x.id)){ list.push(x); ids.add(x.id); n++; } }); return n; };
   addMissing(b.waitlist,waitlist);
   // Projects, Carries, Quick picks, kit tags: add-only, never replace or remove what is here
-  const nk0 = projects.length+traits.length+quickPicks.length+customKitTags.length;
-  addMissing(b.projects,projects); addMissing(b.traits,traits); addMissing(b.quickPicks,quickPicks);
+  const nk0 = projects.length+traits.length+quickPicks.length+customKitTags.length+customReminders.length;
+  addMissing(b.projects,projects); addMissing(b.traits,traits); addMissing(b.quickPicks,quickPicks); addMissing(b.reminders,customReminders);
   (Array.isArray(b.kitTags)?b.kitTags:[]).forEach(t=>{ if(typeof t==='string' && t && !customKitTags.includes(t)) customKitTags.push(t); });
   // Rabbits already here: fill in only what is blank (never overwrite)
   const bById = new Map(b.rabbits.filter(x=>x&&x.id).map(x=>[x.id,x]));
@@ -2235,7 +2300,7 @@ function addBackFromBackup(text){
     if(o.carries&&typeof o.carries==='object'){ r.carries=r.carries||{}; Object.keys(o.carries).forEach(k=>{ if(!(k in r.carries)) r.carries[k]=o.carries[k]; }); }
     if(Array.isArray(o.weightLog)&&o.weightLog.length){ r.weightLog=Array.isArray(r.weightLog)?r.weightLog:[]; const ids=new Set(r.weightLog.map(w=>w.id)); o.weightLog.forEach(w=>{ if(w&&w.id&&!ids.has(w.id)) r.weightLog.push(w); }); }
   });
-  const nk = projects.length+traits.length+quickPicks.length+customKitTags.length-nk0;
+  const nk = projects.length+traits.length+quickPicks.length+customKitTags.length+customReminders.length-nk0;
   const np=addMissing(b.planned,planned), ne=addMissing(b.events,customEvents), ns=addMissing(b.shows,shows), nx=addMissing(b.expenses,expenses);
   ensureRabbitFieldDefaults();
   return {nr,np,ne,ns,nx,nk};
@@ -2246,7 +2311,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-18-palpate';
+const APP_VERSION = '2026-10-19-palsnooze';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2514,20 +2579,32 @@ function weightsCardHTML(r){
   return `<div class="lit-card" style="margin-top:12px;"><span class="lit-label">Weights</span>${ws.length?ws.map(w=>`<div class="st-row" style="padding:6px 0;"><span>${nb(esc(fmtShort(w.date)))}${ageText(r.dob,w.date)?` <span class="card-sub">&middot; ${esc(ageText(r.dob,w.date))} old</span>`:''}</span><b>${esc(ozText(w.oz))}</b></div>`).join(''):'<div class="card-sub">No weights yet.</div>'}
     <button class="btn btn-secondary btn-sm" data-pa="addweight" style="margin-top:8px;">+ Add weight</button></div>`;
 }
+// One typed weight field. A plain number is pounds ("3.4" = 3.4 lb). Units can be typed:
+// "3 lb 4 oz", "3lb4oz", "14 oz", "3 lbs". Returns {oz} on success, {} when empty, {error} when it can't be read.
+function parseWeightText(text){
+  const t=String(text==null?'':text).trim().toLowerCase().replace(/,/g,'.');
+  if(!t) return {};
+  let m=t.match(/^(\d+(?:\.\d+)?|\.\d+)$/);
+  if(m){ const v=parseFloat(m[1]); if(!(v>0)) return {error:'Enter a weight'}; if(v>20) return {error:'Add lb or oz, like 14 oz or 3 lb 4 oz'}; return {oz:Math.round(v*16*10)/10}; }
+  m=t.match(/^(?:(\d+(?:\.\d+)?|\.\d+)\s*(?:lbs?|pounds?|#)\.?)?\s*(?:(\d+(?:\.\d+)?|\.\d+)\s*(?:oz|ounces?)\.?)?$/);
+  if(m && (m[1]||m[2])){ const oz=(m[1]?parseFloat(m[1])*16:0)+(m[2]?parseFloat(m[2]):0); if(oz>0) return {oz:Math.round(oz*10)/10}; }
+  return {error:'Try 3.4, 3 lb 4 oz, or 14 oz'};
+}
+function weightPreviewText(text){
+  const w=parseWeightText(text); if(w.oz) return '= '+ozText(w.oz); return w.error&&String(text).trim()?w.error:'';
+}
 function openAddWeightSheet(r){
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Add weight</h2>
     <div class="card-sub" style="margin-bottom:8px;">${esc(r.name)}</div>
     <div class="field"><label>Date</label><input type="date" id="aw-date" value="${esc(todayStr())}"></div>
-    <div class="field"><label>Weight</label><input id="aw-val" inputmode="decimal" placeholder="e.g. 14 or 3.5" autocomplete="off"></div>
-    <div class="seg" style="margin-bottom:12px;"><button type="button" class="on" data-awu="oz">oz</button><button type="button" data-awu="lb">lb</button></div>
+    <div class="field"><label>Weight</label><input id="aw-val" placeholder="3.4, 3 lb 4 oz, or 14 oz" autocomplete="off"><div class="card-sub" id="aw-prev" style="min-height:18px;margin-top:4px;"></div></div>
     <div class="sheet-actions"><button class="btn btn-secondary" id="aw-cancel">Cancel</button><button class="btn btn-primary" id="aw-save">Save</button></div>`);
-  let unit='oz';
-  document.querySelectorAll('[data-awu]').forEach(b=>b.onclick=()=>{ unit=b.dataset.awu; document.querySelectorAll('[data-awu]').forEach(x=>x.classList.toggle('on',x===b)); });
+  document.getElementById('aw-val').addEventListener('input',e=>{ document.getElementById('aw-prev').textContent=weightPreviewText(e.target.value); });
   document.getElementById('aw-cancel').onclick=closeSheet;
   document.getElementById('aw-save').onclick=()=>{
-    const v=parseFloat(document.getElementById('aw-val').value), date=document.getElementById('aw-date').value||todayStr();
-    if(!isFinite(v)||v<=0){ showToast('Enter a weight'); return; }
-    r.weightLog=r.weightLog||[]; r.weightLog.push({id:uid(), date, oz:Math.round((unit==='lb'?v*16:v)*10)/10, source:'manual'});
+    const w=parseWeightText(document.getElementById('aw-val').value), date=document.getElementById('aw-date').value||todayStr();
+    if(!w.oz){ showToast(w.error||'Enter a weight'); return; }
+    r.weightLog=r.weightLog||[]; r.weightLog.push({id:uid(), date, oz:w.oz, source:'manual'});
     saveData(); closeSheet(); if(profileRabbitId) renderProfile(); showToast('Weight saved');
   };
 }
@@ -2577,7 +2654,8 @@ const ALERT_TYPES=[
   ['weigh','Weigh litter','A litter is due for a weigh-in'],
   ['convert','Litter is 8 weeks old','A nursing litter still has kits to place'],
   ['reb','Ready to rebreed','A nursing doe reaches her rebreed date'],
-  ['graduate','Turned 6 months','A junior moved up to Does or Bucks']
+  ['graduate','Turned 6 months','A junior moved up to Does or Bucks'],
+  ['custom','My reminders','Reminders you add yourself']
 ];
 let alertPrefs={off:{},nestDays:3,palpateDays:14}, alertsSafe=false;
 function palpateDays(){ const n=+alertPrefs.palpateDays; return (n>=7&&n<=28)?Math.round(n):14; }
@@ -2651,6 +2729,92 @@ function openRemindersSheet(){
   draw();
 }
 // ===== REMINDER SETTINGS END =====
+// ===== CUSTOM REMINDERS START =====
+const REMINDERS_KEY='reminders_v1';
+let customReminders=[], remindersSafe=false;
+async function saveReminders(){
+  if(!remindersSafe){ showToast("Your reminders didn't load, so they can't be changed right now. Refresh and try again."); return false; }
+  try{ await window.storage.set(REMINDERS_KEY, JSON.stringify(customReminders), false); return true; }
+  catch(e){ showToast("Couldn't save — check your connection and try again."); return false; }
+}
+function ymdLocal(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function nextRemDate(date,repeat){
+  if(repeat==='weekly') return addDays(date,7);
+  const d=new Date(date+'T00:00:00'), day=d.getDate(); d.setDate(1); d.setMonth(d.getMonth()+1);
+  d.setDate(Math.min(day,new Date(d.getFullYear(),d.getMonth()+1,0).getDate())); return ymdLocal(d);
+}
+function remEffDate(x){ return (x.snoozeUntil && x.snoozeUntil>x.date) ? x.snoozeUntil : x.date; }
+function remActive(x){ return !x.removed && !x.done; }
+function remRepeatLabel(x){ return x.repeat==='weekly'?'Repeats weekly':x.repeat==='monthly'?'Repeats monthly':''; }
+function completeReminder(x){
+  const snap={date:x.date,done:x.done,doneDate:x.doneDate,snoozeUntil:x.snoozeUntil};
+  if(x.repeat==='weekly'||x.repeat==='monthly'){ let n=nextRemDate(x.date,x.repeat); const t=todayStr(); while(n<=t) n=nextRemDate(n,x.repeat); x.date=n; x.snoozeUntil=null; }
+  else { x.done=true; x.doneDate=todayStr(); }
+  return ()=>{ x.date=snap.date; x.done=snap.done; x.doneDate=snap.doneDate; x.snoozeUntil=snap.snoozeUntil; };
+}
+function openSnoozeSheet(label, apply){
+  const pick=(date)=>{ closeSheet(); apply(date); };
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Snooze</h2>
+    <div class="card-sub" style="margin-bottom:10px;">${esc(label)} — remind me again:</div>
+    <div class="nn-chips"><button type="button" class="nn-chip" data-sz="1">Tomorrow</button><button type="button" class="nn-chip" data-sz="3">3 days</button><button type="button" class="nn-chip" data-sz="7">1 week</button></div>
+    <div class="field" style="margin-top:12px;"><label>Or pick a date</label><input type="date" id="sz-date" min="${addDays(todayStr(),1)}"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="sz-go">Snooze</button></div>`);
+  document.querySelectorAll('[data-sz]').forEach(b=>b.onclick=()=>pick(addDays(todayStr(),+b.dataset.sz)));
+  document.getElementById('sz-go').onclick=()=>{ const v=document.getElementById('sz-date').value; if(!v||v<=todayStr()){ showToast('Pick a day after today'); return; } pick(v); };
+}
+function openReminderSheet(x, afterFn, prefillRabbitId){
+  const editing=!!x;
+  const list=rabbits.filter(r=>isActive(r)||(x&&x.rabbitId===r.id)).sort((a,b)=>a.name.localeCompare(b.name));
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>${editing?'Edit reminder':'New reminder'}</h2>
+    <div class="field"><label>Remind me to</label><input id="rm-title" placeholder="e.g. Order pellets, Vet visit, Trim nails" value="${esc(x?x.title:'')}" autocomplete="off"></div>
+    <div class="field"><label>On</label><input type="date" id="rm-date" value="${esc(x?x.date:addDays(todayStr(),1))}">
+      <div class="nn-chips" style="margin-top:6px;"><button type="button" class="nn-chip" data-rmd="1">Tomorrow</button><button type="button" class="nn-chip" data-rmd="3">3 days</button><button type="button" class="nn-chip" data-rmd="7">1 week</button><button type="button" class="nn-chip" data-rmd="m">1 month</button></div></div>
+    <div class="field"><label>About a rabbit (optional)</label><select id="rm-rabbit"><option value="">— none —</option>${list.map(r=>`<option value="${r.id}" ${(x&&x.rabbitId===r.id)||(!x&&prefillRabbitId===r.id)?'selected':''}>${esc(r.name)}</option>`).join('')}</select></div>
+    <div class="field"><label>Repeat</label><select id="rm-rep"><option value="none">Doesn't repeat</option><option value="weekly" ${x&&x.repeat==='weekly'?'selected':''}>Every week</option><option value="monthly" ${x&&x.repeat==='monthly'?'selected':''}>Every month</option></select></div>
+    <div class="sheet-actions">${editing&&x.done?'<button class="btn btn-secondary" id="rm-reopen">Not done</button>':''}${editing?'<button class="btn btn-secondary" id="rm-remove">Remove</button>':'<button class="btn btn-secondary" onclick="closeSheet()">Cancel</button>'}<button class="btn btn-primary" id="rm-save">Save</button></div>`);
+  document.querySelectorAll('[data-rmd]').forEach(b=>b.onclick=()=>{ const k=b.dataset.rmd; document.getElementById('rm-date').value = k==='m'?nextRemDate(todayStr(),'monthly'):addDays(todayStr(),+k); });
+  document.getElementById('rm-save').onclick=async()=>{
+    const title=document.getElementById('rm-title').value.trim(), date=document.getElementById('rm-date').value;
+    if(!title){ showToast('Type what to remind you about'); return; }
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){ showToast('Pick a date'); return; }
+    const rabbitId=document.getElementById('rm-rabbit').value||null, repeat=document.getElementById('rm-rep').value;
+    if(editing){
+      const old=Object.assign({},x);
+      x.title=title; x.date=date; x.rabbitId=rabbitId; x.repeat=repeat; if(date!==old.date) x.snoozeUntil=null;
+      if(!(await saveReminders())){ Object.assign(x,old); return; }
+    } else {
+      const n={id:uid(),title,date,rabbitId,repeat,done:false,removed:false,snoozeUntil:null,createdAt:new Date().toISOString()};
+      customReminders.push(n);
+      if(!(await saveReminders())){ customReminders.pop(); return; }
+    }
+    closeSheet(); render(); showToast('Reminder saved'); if(afterFn) afterFn();
+  };
+  if(editing&&x.done) document.getElementById('rm-reopen').onclick=async()=>{
+    x.done=false; x.doneDate=null;
+    if(!(await saveReminders())){ x.done=true; return; }
+    closeSheet(); render(); showToast('Reminder reopened'); if(afterFn) afterFn();
+  };
+  if(editing) document.getElementById('rm-remove').onclick=async()=>{
+    x.removed=true;
+    if(!(await saveReminders())){ x.removed=false; return; }
+    closeSheet(); render(); showUndoToast('Reminder removed', ()=>{ x.removed=false; saveReminders(); }, 6000);
+  };
+}
+function openMyRemindersSheet(){
+  const act=customReminders.filter(remActive).sort((a,b)=>remEffDate(a).localeCompare(remEffDate(b)));
+  const fin=customReminders.filter(x=>!x.removed&&x.done).sort((a,b)=>(b.doneDate||'').localeCompare(a.doneDate||'')).slice(0,10);
+  const gone=customReminders.filter(x=>x.removed);
+  const rn=x=>{ const r=x.rabbitId&&rabbits.find(q=>q.id===x.rabbitId); return r?' · '+esc(r.name):''; };
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>My reminders</h2>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:12px;" id="mr-add">+ New reminder</button>
+    ${act.length?act.map(x=>`<div class="lit-card" style="display:flex;align-items:center;gap:10px;"><div style="flex:1;min-width:0;"><b>${esc(x.title)}</b><div class="card-sub">${esc(shortD(remEffDate(x)))}${rn(x)}${remRepeatLabel(x)?' · '+remRepeatLabel(x):''}</div></div><button class="btn btn-secondary btn-sm" data-mredit="${x.id}">Edit</button></div>`).join(''):'<div class="empty">No reminders yet.</div>'}
+    ${fin.length?`<div class="section-label">DONE</div>${fin.map(x=>`<div class="lit-card" style="display:flex;align-items:center;gap:10px;opacity:.85;"><div style="flex:1;min-width:0;"><b>${esc(x.title)}</b><div class="card-sub">Done ${esc(shortD(x.doneDate))}${rn(x)}</div></div><button class="btn btn-secondary btn-sm" data-mredit="${x.id}">Edit</button></div>`).join('')}`:''}
+    ${gone.length?`<div class="section-label">REMOVED</div>${gone.map(x=>`<div class="lit-card" style="display:flex;align-items:center;gap:10px;opacity:.75;"><div style="flex:1;min-width:0;"><b>${esc(x.title)}</b></div><button class="btn btn-secondary btn-sm" data-mrrestore="${x.id}">Restore</button></div>`).join('')}`:''}`);
+  document.getElementById('mr-add').onclick=()=>openReminderSheet(null,openMyRemindersSheet);
+  document.querySelectorAll('[data-mredit]').forEach(b=>b.onclick=()=>{ const x=customReminders.find(q=>q.id===b.dataset.mredit); if(x) openReminderSheet(x,openMyRemindersSheet); });
+  document.querySelectorAll('[data-mrrestore]').forEach(b=>b.onclick=async()=>{ const x=customReminders.find(q=>q.id===b.dataset.mrrestore); if(!x) return; x.removed=false; if(!(await saveReminders())){ x.removed=true; return; } openMyRemindersSheet(); render(); });
+}
+// ===== CUSTOM REMINDERS END =====
 const QUICKPICKS_KEY='quickpicks_v1';
 const MAX_QUICKPICKS=10;
 async function saveQuickPicks(){
@@ -2778,7 +2942,7 @@ function openProjectWarnSheet(pid){
 
 // ===== ACCOUNT SWITCH CLEAN-UP START =====
 function clearAccountMemory(){
-  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; quickPicks = []; quickPicksSafe = false; alertPrefs = {off:{},nestDays:3,palpateDays:14}; alertsSafe = false; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
+  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; quickPicks = []; quickPicksSafe = false; alertPrefs = {off:{},nestDays:3,palpateDays:14}; alertsSafe = false; customReminders = []; remindersSafe = false; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
   rabbits = []; planned = []; customEvents = []; shows = []; expenses = [];
   pedigreeSettings = defaultPedigreeSettings();
   trash = [];
@@ -3239,6 +3403,7 @@ function relateBoxHTML(rel){
    Pick one rabbit (or ancestor) and see everyone in your records who is related
    to it, and how. Nothing is worked out until a rabbit is picked, and only that
    rabbit's family is walked. Rabbits link by sire/dam NAME, same as pedigrees. */
+let relativesLine = 'direct';   // 'direct' (parents/grandparents up, kids down) | 'all' (adds siblings, aunts, cousins...)
 let relativesScope = 'everyone';   // 'everyone' | 'herd'
 const REL_NO_NAME = new Set(['','?','unknown','n/a','na','none','-']);
 function relKey(n){ const k=nameKey(n); return REL_NO_NAME.has(k)?'':k; }
@@ -3305,7 +3470,7 @@ function relativesOf(target, scope){
     if(mR.has(tKey)){
       const d=mR.get(tKey).depth;
       const path=relPathDown(mR, tKey);
-      groups.kid.push({r, dist:d, label: d===1 ? relOrdinal(1,male,'down') : relArrow(path)});
+      groups.kid.push({r, dist:d, label: relOrdinal(d,male,'down')+(d===1?'':' &middot; '+relArrow(path))});
       return;
     }
     // otherwise find the closest shared ancestor
@@ -3353,14 +3518,15 @@ function openRelativesSheet(target){
   const parts=[];
   const add=(title,items)=>{ if(items.length) parts.push(`<div class="section-label" style="margin:12px 2px 7px;">${title} &middot; ${items.length}</div>`+items.map(relRowHTML).join('')); };
   add('PARENTS & GRANDPARENTS', g.anc);
-  add('SIBLINGS & HALF-SIBLINGS', g.sib);
+  const direct = relativesLine==='direct';
+  if(!direct) add('SIBLINGS & HALF-SIBLINGS', g.sib);
   const kidNames={1:'KIDS',2:'GRANDKIDS',3:'GREAT-GRANDKIDS'};
   const lateKids=g.kid.filter(i=>i.dist>3);
   [1,2,3].forEach(d=>add(kidNames[d], g.kid.filter(i=>i.dist===d)));
   add('LATER GENERATIONS', lateKids);
-  add('AUNTS, UNCLES, NIECES & NEPHEWS', g.aunt);
-  add('OTHER RELATIVES', g.other);
-  const total=g.anc.length+g.sib.length+g.kid.length+g.aunt.length+g.other.length;
+  if(!direct){ add('AUNTS, UNCLES, NIECES & NEPHEWS', g.aunt); add('OTHER RELATIVES', g.other); }
+  const extra=g.sib.length+g.aunt.length+g.other.length;
+  const total=g.anc.length+g.kid.length+(direct?0:extra);
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>Relatives</h2>
     <div class="card no-tap" style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
@@ -3371,8 +3537,10 @@ function openRelativesSheet(target){
       <div class="card-sub" style="margin:0;">${total} ${total===1?'relative':'relatives'}<br>${relativesScope==='herd'?'in your herd':'in your records'}</div>
       <div class="seg" style="flex:none; width:230px;"><button type="button" data-relscope="everyone" class="${relativesScope==='everyone'?'on':''}">Everyone</button><button type="button" data-relscope="herd" class="${relativesScope==='herd'?'on':''}">Herd only</button></div>
     </div>
-    ${total ? parts.join('') : `<div class="empty">No relatives found for ${esc(target.name)}${relativesScope==='herd'?' in your herd':''}.<br>${(target.sireName||target.damName)?'':'This rabbit has no sire or dam on file, so there is nothing to connect.'}</div>`}`);
+    <div class="seg" style="margin:6px 0 8px;"><button type="button" data-relline="direct" class="${direct?'on':''}">Direct line</button><button type="button" data-relline="all" class="${direct?'':'on'}">All relatives${direct&&extra?' (+'+extra+')':''}</button></div>
+    ${total ? parts.join('') : `<div class="empty">${direct&&extra?'No direct-line relatives found. Tap All relatives to see siblings, aunts and cousins.<br><br>':''}No relatives found for ${esc(target.name)}${relativesScope==='herd'?' in your herd':''}.<br>${(target.sireName||target.damName)?'':'This rabbit has no sire or dam on file, so there is nothing to connect.'}</div>`}`);
   document.getElementById('relChange').onclick=()=>openRelativesPicker('');
+  document.querySelectorAll('[data-relline]').forEach(b=>b.onclick=()=>{ relativesLine=b.dataset.relline; openRelativesSheet(target); });
   document.querySelectorAll('[data-relscope]').forEach(b=>b.onclick=()=>{ relativesScope=b.dataset.relscope; openRelativesSheet(target); });
   document.querySelectorAll('[data-relopen]').forEach(c=>c.onclick=()=>{
     const r=rabbits.find(x=>x.id===c.dataset.relopen); if(!r) return;
@@ -3479,29 +3647,46 @@ function cardHTML(r, forceUrgent, origin){
   let detail='';
   if(r.status==='pregnant'){
     const d=daysToDue(r);
-    const t = d===0?'due today':d>0?`due in ${d} day${d===1?'':'s'}`:`${-d} day${-d===1?'':'s'} overdue`;
-    detail = `Bred to <b>${esc(r.partner||'?')}</b> ${fmtDate(r.bredDate)} &middot; <b>${t}</b> (${fmtDate(r.dueDate)})`;
-    if(r.palpate && r.palpate.key===palpateKey(r) && r.palpate.state==='positive') detail += `<br>Palpated positive ${fmtShort(r.palpate.date)}`;
-    else if(r.palpate && r.palpate.key===palpateKey(r) && r.palpate.next) detail += `<br>Unsure at last check &middot; palpate again ${fmtShort(r.palpate.next)}`;
+    const t = d===null?'':d===0?'due today':d>0?`due in ${d} day${d===1?'':'s'}`:`${-d} day${-d===1?'':'s'} overdue`;
+    detail = `Bred to <b>${esc(r.partner||'?')}</b> ${esc(fmtShort(r.bredDate))}${t?' &middot; <b>'+t+'</b>':''}`;
+    const pal=palpateLineHTML(r); if(pal) detail += `<br>${pal}`;
     if(needsNestBox(r)) detail += `<br><b>Give her a nest box</b> — due ${d<=0?'now':d===1?'tomorrow':'in '+d+' days'}.`;
   } else if(r.status==='nursing'){
-    const age=litterAgeDays(r), rem=r.rebreedDate?daysBetween(todayStr(),r.rebreedDate):null;
-    detail = `${r.litterKits?r.litterKits.length:0} kits, born ${fmtDate(r.litterBornDate)} (${ageText(r.litterBornDate)} old) &middot; wean ${fmtDate(r.weanDate)} &middot; sell ${fmtDate(r.sellDate)}<br>rebreed target ${r.rebreedDate?fmtDate(r.rebreedDate):'not set'}${rem===null?'':' — '+(rem<=0?'<b>ready now</b>':'ready in '+rem+' day'+(rem===1?'':'s'))}`;
+    const rem=r.rebreedDate?daysBetween(todayStr(),r.rebreedDate):null;
+    detail = `${kitCountText(r.litterKits,r.litterDead)} &middot; born ${esc(fmtShort(r.litterBornDate))} (${esc(ageText(r.litterBornDate))} old)<br>Wean ${esc(fmtShort(r.weanDate))}${rem===null?'':' &middot; '+(rem<=0?'<b>ready to rebreed</b>':'rebreed in '+rem+' day'+(rem===1?'':'s'))}`;
   } else if(r.sale){
     detail = saleLine(r);
   } else {
     detail = r.lastLitterSummary ? 'Last litter: '+esc(r.lastLitterSummary) : ((r.sireName||r.damName)?`Sire: ${esc(r.sireName||'?')} &middot; Dam: ${esc(r.damName||'?')}`:'No breeding history yet');
   }
   const flag = r.flag?`<div class="flag">${esc(r.flag)}</div>`:'';
-  let a='';
-  if(r.status==='pregnant') a=`<button class="btn btn-primary" data-act="kindled" data-id="${r.id}">Kindled</button><button class="btn btn-danger" data-act="lost" data-id="${r.id}">Not bred</button>`;
-  else if(r.status==='nursing') a=`${canRebred(r)?`<button class="btn btn-primary" data-act="rebred" data-id="${r.id}">Rebred</button>`:`<button class="btn btn-secondary btn-sm" disabled style="opacity:.5;">Rebreed available ${fmtDate(r.rebreedDate)}</button>`}<button class="btn btn-secondary" data-act="wean" data-id="${r.id}">Weaned</button>`;
-  else if(isArchived(r)) a=`<button class="btn btn-primary" data-act="unarchive" data-id="${r.id}">Return to roster</button>`;
-  else if(r.sex==='doe') a=`<button class="btn btn-primary" data-act="bred" data-id="${r.id}">Record breeding</button><button class="btn btn-secondary btn-sm" data-act="plan" data-id="${r.id}">Plan a breeding</button>`+((r.status==='open'||r.status==='resting')?`<button class="btn btn-secondary btn-sm" data-act="kindled" data-id="${r.id}">Record litter</button>`:'');
-  else a='';
-  a+=`<button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button><button class="btn btn-secondary btn-sm" data-act="wins" data-id="${r.id}">Wins</button><button class="btn btn-secondary btn-sm" data-act="history" data-id="${r.id}">History</button><button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">Edit</button>`;
-  return `<div class="card ${urgent?'urgent':''}" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${statusBadge(r)}</div>
-    <div class="card-detail">${detail}</div>${flag}${projChipsHTML(r)}<div class="card-actions">${a}</div></div>`;
+  let primary='';
+  if(r.status==='pregnant') primary=`<button class="btn btn-primary" data-act="kindled" data-id="${r.id}">Kindled</button>`;
+  else if(r.status==='nursing') primary = canRebred(r) ? `<button class="btn btn-primary" data-act="rebred" data-id="${r.id}">Rebred</button>` : `<button class="btn btn-primary" data-act="wean" data-id="${r.id}">Wean litter</button>`;
+  else if(isArchived(r)) primary=`<button class="btn btn-primary" data-act="unarchive" data-id="${r.id}">Return to roster</button>`;
+  else if(r.sex==='doe') primary=`<button class="btn btn-primary" data-act="bred" data-id="${r.id}">Record breeding</button>`;
+  const a = primary+`<button class="btn btn-secondary" data-act="pedigree" data-id="${r.id}">Pedigree</button><button class="btn btn-secondary" data-act="more" data-id="${r.id}" aria-label="More actions">More</button>`;
+  return `<div class="card hc ${urgent?'urgent':''}" data-openprofile="${r.id}"><div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div><span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
+    <div class="hc-chips">${statusBadge(r)}${projChipsHTML(r)}</div>
+    <div class="card-detail">${detail}</div>${flag}<div class="card-actions">${a}</div></div>`;
+}
+// The less-used actions for a rabbit, kept one tap away so the card stays clean.
+function openCardMore(r){
+  const items=[];
+  if(r.status==='pregnant'){ items.push(['lost','Not bred']); }
+  else if(r.status==='nursing'){ items.push(canRebred(r)?['wean','Wean litter']:['rebred','Rebred'],['editlitter','Edit litter']); }
+  else if(isArchived(r)){ }
+  else if(r.status==='growing' || r.sex==='buck'){ }
+  else if(r.sex==='doe'){ items.push(['plan','Plan a breeding']); if(r.status==='open'||r.status==='resting') items.push(['kindled','Kindled']); }
+  items.push(['wins','Add win'],['history','Breeding history'],['relatives','Relatives'],['edit','Edit']);
+  if(r.status==='growing' && !isUnderSixMonths(r)) items.unshift(['graduate','Move to '+(r.sex==='doe'?'Does':'Bucks')]);
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>${esc(r.name)}</h2>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">${items.map(([k,l])=>`<button class="btn btn-secondary" style="width:100%;" data-more="${k}">${l}</button>`).join('')}</div>`);
+  document.querySelectorAll('#sheet [data-more]').forEach(b=>b.onclick=()=>{
+    const act=b.dataset.more;
+    if(act==='lost'){ runCardAct('lost',r,b); return; }       // asks for a second tap, so the sheet stays open
+    closeSheet(); runCardAct(act,r,b);
+  });
 }
 function saleLine(r){
   const s=r.sale; if(!s) return '';
@@ -3517,12 +3702,12 @@ function saleLine(r){
 function buckCardHTML(r){
   const cov=bucksCoverage(r.name);
   const txt = cov.length?'Currently paired with: '+cov.map(d=>esc(d.name)).join(', ') : (r.sale?saleLine(r):((r.sireName||r.damName)?`Sire: ${esc(r.sireName||'?')} &middot; Dam: ${esc(r.damName||'?')}`:'Not currently paired with anyone'));
-  return `<div class="card" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div></div>
-    <div class="card-detail">${txt}</div>${projChipsHTML(r)}
+  return `<div class="card hc" data-openprofile="${r.id}"><div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div><span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
+    <div class="hc-chips">${statusBadge(r)}${projChipsHTML(r)}</div>
+    <div class="card-detail">${txt}</div>
     <div class="card-actions">
-      <button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button>
-      <button class="btn btn-secondary btn-sm" data-act="history" data-id="${r.id}">History</button>
-      <button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">Edit</button>
+      <button class="btn btn-primary" data-act="pedigree" data-id="${r.id}">Pedigree</button>
+      <button class="btn btn-secondary" data-act="more" data-id="${r.id}" aria-label="More actions">More</button>
     </div></div>`;
 }
 function juniorCardHTML(r){
@@ -3532,11 +3717,12 @@ function juniorCardHTML(r){
   else if(!r.dob) d='No birthdate on file — add one to track breeding readiness.';
   else if(ready) d=`${ageText(r.dob)} old &middot; moving up to ${r.sex==='doe'?'Does':'Bucks'} automatically`;
   else { const left=daysBetween(todayStr(), sixMonthDate(r.dob)); d=`${ageText(r.dob)} old &middot; ready to breed in ${left} day${left===1?'':'s'} (${fmtDate(sixMonthDate(r.dob))})`; }
-  return `<div class="card ${ready?'urgent':''}" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${statusBadge(r)}</div>
-    <div class="card-detail">${d}</div>${r.flag?`<div class="flag">${esc(r.flag)}</div>`:''}${projChipsHTML(r)}
+  return `<div class="card hc ${ready?'urgent':''}" data-openprofile="${r.id}"><div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div><span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
+    <div class="hc-chips">${statusBadge(r)}${projChipsHTML(r)}</div>
+    <div class="card-detail">${d}</div>${r.flag?`<div class="flag">${esc(r.flag)}</div>`:''}
     <div class="card-actions">
-      <button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button>
-      <button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">Edit</button>
+      <button class="btn btn-primary" data-act="pedigree" data-id="${r.id}">Pedigree</button>
+      <button class="btn btn-secondary" data-act="more" data-id="${r.id}" aria-label="More actions">More</button>
     </div></div>`;
 }
 function kitBadgeHTML(k){
@@ -3947,7 +4133,7 @@ function openWeanPlanSheet(r){
         setKitTag(x.k, x.tag || ((x.k.tag && x.k.tag!=='For sale' && x.k.tag!=='Reserved') ? x.k.tag : 'Keeping'));
       });
       r.status='open'; r.litterKits=kits; syncLitterEntry(r);
-      saveData(); closeSheet(); render(); showToast(r.name+' weaned — '+open.length+' kit'+(open.length===1?'':'s')+' moved to Juniors');
+      saveData(); closeSheet(); render(); if(profileRabbitId) renderProfile(); showToast(r.name+' weaned — '+open.length+' kit'+(open.length===1?'':'s')+' moved to Juniors');
     };
   };
   draw();
@@ -4151,7 +4337,7 @@ function plannedCardHTML(p){
   return `<div class="card no-tap"><div class="card-top"><div><div class="card-name">${esc(dn)} &times; ${esc(bn)}</div><div class="card-sub">Target: ${fmtDate(p.targetDate)}${doe?' · doe is '+doe.status:''}</div></div></div>
     <div class="relate-box">${relateBoxHTML(rel)}${warnBoxHTML(doe||findByName(dn)||{name:dn}, buck||findByName(bn)||{name:bn})}</div>
     ${p.notes?`<div class="card-detail">${esc(p.notes)}</div>`:''}
-    <div class="card-actions"><button class="btn btn-primary" data-act="executePlanned" data-id="${p.id}">Execute now</button><button class="btn btn-danger btn-sm" data-act="deletePlanned" data-id="${p.id}">Delete</button></div></div>`;
+    <div class="card-actions"><button class="btn btn-primary" data-act="executePlanned" data-id="${p.id}">Execute now</button><button class="btn btn-secondary btn-sm" data-act="editPlanned" data-id="${p.id}">Edit</button><button class="btn btn-danger btn-sm" data-act="deletePlanned" data-id="${p.id}">Delete</button></div></div>`;
 }
 
 function checklistRow(text, buttons){
@@ -4212,7 +4398,8 @@ function renderMain(){
   attachCardEvents();
 }
 
-function snoozed(r,type){ return !!(r.attnSnooze && r.attnSnooze[type] && r.attnSnooze[type] > todayStr()); }
+function dismissKey(r){ return [r.activeBreedingId||'',r.bredDate||'',r.litterBornDate||'',r.graduatedDate||'',(r.sale&&r.sale.pickupDate)||''].join('|'); }
+function snoozed(r,type){ return !!(r.attnSnooze && r.attnSnooze[type] && r.attnSnooze[type] > todayStr()) || !!(r.attnDismiss && r.attnDismiss[type]===dismissKey(r)); }
 function showUndoToast(label, revertFn, ms){
   const t = document.getElementById('toast');
   clearTimeout(window._toastTimer);
@@ -4224,17 +4411,25 @@ function showUndoToast(label, revertFn, ms){
 const QA_PLUS_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
 const QA_BUNNY_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 10c-1-3 0-6 1.5-6S11 7 11 10"/><path d="M16 10c1-3 0-6-1.5-6S13 7 13 10"/><ellipse cx="12" cy="15" rx="6" ry="5.5"/><circle cx="9.7" cy="14" r=".6" fill="currentColor" stroke="none"/><circle cx="14.3" cy="14" r=".6" fill="currentColor" stroke="none"/></svg>`;
 const QA_TAG_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 12.5 12 21l-9-9V4h8z"/><circle cx="7.5" cy="8.5" r="1.2" fill="currentColor" stroke="none"/></svg>`;
+const QA_SCALE_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8.5 10a3.5 3.5 0 0 1 7 0"/><path d="M12 10l1.5-1.5"/></svg>`;
 const CLOCK_SVG = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>`;
 const CHEVRON_SVG = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
-function attnRowHTML({ urgent=false, text, sub='', buttons='', circleId=null, circleType='', circleLabel='', snoozeId=null, snoozeType='' }){
+function attnRowHTML({ urgent=false, text, sub='', buttons='', circleId=null, circleType='', circleLabel='', snoozeId=null, snoozeType='', openId=null, swId=null, swType='' }){
   const circle = circleId ? `<div class="todo-circle ${urgent?'overdue':''}" data-circledone="${circleId}" data-circletype="${circleType}" data-circlelabel="${esc(circleLabel)}"></div>` : '';
   const clock = snoozeId ? `<button class="todo-clock" data-snooze="${snoozeId}" data-snoozetype="${snoozeType}" aria-label="Snooze">${CLOCK_SVG}</button>` : '';
-  return `<div class="todo-row ${urgent?'overdue':''}">
+  const acts = buttons ? `<div class="todo-acts">${buttons}</div>` : '';
+  const sid = swId||snoozeId, sty = swType||snoozeType;
+  const canDone = !!(circleId || snoozeType==='rem');
+  const row = `<div class="todo-row roomy ${urgent?'overdue':''}" ${openId?`data-openrow="${openId}"`:''}>
     ${circle}
-    <div class="todo-text" style="flex:1;">${text}${sub?`<div class="todo-sub-text">${sub}</div>`:''}</div>
-    <div style="display:flex; gap:6px; flex-shrink:0; align-items:center; flex-wrap:wrap; justify-content:flex-end;">${buttons}${clock}</div>
+    <div class="todo-main"><div class="todo-top"><div class="todo-text" style="flex:1;">${text}${sub?`<div class="todo-sub-text">${sub}</div>`:''}</div>${clock}</div>${acts}</div>
   </div>`;
+  if(!sid) return row;
+  return `<div class="swipe-wrap" data-swid="${sid}" data-swtype="${sty}" data-swdone="${canDone?1:0}">${canDone?'<div class="sw-done">Done</div>':''}<div class="sw-acts"><button class="sw-snz" data-swsnz>Snooze</button><button class="sw-dis" data-swdis>Dismiss</button></div>${row}</div>`;
 }
+let doneToday = [];   // this session only; Undo for things ticked off on Home
+function shortD(d){ return d ? fmtDate(d).replace(/, \d{4}$/,'') : ''; }
+function bredDueSub(r){ return [r.bredDate?'Bred '+shortD(r.bredDate):'', r.dueDate?'due '+shortD(r.dueDate):''].filter(Boolean).join(' · '); }
 function nestGroupHTML(nest){
   return `<div class="todo-nestgroup">
     <div class="todo-row" data-nesttoggle="1" style="cursor:pointer;">
@@ -4246,7 +4441,7 @@ function nestGroupHTML(nest){
       ${nest.map(r=>{
         const d=daysToDue(r);
         const when = d===0 ? 'due today' : `due in ${d} day${d===1?'':'s'}`;
-        return attnRowHTML({ text:`<b>${esc(r.name)}</b> — ${when}`, circleId:r.id, circleType:'nest', circleLabel:`${r.name}'s nest box marked done`, snoozeId:r.id, snoozeType:'nest' });
+        return attnRowHTML({ text:`<b>${esc(r.name)}</b> — ${when}`, sub:bredDueSub(r), openId:r.id, circleId:r.id, circleType:'nest', circleLabel:`${r.name}'s nest box marked done`, snoozeId:r.id, snoozeType:'nest' });
       }).join('')}
     </div>
   </div>`;
@@ -4269,22 +4464,89 @@ function wireAttentionRows(root){
     else if(type==='pickup'){ prevVal=r.sale?r.sale.pickupAckDate:null; if(r.sale) r.sale.pickupAckDate=todayStr(); }
     el.closest('.todo-row').classList.add('todo-complete');
     saveData();
+    const revert=()=>{
+      const rr=rabbits.find(x=>x.id===id); if(!rr) return;
+      if(type==='nest') rr.nestBoxAckDate=prevVal;
+      else if(type==='graduate') rr.juniorAckDone=prevVal;
+      else if(type==='pickup' && rr.sale) rr.sale.pickupAckDate=prevVal;
+    };
+    doneToday.push({date:todayStr(), label:label.replace(/ marked (done|complete)$/,'').replace(/ acknowledged$/,''), undo:revert});
     setTimeout(()=>{
       render();
-      showUndoToast(label, ()=>{
-        const rr=rabbits.find(x=>x.id===id); if(!rr) return;
-        if(type==='nest') rr.nestBoxAckDate=prevVal;
-        else if(type==='graduate') rr.juniorAckDone=prevVal;
-        else if(type==='pickup' && rr.sale) rr.sale.pickupAckDate=prevVal;
-      });
+      showUndoToast(label, ()=>{ revert(); doneToday=doneToday.filter(d=>d.undo!==revert); });
     }, 380);
   });
-  root.querySelectorAll('[data-snooze]').forEach(el=>el.onclick=()=>{
-    const id=el.dataset.snooze, type=el.dataset.snoozetype;
-    const r=rabbits.find(x=>x.id===id); if(!r) return;
-    r.attnSnooze = r.attnSnooze || {};
-    r.attnSnooze[type] = addDays(todayStr(),1);
-    saveData(); render(); showToast('Snoozed until tomorrow');
+  root.querySelectorAll('[data-openrow]').forEach(row=>row.addEventListener('click',(ev)=>{
+    if(ev.target.closest('button,.todo-circle,[data-nesttoggle]')) return;
+    const r=rabbits.find(x=>x.id===row.dataset.openrow); if(!r) return;
+    try{ closeSheet(); }catch(e){}
+    openRabbitProfile(r);
+  }));
+  root.querySelectorAll('[data-remdone]').forEach(b=>b.onclick=async()=>{
+    const x=customReminders.find(q=>q.id===b.dataset.remdone); if(!x) return;
+    const revert=completeReminder(x);
+    if(!(await saveReminders())){ revert(); return; }
+    doneToday.push({date:todayStr(), label:x.title, undo:()=>{ revert(); saveReminders(); }});
+    render(); showUndoToast('Reminder done', ()=>{ revert(); doneToday=doneToday.filter(d=>d.label!==x.title); saveReminders(); });
+  });
+  root.querySelectorAll('[data-remedit]').forEach(b=>b.onclick=()=>{ const x=customReminders.find(q=>q.id===b.dataset.remedit); if(x) openReminderSheet(x); });
+  root.querySelectorAll('[data-snooze]').forEach(el=>el.onclick=()=>attnSnoozeFor(el.dataset.snooze, el.dataset.snoozetype));
+  wireSwipeRows(root);
+}
+function attnSnoozeFor(id,type){
+  if(type==='rem'){ const x=customReminders.find(q=>q.id===id); if(!x) return; openSnoozeSheet(x.title, date=>{ const old=x.snoozeUntil; x.snoozeUntil=date; saveReminders().then(ok=>{ if(!ok) x.snoozeUntil=old; render(); if(ok) showToast('Snoozed until '+shortD(date)); }); }); return; }
+  const r=rabbits.find(x=>x.id===id); if(!r) return;
+  if(type==='palpate'){ openPalpateLaterSheet(r); return; }
+  openSnoozeSheet(r.name, date=>{ r.attnSnooze = r.attnSnooze || {}; r.attnSnooze[type] = date; saveData(); render(); showToast('Snoozed until '+shortD(date)); });
+}
+// Dismiss hides just this one alert. Nothing is deleted: a rabbit alert comes back for her next breeding/litter, a reminder can be restored from My reminders.
+function attnDismissFor(id,type){
+  if(type==='rem'){
+    const x=customReminders.find(q=>q.id===id); if(!x) return;
+    const snap={date:x.date,removed:x.removed,snoozeUntil:x.snoozeUntil};
+    if(x.repeat==='weekly'||x.repeat==='monthly'){ let n=nextRemDate(x.date,x.repeat); const t=todayStr(); while(n<=t) n=nextRemDate(n,x.repeat); x.date=n; x.snoozeUntil=null; } else { x.removed=true; }
+    const undo=()=>{ x.date=snap.date; x.removed=snap.removed; x.snoozeUntil=snap.snoozeUntil; };
+    saveReminders().then(ok=>{ if(!ok){ undo(); return; } render(); showUndoToast('Dismissed', ()=>{ undo(); saveReminders(); }, 6000); });
+    return;
+  }
+  const r=rabbits.find(x=>x.id===id); if(!r) return;
+  const had=r.attnDismiss&&r.attnDismiss[type];
+  r.attnDismiss=r.attnDismiss||{}; r.attnDismiss[type]=dismissKey(r);
+  saveData(); render();
+  showUndoToast('Dismissed', ()=>{ if(had) r.attnDismiss[type]=had; else delete r.attnDismiss[type]; }, 6000);
+}
+let swipeOpen=null;
+function closeSwipe(){ if(swipeOpen){ const row=swipeOpen.querySelector('.todo-row'); if(row) row.style.transform=''; swipeOpen=null; } }
+function wireSwipeRows(root){
+  root.querySelectorAll('.swipe-wrap').forEach(w=>{
+    const row=w.querySelector('.todo-row'), canDone=w.dataset.swdone==='1', OPEN=160;
+    let x0=0,y0=0,dx=0,active=false,engaged=false,base=0;
+    w.addEventListener('pointerdown',e=>{
+      if(e.target.closest('.sw-acts')) return;
+      if(e.target.closest('button,.todo-circle,[data-nesttoggle]')) return;
+      if(swipeOpen && swipeOpen!==w) closeSwipe();
+      active=true; engaged=false; x0=e.clientX; y0=e.clientY; dx=0; base=(swipeOpen===w)?-OPEN:0;
+    });
+    w.addEventListener('pointermove',e=>{
+      if(!active) return;
+      const mx=e.clientX-x0, my=e.clientY-y0;
+      if(!engaged){ if(Math.abs(mx)>10 && Math.abs(mx)>Math.abs(my)*1.5){ engaged=true; w.classList.add('dragging'); try{ w.setPointerCapture(e.pointerId); }catch(_){} } else return; }
+      dx=Math.max(-OPEN, Math.min(canDone?120:0, base+mx));
+      row.style.transform='translateX('+dx+'px)';
+    });
+    const end=()=>{
+      if(!active) return; active=false;
+      if(!engaged) return;
+      w.classList.remove('dragging'); w._dragged=true; setTimeout(()=>{ w._dragged=false; },60);
+      if(canDone && dx>90){ w._dragged=false; row.style.transform=''; swipeOpen=null; const c=w.querySelector('[data-circledone]')||w.querySelector('[data-remdone]'); if(c) c.click(); return; }
+      if(dx<-60){ row.style.transform='translateX(-'+OPEN+'px)'; swipeOpen=w; }
+      else { row.style.transform=''; if(swipeOpen===w) swipeOpen=null; }
+    };
+    w.addEventListener('pointerup',end); w.addEventListener('pointercancel',end);
+    w.addEventListener('click',e=>{ if(w._dragged){ e.stopPropagation(); e.preventDefault(); return; } if(swipeOpen===w && !e.target.closest('.sw-acts')){ closeSwipe(); e.stopPropagation(); } },true);
+    const sn=w.querySelector('[data-swsnz]'), di=w.querySelector('[data-swdis]');
+    if(sn) sn.onclick=()=>{ closeSwipe(); attnSnoozeFor(w.dataset.swid,w.dataset.swtype); };
+    if(di) di.onclick=()=>{ closeSwipe(); attnDismissFor(w.dataset.swid,w.dataset.swtype); };
   });
 }
 function openAttentionSheet(rowsHtml){
@@ -4302,7 +4564,17 @@ function wireConvertButtons(root){
   root.querySelectorAll('[data-convertyes]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.convertyes); if(r) convertLitterToIndividuals(r.id); });
   root.querySelectorAll('[data-convertno]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.convertno); if(r){ r.litterConvertAckDate=todayStr(); saveData(); render(); } });
 }
-function comingUpRowHTML(e){ return `<div class="comingup-row"><span>${esc(e.label)}</span><span class="comingup-date">${fmtDate(e.date).replace(/, \d{4}$/,'')}</span></div>`; }
+function comingUpRowHTML(e){
+  const dt=new Date(e.date+'T00:00:00');
+  return `<div class="cu-row" ${e.remId?`data-remedit="${e.remId}" style="cursor:pointer;"`:e.id?`data-openrow="${e.id}"`:''}><div class="cu-dd"><div class="w">${dt.toLocaleDateString('en-US',{weekday:'short'})}</div><div class="n">${dt.getDate()}</div></div>
+    <div class="cu-main"><div class="cu-name">${e.kind?`<span class="cu-pill">${esc(e.kind)}</span>`:''}${esc(e.name)}</div>${e.detail?`<div class="cu-det">${esc(e.detail)}</div>`:''}</div>${(e.id||e.remId)?'<div class="cu-chev">&rsaquo;</div>':''}</div>`;
+}
+function comingDayLabel(d,t){
+  const n=daysBetween(t,d); if(n===0) return 'Today'; if(n===1) return 'Tomorrow';
+  const dt=new Date(d+'T00:00:00');
+  return n<=6 ? dt.toLocaleDateString('en-US',{weekday:'long'}) : dt.toLocaleDateString('en-US',{month:'long'});
+}
+let homeComingAll=false;
 
 function renderHome(main){
   const t = todayStr();
@@ -4323,21 +4595,21 @@ function renderHome(main){
   overdueDoes.forEach(r=>{
     const d=daysToDue(r);
     rows.push({ urgent:true, sortKey:d, html: attnRowHTML({
-      urgent:true, text:`<b>${esc(r.name)}</b> is overdue — ${-d} day${-d===1?'':'s'} past due`,
+      urgent:true, text:`<b>${esc(r.name)}</b> is overdue — ${-d} day${-d===1?'':'s'} past due`, sub:bredDueSub(r), openId:r.id,
       buttons:`<button class="btn btn-primary btn-sm" data-act="kindled" data-id="${r.id}">Kindled</button>`,
       snoozeId:r.id, snoozeType:'overdue'
     })});
   });
   pickupOverdue.forEach(r=>{
     rows.push({ urgent:true, sortKey:0, html: attnRowHTML({
-      urgent:true, text:`Overdue — pickup: <b>${esc(r.name)}</b>`, sub:`Buyer pickup was scheduled for ${fmtDate(r.sale.pickupDate)}`,
+      urgent:true, openId:r.id, text:`Overdue — pickup: <b>${esc(r.name)}</b>`, sub:`Buyer pickup was scheduled for ${fmtDate(r.sale.pickupDate)}`,
       circleId:r.id, circleType:'pickup', circleLabel:`${r.name}'s pickup marked complete`,
       snoozeId:r.id, snoozeType:'pickup'
     })});
   });
   convert.forEach(r=>{
     rows.push({ urgent:false, sortKey:5, html: attnRowHTML({
-      text: convertReady(r) ? `<b>${esc(r.name)}'s litter</b> is 8 weeks old — make individual pages?` : `<b>${esc(r.name)}'s litter</b> is 8 weeks old — set each kit's sex so you can make pages.`,
+      openId:r.id, sub:r.litterBornDate?'Kindled '+shortD(r.litterBornDate):'', text: convertReady(r) ? `<b>${esc(r.name)}'s litter</b> is 8 weeks old — make individual pages?` : `<b>${esc(r.name)}'s litter</b> is 8 weeks old — set each kit's sex so you can make pages.`,
       buttons: convertReady(r) ? `<button class="btn btn-primary btn-sm" data-convertyes="${r.id}">Yes</button><button class="btn btn-secondary btn-sm" data-convertno="${r.id}">Not yet</button>` : `<button class="btn btn-primary btn-sm" data-kitsetup="${r.id}">Set sex</button><button class="btn btn-secondary btn-sm" data-convertno="${r.id}">Not yet</button>`,
       snoozeId:r.id, snoozeType:'convert'
     })});
@@ -4345,21 +4617,21 @@ function renderHome(main){
   palp.forEach(r=>{
     const since=daysBetween(r.bredDate,t);
     rows.push({ urgent:false, sortKey:3, html: attnRowHTML({
-      text:`Palpate <b>${esc(r.name)}</b> — bred ${since} day${since===1?'':'s'} ago`,
+      openId:r.id, swId:r.id, swType:'palpate', text:`Palpate <b>${esc(r.name)}</b> — bred ${since} day${since===1?'':'s'} ago`,
       sub:`Bred to ${esc(r.partner||'?')} ${fmtDate(r.bredDate)}`,
-      buttons:`<button class="btn btn-primary btn-sm" data-palpos="${r.id}">Positive</button><button class="btn btn-secondary btn-sm" data-palunsure="${r.id}">Unsure</button><button class="btn btn-danger btn-sm" data-palno="${r.id}">Not bred</button>`
+      buttons:`<button class="btn btn-primary btn-sm" data-palpos="${r.id}">Positive</button><button class="btn btn-secondary btn-sm" data-palunsure="${r.id}">Snooze</button><button class="btn btn-danger btn-sm" data-palno="${r.id}">Not bred</button>`
     })});
   });
   reb.forEach(r=>{
     rows.push({ urgent:false, sortKey:6, html: attnRowHTML({
-      text:`<b>${esc(r.name)}</b> is ready to rebreed`,
+      openId:r.id, sub:r.litterBornDate?'Kindled '+shortD(r.litterBornDate):'', text:`<b>${esc(r.name)}</b> is ready to rebreed`,
       buttons:`<button class="btn btn-primary btn-sm" data-act="rebred" data-id="${r.id}">Rebred</button>`,
       snoozeId:r.id, snoozeType:'reb'
     })});
   });
   recentGraduates.forEach(r=>{
     rows.push({ urgent:false, sortKey:7, html: attnRowHTML({
-      text:`<b>${esc(r.name)}</b> turned 6 months — moved up to ${r.sex==='doe'?'Does':'Bucks'}`,
+      openId:r.id, text:`<b>${esc(r.name)}</b> turned 6 months — moved up to ${r.sex==='doe'?'Does':'Bucks'}`,
       circleId:r.id, circleType:'graduate', circleLabel:`${r.name} acknowledged`,
       snoozeId:r.id, snoozeType:'graduate'
     })});
@@ -4367,9 +4639,17 @@ function renderHome(main){
   if(litterUiOn && alertOn('weigh')) rabbits.forEach(r=>{
     const wd=litterWeighDue(r); if(!wd || snoozed(r,'weigh')) return;
     rows.push({ urgent:false, sortKey:4, html: attnRowHTML({
-      text:`Weigh <b>${esc(r.name)}'s litter</b> — ${wd.label} old`,
+      openId:r.id, sub:r.litterBornDate?'Kindled '+shortD(r.litterBornDate):'', text:`Weigh <b>${esc(r.name)}'s litter</b> — ${wd.label} old`,
       buttons:`<button class="btn btn-primary btn-sm" data-weighlitter="${r.id}">Weigh</button>`,
       snoozeId:r.id, snoozeType:'weigh'
+    })});
+  });
+  if(alertOn('custom')) customReminders.filter(x=>remActive(x)&&x.date<=t&&!(x.snoozeUntil&&x.snoozeUntil>t)).forEach(x=>{
+    const rb=x.rabbitId?rabbits.find(q=>q.id===x.rabbitId):null, late=x.date<t;
+    rows.push({ urgent:false, sortKey:late?-2:2, html: attnRowHTML({
+      text:`<b>${esc(x.title)}</b>`, sub:[late?'Was due '+shortD(x.date):'Today', rb?esc(rb.name):'', remRepeatLabel(x)].filter(Boolean).join(' · '),
+      openId:rb?rb.id:null, snoozeId:x.id, snoozeType:'rem',
+      buttons:`<button class="btn btn-primary btn-sm" data-remdone="${x.id}">Done</button><button class="btn btn-secondary btn-sm" data-remedit="${x.id}">Edit</button>`
     })});
   });
   rows.sort((a,b)=> a.urgent===b.urgent ? a.sortKey-b.sortKey : (a.urgent?-1:1));
@@ -4378,27 +4658,46 @@ function renderHome(main){
   const visibleRows = rows.slice(0,VISIBLE_CAP);
   const hiddenCount = attnTotal - visibleRows.length;
 
-  // Coming up: bucketed into "This week" (next 7 days) and "Later" (8-30 days).
+  // Coming up: next 14 days, grouped by day, each with the doe's name and what's happening.
   const upcoming = [];
   rabbits.forEach(r=>{
-    if(r.sex==='doe'&&r.status==='pregnant'&&r.dueDate&&daysToDue(r)>=0) upcoming.push({date:r.dueDate, label:`${r.name} x ${r.partner||'?'} due`});
+    if(r.sex==='doe'&&r.status==='pregnant'){
+      if(r.dueDate&&daysToDue(r)>=0){
+        upcoming.push({date:r.dueDate, kind:'Due', name:r.name, detail:'Bred to '+(r.partner||'?')+(r.bredDate?' · '+shortD(r.bredDate):''), id:r.id});
+        if(alertOn('nest')){ const nd=addDays(r.dueDate,-nestDays()); if(nd>=t && nd!==r.dueDate) upcoming.push({date:nd, kind:'Nest box', name:r.name, detail:'Due '+shortD(r.dueDate), id:r.id}); }
+      }
+      if(alertOn('palpate') && r.bredDate && !(r.palpate && r.palpate.key===palpateKey(r) && r.palpate.state==='positive')){
+        const pd=palpateDueDate(r); if(pd>t) upcoming.push({date:pd, kind:'Palpate', name:r.name, detail:'Bred '+shortD(r.bredDate), id:r.id});
+      }
+    }
     if(r.sex==='doe'&&r.status==='nursing'){
-      if(r.weanDate&&r.weanDate>=t) upcoming.push({date:r.weanDate, label:`${r.name}'s litter ready to wean`});
-      if(r.sellDate&&r.sellDate>=t) upcoming.push({date:r.sellDate, label:`${r.name}'s litter ready to go`});
+      const kc=(r.litterKits||[]).length;
+      if(r.weanDate&&r.weanDate>=t) upcoming.push({date:r.weanDate, kind:'Wean', name:r.name+"'s litter", detail:(kc?kc+' kits · ':'')+(r.litterBornDate?'kindled '+shortD(r.litterBornDate):''), id:r.id});
+      if(r.sellDate&&r.sellDate>=t) upcoming.push({date:r.sellDate, kind:'Ready to go', name:r.name+"'s litter", detail:(kc?kc+' kits':''), id:r.id});
+      if(r.rebreedDate&&r.rebreedDate>=t) upcoming.push({date:r.rebreedDate, kind:'Rebreed', name:r.name, detail:r.litterBornDate?'Kindled '+shortD(r.litterBornDate):'', id:r.id});
     }
   });
-  planned.forEach(p=>{ if(p.targetDate>=t) upcoming.push({date:p.targetDate, label:`Planned: ${p.doeName||'?'} × ${p.buckName||'?'}`}); });
-  customEvents.forEach(e=>{ if(e.date>=t) upcoming.push({date:e.date, label:e.title}); });
-  upcoming.sort((a,b)=>a.date.localeCompare(b.date));
-  const thisWeek = upcoming.filter(e=>daysBetween(t,e.date)<=6);
-  const later = upcoming.filter(e=>{ const d=daysBetween(t,e.date); return d>6 && d<=30; });
+  planned.forEach(p=>{ if(p.targetDate>=t) upcoming.push({date:p.targetDate, kind:'Planned', name:`${p.doeName||'?'} × ${p.buckName||'?'}`, detail:p.notes||'', id:p.doeId||null}); });
+  customEvents.forEach(e=>{ if(e.date>=t) upcoming.push({date:e.date, kind:'Event', name:e.title, detail:'', id:null}); });
+  if(alertOn('custom')) customReminders.filter(remActive).forEach(x=>{ const ed=remEffDate(x); if(ed>t){ const rb=x.rabbitId?rabbits.find(q=>q.id===x.rabbitId):null; upcoming.push({date:ed, kind:'Reminder', name:x.title, detail:[rb?rb.name:'',remRepeatLabel(x)].filter(Boolean).join(' · '), id:rb?rb.id:null, remId:x.id}); } });
+  const upAll = upcoming.filter(e=>daysBetween(t,e.date)<=14).sort((a,b)=>a.date.localeCompare(b.date));
+  const UP_CAP=8;
+  const upShown = homeComingAll ? upAll : upAll.slice(0,UP_CAP);
+  const thisWeekN = upAll.filter(e=>daysBetween(t,e.date)<=6).length;
 
   const show = nextUpcomingShow();
 
-  let h = `<div class="quick-actions">
-    <button class="qa-btn qa-primary" id="qaAddBreeding"><span class="qa-icon">${QA_PLUS_SVG}</span><span>Add breeding</span></button>
-    <button class="qa-btn" id="qaOpenDoes"><span class="qa-icon">${QA_BUNNY_SVG}</span><span>Open does</span></button>
-    <button class="qa-btn" id="qaForSale"><span class="qa-icon">${QA_TAG_SVG}</span><span>For sale</span></button>
+  const herdDoes = rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r));
+  const forSaleN = rabbits.filter(r=>r.forSale && r.status!=='sold' && !isArchived(r) && r.status!=='external').length
+    + rabbits.reduce((n,d)=>n+((d.sex==='doe'&&d.litterKits)?d.litterKits.filter(k=>k.forSale&&!k.individualId).length:0),0);
+  const cnt = k=>herdDoes.filter(r=>r.status===k).length;
+  const tiles = [['pregnant','Bred',cnt('pregnant')],['nursing','On a litter',cnt('nursing')],['open','Open does',cnt('open')],['sale','For sale',forSaleN]];
+  let h = `<div class="home-sum"><b>${attnTotal}</b> ${attnTotal===1?'needs':'need'} attention · <b>${thisWeekN}</b> coming up this week · <b>${nursingDoes.length}</b> litter${nursingDoes.length===1?'':'s'} nursing</div>
+  <div class="stats home-tiles">${tiles.map(([k,l,n])=>`<div class="stat" data-hometile="${k}" role="button" tabindex="0"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('')}</div>
+  <div class="quick-actions">
+    <button class="qa-btn qa-primary" id="qaAddBreeding"><span class="qa-icon">${QA_PLUS_SVG}</span><span>Record breeding</span></button>
+    <button class="qa-btn" id="qaKindled"><span class="qa-icon">${QA_BUNNY_SVG}</span><span>Kindled</span></button>
+    <button class="qa-btn" id="qaWeight"><span class="qa-icon">${QA_SCALE_SVG}</span><span>Add weight</span></button>
     <button class="qa-btn" id="qaAddRabbit"><span class="qa-icon">${QA_PLUS_SVG}</span><span>Add rabbit</span></button>
   </div>`;
 
@@ -4420,22 +4719,42 @@ function renderHome(main){
     h += visibleRows.map(r=>r.html).join('');
     if(hiddenCount>0) h += `<button class="attn-viewall" id="attnViewAll">View all (${attnTotal}) &rarr;</button>`;
   }
+  doneToday = doneToday.filter(d=>d.date===t);
+  if(doneToday.length){
+    h += `<button class="attn-viewall" id="doneTodayBtn" style="text-align:left;">Done today (${doneToday.length}) <span id="doneChev">&rsaquo;</span></button>
+      <div id="doneTodayList" style="display:none;">${doneToday.map((d,i)=>`<div class="done-row"><div class="t">${esc(d.label)}</div><button data-doneundo="${i}">Undo</button></div>`).join('')}</div>`;
+  }
 
-  h += `<div class="section-label">COMING UP</div>`;
-  if(!thisWeek.length && !later.length){
+  h += `<div class="section-label" style="display:flex;align-items:center;justify-content:space-between;"><span>COMING UP</span><button class="attn-viewall" id="addReminderBtn" style="width:auto;padding:4px 0;">+ Add a reminder</button></div>`;
+  if(!upAll.length){
     h += `<div class="card no-tap"><div class="card-detail">Nothing coming up in the next month.</div></div>`;
   } else {
-    if(thisWeek.length) h += `<div class="section-label" style="margin-top:10px; opacity:.6;">THIS WEEK</div><div class="card no-tap">${thisWeek.map(comingUpRowHTML).join('')}</div>`;
-    if(later.length) h += `<div class="section-label" style="margin-top:10px; opacity:.6;">LATER</div><div class="card no-tap">${later.map(comingUpRowHTML).join('')}</div>`;
+    let lastLbl=null;
+    upShown.forEach(e=>{ const lb=comingDayLabel(e.date,t); if(lb!==lastLbl){ h+=`<div class="cu-day">${lb}</div>`; lastLbl=lb; } h+=comingUpRowHTML(e); });
+    if(upAll.length>UP_CAP) h += `<button class="attn-viewall" id="comingToggle">${homeComingAll?'Show fewer':'Show all next 14 days ('+upAll.length+')'}</button>`;
   }
 
   main.innerHTML = h;
 
-  document.getElementById('qaAddBreeding').onclick = ()=>openAddPlannedSheet();
-  document.getElementById('qaOpenDoes').onclick = ()=>{ currentTab='rabbits'; rabbitsGroup='does'; doesFilter='open'; render(); window.scrollTo(0,0); };
-  document.getElementById('qaForSale').onclick = ()=>{ currentTab='forsale'; render(); window.scrollTo(0,0); };
+  document.getElementById('qaAddBreeding').onclick = ()=>openQuickBreedSheet();
+  document.getElementById('qaKindled').onclick = ()=>{
+    const does=rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r));
+    const bred=does.filter(r=>r.status==='pregnant');
+    openRabbitPickSheet('Kindled — which doe?', bred.length?bred:does, r=>openKindledSheet(r), bred.length&&bred.length<does.length?'Showing bred does':'');
+  };
+  document.getElementById('qaWeight').onclick = ()=>openRabbitPickSheet('Add weight — which rabbit?', rabbits.filter(r=>isActive(r)&&r.status!=='external'), r=>openAddWeightSheet(r), '');
   document.getElementById('qaAddRabbit').onclick = openAddSheet;
   if(document.getElementById('showBannerCard')) document.getElementById('showBannerCard').onclick = openShowsSheet;
+  main.querySelectorAll('[data-hometile]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.hometile;
+    if(k==='sale'){ currentTab='forsale'; }
+    else { currentTab='rabbits'; rabbitsGroup='does'; doesFilter=k; selectMode=false; }
+    render(); window.scrollTo(0,0);
+  });
+  if(document.getElementById('addReminderBtn')) document.getElementById('addReminderBtn').onclick=()=>openReminderSheet(null);
+  if(document.getElementById('comingToggle')) document.getElementById('comingToggle').onclick=()=>{ homeComingAll=!homeComingAll; render(); };
+  if(document.getElementById('doneTodayBtn')) document.getElementById('doneTodayBtn').onclick=()=>{ const l=document.getElementById('doneTodayList'); const open=l.style.display==='none'; l.style.display=open?'block':'none'; document.getElementById('doneChev').innerHTML=open?'&#9662;':'&rsaquo;'; };
+  main.querySelectorAll('[data-doneundo]').forEach(b=>b.onclick=()=>{ const d=doneToday[+b.dataset.doneundo]; if(!d) return; d.undo(); doneToday=doneToday.filter(x=>x!==d); saveData(); render(); showToast('Undone'); });
   if(document.getElementById('attnViewAll')) document.getElementById('attnViewAll').onclick = ()=>openAttentionSheet(rows.map(r=>r.html).join(''));
   wireAttentionRows(main);
   wireConvertButtons(main);
@@ -4533,8 +4852,9 @@ function renderCalendar(main){
     events.push({date:p.targetDate, label:`Planned: ${p.doeName||(doe?doe.name:'?')} × ${p.buckName}`, sub:p.notes||'Planned breeding', id:doe?doe.id:null, plannedId:p.id, type:'planned'});
   });
   customEvents.forEach(e=>{ events.push({date:e.date, label:e.title, sub:'Custom event', id:null, customId:e.id, type:'custom'}); });
+  customReminders.filter(remActive).forEach(x=>{ const rb=x.rabbitId?rabbits.find(q=>q.id===x.rabbitId):null; events.push({date:remEffDate(x), label:x.title, sub:['Reminder',rb?rb.name:'',remRepeatLabel(x)].filter(Boolean).join(' · '), id:rb?rb.id:null, remId:x.id, type:'reminder'}); });
 
-  const DOT = {weigh:'var(--ink-soft)', due:'var(--rust)', rebreed:'var(--gold-deep)', wean:'var(--marsh)', sell:'var(--marsh)', planned:'var(--gold-deep)', custom:'var(--ink-soft)'};
+  const DOT = {weigh:'var(--ink-soft)', due:'var(--rust)', rebreed:'var(--gold-deep)', wean:'var(--marsh)', sell:'var(--marsh)', planned:'var(--gold-deep)', custom:'var(--ink-soft)', reminder:'var(--marsh)'};
 
   const days=[]; for(let i=0;i<7;i++){ days.push(addDays(calWeekStart,i)); }
   const dayLabels=['SUN','MON','TUE','WED','THU','FRI','SAT'];
@@ -4589,6 +4909,9 @@ function renderCalendar(main){
   document.querySelectorAll('[data-calopen]').forEach(b=>b.onclick=()=>{
     const r=rabbits.find(x=>x.id===b.dataset.calopen); if(r) openRabbitProfile(r);
   });
+  document.querySelectorAll('[data-calremedit]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const x=customReminders.find(q=>q.id===b.dataset.calremedit); if(x) openReminderSheet(x); });
+  document.querySelectorAll('[data-caledit]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const x=customEvents.find(q=>q.id===b.dataset.caledit); if(x) openAddEventSheet(null,x); });
+  document.querySelectorAll('[data-calplanedit]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const x=planned.find(q=>q.id===b.dataset.calplanedit); if(x) openAddPlannedSheet(null,x); });
   document.querySelectorAll('[data-caldel]').forEach(b=>b.onclick=(ev)=>{
     ev.stopPropagation();
     const gone = customEvents.find(x=>x.id===b.dataset.caldel); if(!gone) return;
@@ -4609,20 +4932,22 @@ function calRowHTML(e, overdue){
       <div class="cal-row-text"><b>${esc(e.label)}</b></div>
       <div class="cal-row-text" style="opacity:.75; font-size:12px; margin-top:2px;">${esc(e.sub||'')}</div>
     </div>
-    ${e.customId?`<button class="btn btn-danger btn-sm" style="flex:0 0 auto;" data-caldel="${e.customId}">Remove</button>`:''}
-    ${e.plannedId?`<button class="btn btn-danger btn-sm" style="flex:0 0 auto;" data-calplandel="${e.plannedId}">Remove</button>`:''}
+    ${e.customId?`<button class="btn btn-secondary btn-sm" style="flex:0 0 auto;" data-caledit="${e.customId}">Edit</button><button class="btn btn-danger btn-sm" style="flex:0 0 auto;" data-caldel="${e.customId}">Remove</button>`:''}
+    ${e.plannedId?`<button class="btn btn-secondary btn-sm" style="flex:0 0 auto;" data-calplanedit="${e.plannedId}">Edit</button><button class="btn btn-danger btn-sm" style="flex:0 0 auto;" data-calplandel="${e.plannedId}">Remove</button>`:''}
+    ${e.remId?`<button class="btn btn-secondary btn-sm" style="flex:0 0 auto;" data-calremedit="${e.remId}">Edit</button>`:''}
   </div>`;
 }
-function openAddEventSheet(defaultDate){
+function openAddEventSheet(defaultDate, existing){
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
-    <h2>Add an event</h2>
-    <div class="field"><label>Title</label><input id="f-evtitle" placeholder="e.g. Vet visit, show entry deadline"></div>
-    <div class="field"><label>Date</label><input type="date" id="f-evdate" value="${esc(defaultDate||todayStr())}"></div>
+    <h2>${existing?'Edit event':'Add an event'}</h2>
+    <div class="field"><label>Title</label><input id="f-evtitle" placeholder="e.g. Vet visit, show entry deadline" value="${esc(existing?existing.title:'')}"></div>
+    <div class="field"><label>Date</label><input type="date" id="f-evdate" value="${esc(existing?existing.date:(defaultDate||todayStr()))}"></div>
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>`);
   document.getElementById('f-save').onclick=()=>{
     const title=document.getElementById('f-evtitle').value.trim();
     if(!title){ showToast('Enter a title'); return; }
     const d = csvParseDate(document.getElementById('f-evdate').value)||todayStr();
+    if(existing){ existing.title=title; existing.date=d; calSelectedDate=d; saveEvents(); closeSheet(); render(); showToast('Event updated'); return; }
     customEvents.push({id:uid(), title, date:d});
     calSelectedDate = d;
     saveEvents(); closeSheet(); render(); showToast('Event added');
@@ -4754,6 +5079,23 @@ function armConfirm(btn, confirmText, onConfirm){
   btn.textContent=confirmText;
   setTimeout(()=>{ if(btn.dataset.armed==='1'){ btn.dataset.armed='0'; btn.textContent=btn.dataset.origText; } }, 4000);
 }
+function runCardAct(act,r,btn){
+  if(act==='kindled') openKindledSheet(r);
+      else if(act==='editlitter') openKindledSheet(r,true);
+      else if(act==='litterpedigree') openLitterPedigreeSheet(r);
+      else if(act==='lost'){ armConfirm(btn, 'Tap again to confirm', ()=>{ markLitterLost(r); saveData(); closeSheet(); render(); showToast(r.name+' marked open'); }); }
+      else if(act==='rebred'||act==='bred') openBreedSheet(r);
+      else if(act==='plan') openAddPlannedSheet(r.id);
+      else if(act==='wean'){ if(litterUiOn){ openWeanPlanSheet(r); } else { r.status='open'; saveData(); render(); showToast(r.name+' weaned'); } }
+      else if(act==='graduate'){ if(isUnderSixMonths(r)){ showToast(r.name+' stays in Juniors until '+fmtDate(sixMonthDate(r.dob))); return; } r.status = r.sex==='doe'?'open':'available'; saveData(); render(); showToast(r.name+' moved to '+(r.sex==='doe'?'Does':'Bucks')); }
+      else if(act==='unarchive') openUnarchive(r);
+      else if(act==='edit') openEditSheet(r);
+      else if(act==='pedigree') openRabbitProfile(r,'pedigree');
+      else if(act==='wins') openWinsSheet(r);
+      else if(act==='history') openHistorySheet(r);
+  else if(act==='relatives') openRelativesSheet(r);
+  else if(act==='more') openCardMore(r);
+}
 function attachCardEvents(){
   document.querySelectorAll('[data-openprofile]').forEach(el=>{
     el.addEventListener('click', (ev)=>{
@@ -4765,27 +5107,16 @@ function attachCardEvents(){
     btn.onclick=(ev)=>{
       ev.stopPropagation();
       const id=btn.dataset.id, act=btn.dataset.act;
-      if(act==='executePlanned'||act==='deletePlanned'){
+      if(act==='executePlanned'||act==='deletePlanned'||act==='editPlanned'){
         const p=planned.find(x=>x.id===id); if(!p) return;
+        if(act==='editPlanned'){ openAddPlannedSheet(null,p); return; }
         if(act==='deletePlanned'){ planned=planned.filter(x=>x.id!==id); savePlanned(); render(); showToast('Planned breeding removed'); return; }
         const doe=rabbits.find(r=>r.id===p.doeId);
         if(doe) openBreedSheet(doe, p.buckName||(rabbits.find(r=>r.id===p.buckId)||{}).name, ()=>{ planned=planned.filter(x=>x.id!==id); savePlanned(); render(); });
         return;
       }
       const r=rabbits.find(x=>x.id===id); if(!r) return;
-      if(act==='kindled') openKindledSheet(r);
-      else if(act==='editlitter') openKindledSheet(r,true);
-      else if(act==='litterpedigree') openLitterPedigreeSheet(r);
-      else if(act==='lost'){ armConfirm(btn, 'Tap again to confirm', ()=>{ markLitterLost(r); saveData(); render(); showToast(r.name+' marked open'); }); }
-      else if(act==='rebred'||act==='bred') openBreedSheet(r);
-      else if(act==='plan') openAddPlannedSheet(r.id);
-      else if(act==='wean'){ r.status='open'; saveData(); render(); showToast(r.name+' weaned'); }
-      else if(act==='graduate'){ if(isUnderSixMonths(r)){ showToast(r.name+' stays in Juniors until '+fmtDate(sixMonthDate(r.dob))); return; } r.status = r.sex==='doe'?'open':'available'; saveData(); render(); showToast(r.name+' moved to '+(r.sex==='doe'?'Does':'Bucks')); }
-      else if(act==='unarchive') openUnarchive(r);
-      else if(act==='edit') openEditSheet(r);
-      else if(act==='pedigree') openRabbitProfile(r,'pedigree');
-      else if(act==='wins') openWinsSheet(r);
-      else if(act==='history') openHistorySheet(r);
+      runCardAct(act,r,btn);
     };
   });
   document.querySelectorAll('[data-keepkit]').forEach(btn=>{
@@ -4845,8 +5176,8 @@ function openKindledSheet(r, editing){
       <div class="st-num" id="st-${key}">${st[key]}</div>
       <button type="button" data-st="${key}" data-d="1" aria-label="More">+</button></div>`;
   openSheet(`<div class="lit-sheet"><button class="close-x" onclick="closeSheet()">&times;</button>
-    <h2>${esc(r.name)} — ${editing?'edit litter':'record litter'}</h2>
-    <div class="lit-card"><div class="field"><label>Litter born</label><input type="date" id="f-born" value="${esc(st.born)}"></div>
+    <h2>${esc(r.name)} — ${editing?'edit litter':'kindled'}</h2>
+    <div class="lit-card"><div class="field"><label>Date kindled</label><input type="date" id="f-born" value="${esc(st.born)}"></div>
     ${needsBuck?`<div class="field" style="margin-top:12px;"><label>Buck (optional)</label><input id="f-buck" placeholder="Type or pick a buck" autocomplete="off">
       <div class="lit-hint" id="f-bredhint"></div></div>`:''}</div>
     ${(editing&&litterUiOn)?`<div class="lit-card"><div class="st-row" style="padding:0;"><div><b>${existing.length} ${existing.length===1?'kit':'kits'} in this litter</b><div class="card-sub">To record a loss, use the litter page.</div></div><button type="button" class="btn btn-secondary btn-sm" id="f-addkit">+ Add a kit</button></div></div>`:`<div class="st-block lit-card lit-alive">
@@ -4909,7 +5240,7 @@ function openKindledSheet(r, editing){
     // read what is actually showing in the date boxes, so what you see is what gets saved
     onBorn(); onReb();
     const yr=+String(st.born||'').slice(0,4), thisYr=new Date().getFullYear();
-    if(!st.born || yr<thisYr-15 || yr>thisYr+1){ showToast('Check the litter born date — it says '+(st.born?fmtDate(st.born):'nothing')+'. Fix it, then Save.'); return; }
+    if(!st.born || yr<thisYr-15 || yr>thisYr+1){ showToast('Check the kindled date — it says '+(st.born?fmtDate(st.born):'nothing')+'. Fix it, then Save.'); return; }
     const born=st.born||todayStr();
     const wasEditing = editing;
     // kits: new litters start blank; editing adds blanks or drops unlinked kits from the end
@@ -5575,10 +5906,10 @@ function openAddSheet(){
       <div class="field"><label>Legs</label><input id="f-legs"></div>
       <div class="lit-label" style="margin:4px 0 6px;">Weight</div>
       <div class="row2">
-        <div class="field"><input id="f-weight" inputmode="decimal" placeholder="e.g. 3.5"></div>
+        <div class="field"><input id="f-weight" placeholder="3.4, 3 lb 4 oz, or 14 oz" autocomplete="off"></div>
         <div class="field"><input type="date" id="f-wdate" value="${esc(todayStr())}"></div>
       </div>
-      <div class="seg" id="f-wunit" style="margin-bottom:12px;"><button type="button" class="on" data-u="lb">lb</button><button type="button" data-u="oz">oz</button></div>
+      <div class="card-sub" id="f-wprev" style="min-height:18px;margin:-4px 0 10px;"></div>
       <div class="lit-label" style="margin:4px 0 6px;">Where did this rabbit come from?</div>
       <div class="seg" id="f-origin" style="margin-bottom:8px;"><button type="button" data-o="bred">Bred here</button><button type="button" data-o="bought">Came from elsewhere</button></div>
       <div id="f-originmore" hidden>
@@ -5593,9 +5924,9 @@ function openAddSheet(){
   attachSuggest(document.getElementById('f-sire'), ()=>rabbits.filter(x=>x.sex==='buck').map(x=>x.name));
   attachSuggest(document.getElementById('f-dam'), ()=>rabbits.filter(x=>x.sex==='doe').map(x=>x.name));
   attachNameMatchSuggest(document.getElementById('f-name'));
-  let sex='doe', unit='lb', origin='';
+  let sex='doe', origin='';
   document.querySelectorAll('#f-sex button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#f-sex button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); sex=b.dataset.v; });
-  document.querySelectorAll('#f-wunit button').forEach(b=>b.onclick=()=>{ unit=b.dataset.u; document.querySelectorAll('#f-wunit button').forEach(x=>x.classList.toggle('on',x===b)); });
+  document.getElementById('f-weight').addEventListener('input',e=>{ document.getElementById('f-wprev').textContent=weightPreviewText(e.target.value); });
   document.querySelectorAll('#f-origin button').forEach(b=>b.onclick=()=>{
     origin = origin===b.dataset.o ? '' : b.dataset.o;   // tap again to clear
     document.querySelectorAll('#f-origin button').forEach(x=>x.classList.toggle('on',x.dataset.o===origin));
@@ -5611,13 +5942,13 @@ function openAddSheet(){
   const val=id=>document.getElementById(id).value;
   const gather=()=>{
     const carries={}; document.querySelectorAll('[data-ft]').forEach(g=>{ const on=g.querySelector('button.on'); if(on && on.dataset.fv!=='unknown') carries[g.dataset.ft]=on.dataset.fv; });
-    const w=parseFloat(val('f-weight'));
+    const wp=parseWeightText(val('f-weight')), w=wp.oz?wp.oz/16:NaN;
     return {
       breed:val('f-breed'), color:val('f-color'), earNumber:val('f-ear'), dob:csvParseDate(val('f-dob'))||null,
       sireName:val('f-sire').trim(), damName:val('f-dam').trim(),
       registrationNumber:val('f-reg').trim(), gcNumber:val('f-gc').trim(), legsWins:val('f-legs').trim(),
       projectIds:[...document.querySelectorAll('#f-projs [data-fp].on')].map(b=>b.dataset.fp), carries,
-      weightLbs:isFinite(w)&&w>0?(unit==='oz'?Math.round(w/16*100)/100:w):null, weightOz:isFinite(w)&&w>0?(unit==='oz'?w:Math.round(w*16*10)/10):null, weightDate:val('f-wdate')||todayStr(),
+      weightLbs:isFinite(w)&&w>0?Math.round(w*100)/100:null, weightOz:wp.oz||null, weightBad:wp.error||'', weightDate:val('f-wdate')||todayStr(),
       origin: origin?{type:origin, from:origin==='bought'?val('f-from').trim():'', acquired:origin==='bought'?(val('f-acq')||''):''}:null,
       notes:val('f-notes').trim(), photo:(document.getElementById('f-photo').files||[])[0]||null
     };
@@ -5627,7 +5958,7 @@ function openAddSheet(){
     if(!base){ showToast('Enter a name'); return; }
     const prefix=document.getElementById('f-prefix').value.trim();
     const name=fullName(prefix, base);
-    const d=gather(); d.prefix=prefix; d.alias=val('f-alias').trim();
+    const d=gather(); if(d.weightBad){ showToast(d.weightBad); return; } d.prefix=prefix; d.alias=val('f-alias').trim();
     const m=fuzzyMatches(name);
     if(m.length){
       openDuplicateSheet(name, m, chosen=>{
@@ -5681,12 +6012,14 @@ function pedBox(node,path,role){
 }
 function historyEntryHTML(damObj, e){
   const cls = e.outcome==='litter'?'took':e.outcome==='lost'?'lost':'pending';
-  const label = e.outcome==='litter'?'Took — litter born':e.outcome==='lost'?'Did not take / litter lost':'Pending';
+  const label = e.outcome==='litter'?'Took — kindled':e.outcome==='lost'?'Did not take / litter lost':'Pending';
   let detail = `Bred to <b>${esc(e.partner||'?')}</b> on ${fmtDate(e.bredDate)}`;
   if(damObj) detail = `<b>${esc(damObj.name)}</b> &times; ${esc(e.partner||'?')} — bred ${fmtDate(e.bredDate)}`;
-  if(e.outcome==='litter' && e.litterKits) detail += `<br>${e.litterKits.length} kits born ${fmtDate(e.litterBornDate)}`;
+  if(e.outcome==='litter' && e.litterKits) detail += `<br>${kitCountText(e.litterKits,e.litterDead)} &middot; born ${fmtDate(e.litterBornDate)}`;
+  if(e.palpated==='positive') detail += `<br>Palpated positive${e.palpatedDate?' '+esc(fmtShort(e.palpatedDate)):''}`;
+  const canAgain = damObj && e.partner && damObj.sex==='doe' && damObj.status!=='pregnant' && damObj.status!=='growing' && (damObj.status!=='nursing' || canRebred(damObj));
   return `<div class="history-entry ${cls}"><div class="card-detail" style="margin:0;"><b>${label}</b></div><div class="card-detail" style="margin-top:2px;">${detail}</div>
-    ${damObj?`<div class="card-actions" style="margin-top:8px;"><button class="btn btn-secondary btn-sm" data-histedit="${damObj.id}:${e.id}">Edit this entry</button></div>`:''}</div>`;
+    ${damObj?`<div class="card-actions" style="margin-top:8px;"><button class="btn btn-secondary btn-sm" data-histedit="${damObj.id}:${e.id}">Edit this entry</button>${canAgain?`<button class="btn btn-secondary btn-sm" data-again="${damObj.id}:${e.id}">Breed again to ${esc(e.partner)}</button>`:''}</div>`:''}</div>`;
 }
 function openHistorySheet(r){
   let html;
@@ -5764,7 +6097,34 @@ function openAncestorSheet(anc, origin){
   };
   document.getElementById('f-adelete').onclick=(e)=>{ armConfirm(e.target, 'Tap again to confirm', async ()=>{ if(!(await moveToTrash(anc))){ showToast('Could not delete — check your connection and try again'); return; } rabbits=rabbits.filter(x=>x.id!==anc.id); saveData(); done(origin); }); };
 }
+const pedOpen = new Set();
+function pedNestRow(node,path,role){
+  if(!node||!node.name) return `<div class="pdn-row unknown" data-pedpath="${path}"><div class="pdn-role">${role}</div><div class="pdn-grow"><div class="pn">+ Add name</div></div></div>`;
+  return `<div class="pdn-row ${node.external?'anc':''}" data-pedname="${esc(node.name)}"><div class="pdn-role">${role}</div><div class="pdn-grow"><div class="pn">${esc(node.name)}</div>${node.color?`<div class="pc">${esc(node.color)}</div>`:''}</div></div>`;
+}
+function pedNestHTML(r){
+  const g=p=>ancestorByPath(r.name,p);
+  const more=(parentPath,caption,a,b,pa,pb)=>{
+    const key=r.id+':'+parentPath, open=pedOpen.has(key);
+    const n=(g(pa)&&g(pa).name?1:0)+(g(pb)&&g(pb).name?1:0);
+    return `<button type="button" class="pdn-tg" data-pedtg="${key}"><span>${caption}</span><span>${n}/2 <b>${open?'▾':'›'}</b></span></button>
+      <div class="pdn-nest pdn-more ${open?'on':''}">${pedNestRow(g(pa),pa,'Sire')}${pedNestRow(g(pb),pb,'Dam')}</div>`;
+  };
+  const side=(p,pc,gs,gd,lbl)=>`${pedNestRow(g(p),p,pc)}
+    <div class="pdn-nest"><div class="ped-side-label" style="margin:2px 0 0;">GRANDPARENTS · ${lbl}</div>
+      <div>${pedNestRow(g(p+'s'),p+'s','Grandsire')}${more(p+'s',"Grandsire's parents",0,0,p+'ss',p+'sd')}</div>
+      <div>${pedNestRow(g(p+'d'),p+'d','Granddam')}${more(p+'d',"Granddam's parents",0,0,p+'ds',p+'dd')}</div></div>`;
+  return `<div class="ped-gen"><div class="ped-gen-label">PARENTS</div>${side('s','Sire',0,0,"SIRE'S SIDE")}<div style="height:12px"></div>${side('d','Dam',0,0,"DAM'S SIDE")}</div>`;
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest&&e.target.closest('[data-pedtg]'); if(!t) return;
+  const key=t.dataset.pedtg, block=t.nextElementSibling; if(!block) return;
+  const on=!block.classList.contains('on'); block.classList.toggle('on',on);
+  if(on) pedOpen.add(key); else pedOpen.delete(key);
+  const b=t.querySelector('b'); if(b) b.textContent=on?'▾':'›';
+});
 function pedigreeTreeHTML(r){
+  if(window.matchMedia && window.matchMedia('(max-width:899px)').matches) return pedNestHTML(r);
   const g=p=>ancestorByPath(r.name,p);
   return `<div class="ped-gen"><div class="ped-gen-label">PARENTS</div><div class="ped-row">${pedBox(g('s'),'s','Sire')}${pedBox(g('d'),'d','Dam')}</div></div>
     <div class="ped-gen"><div class="ped-gen-label">GRANDPARENTS</div>
@@ -6805,7 +7165,7 @@ async function previewWorstCaseBackgroundPDF(filename){
   }
 }
 
-async function downloadOfficialPedigreePDF(r){
+async function downloadOfficialPedigreePDF(r, opts){
   try{
     const myProfileForPdf = await getMyPedigreeProfile();
     const templateName = myProfileForPdf.pedigree_template || 'generic';
@@ -6819,7 +7179,7 @@ async function downloadOfficialPedigreePDF(r){
     const staticTemplateName = myProfileForPdf.pedigree_static_template
       || (!myProfileForPdf.pedigree_background && templateName!=='generic' ? templateName : null);
     if(staticTemplateName){
-      openPedigreeStyleChooserSheet(r, myProfileForPdf, staticTemplateName, hasCustomBackground);
+      openPedigreeStyleChooserSheet(r, myProfileForPdf, staticTemplateName, hasCustomBackground, opts);
       return;
     }
     openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground);
@@ -6828,7 +7188,7 @@ async function downloadOfficialPedigreePDF(r){
     alert('Could not open pedigree options:\n\n' + (err && err.message ? err.message : err));
   }
 }
-function openPedigreeStyleChooserSheet(r, myProfileForPdf, staticTemplateName, hasCustomBackground){
+function openPedigreeStyleChooserSheet(r, myProfileForPdf, staticTemplateName, hasCustomBackground, opts){
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>${esc(r.name)} — Pedigree style</h2>
     <div class="card-sub" style="margin-bottom:14px;">This account has more than one pedigree layout set up. Choose which one to use.</div>
@@ -6845,14 +7205,28 @@ function openPedigreeStyleChooserSheet(r, myProfileForPdf, staticTemplateName, h
     <div class="sheet-actions"><button class="btn btn-secondary" style="width:100%;" onclick="closeSheet()">Cancel</button></div>`);
   document.getElementById('pp-choice-static').onclick = ()=>{
     closeSheet();
-    generateStaticTemplatePedigreePDF(r, myProfileForPdf, staticTemplateName);
+    generateStaticTemplatePedigreePDF(r, myProfileForPdf, staticTemplateName, opts);
   };
   document.getElementById('pp-choice-dynamic').onclick = ()=>{
     closeSheet();
     openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground);
   };
 }
-async function generateStaticTemplatePedigreePDF(r, myProfileForPdf, templateNameArg){
+// Shows a finished PDF on screen first. Nothing is downloaded or saved until Save PDF is tapped.
+function openPdfPreviewSheet(blob, filename, title){
+  const url=URL.createObjectURL(blob);
+  const done=()=>{ try{ URL.revokeObjectURL(url); }catch(e){} closeSheet(); };
+  openSheet(`<button class="close-x" id="pv-x">&times;</button><h2>${esc(title)}</h2>
+    <div class="card-sub" style="margin-bottom:8px;">Preview — nothing is saved until you tap Save PDF.</div>
+    <iframe src="${url}#toolbar=0&navpanes=0" title="Pedigree preview" style="width:100%;height:60vh;border:1px solid var(--line);border-radius:10px;background:#fff;"></iframe>
+    <div class="sheet-actions"><button class="btn btn-secondary" id="pv-close">Close</button><button class="btn btn-primary" id="pv-save">Save PDF</button></div>`);
+  document.getElementById('pv-x').onclick=done; document.getElementById('pv-close').onclick=done;
+  document.getElementById('pv-save').onclick=()=>{
+    const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+    showToast('Saved');
+  };
+}
+async function generateStaticTemplatePedigreePDF(r, myProfileForPdf, templateNameArg, opts){
   try{
     const templateName = templateNameArg || myProfileForPdf.pedigree_static_template || myProfileForPdf.pedigree_template || 'generic';
     const { PDFDocument, StandardFonts } = PDFLib;
@@ -6932,10 +7306,12 @@ async function generateStaticTemplatePedigreePDF(r, myProfileForPdf, templateNam
     });
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type:'application/pdf' });
+    const fileName = `${(r.name||'pedigree').replace(/\s+/g,'-')}-pedigree.pdf`;
+    if(opts && opts.preview){ openPdfPreviewSheet(blob, fileName, r.name+' — Pedigree preview'); return; }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${(r.name||'pedigree').replace(/\s+/g,'-')}-pedigree.pdf`;
+    a.download = fileName;
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
   }catch(err){
@@ -6991,16 +7367,17 @@ function openLitterPedigreeSheet(dam){
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()" style="flex:1;">Close</button></div>`);
   document.querySelectorAll('#sheet [data-pedname]').forEach(b=>b.onclick=null);
 }
-function openAddPlannedSheet(presetDoeId){
+function openAddPlannedSheet(presetDoeId, existing){
+  if(existing) presetDoeId=existing.doeId;
   const does=rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing');
   const bucks=rabbits.filter(r=>r.sex==='buck'&&isActive(r)&&r.status!=='growing');
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
-    <h2>Plan a breeding</h2>
+    <h2>${existing?'Edit planned breeding':'Plan a breeding'}</h2>
     <div class="field"><label>Doe</label><select id="f-doe"><option value="">Select a doe</option>${does.map(x=>`<option value="${x.id}" ${x.id===presetDoeId?'selected':''}>${esc(x.name)} — ${x.status}</option>`).join('')}</select></div>
-    <div class="field"><label>Buck</label><select id="f-buck"><option value="">Select a buck</option>${bucks.map(x=>`<option value="${x.id}">${esc(x.name)} — ${x.status}</option>`).join('')}</select></div>
-    <div class="field"><label>Target date</label><input type="date" id="f-date" value="${esc(todayStr())}"></div>
+    <div class="field"><label>Buck</label><select id="f-buck"><option value="">Select a buck</option>${bucks.map(x=>`<option value="${x.id}" ${existing&&x.id===existing.buckId?'selected':''}>${esc(x.name)} — ${x.status}</option>`).join('')}</select></div>
+    <div class="field"><label>Target date</label><input type="date" id="f-date" value="${esc(existing?existing.targetDate:todayStr())}"></div>
     <div id="f-relate" class="relate-box">Select both a doe and a buck to check relatedness.</div>
-    <div class="field" style="margin-top:12px;"><label>Notes</label><textarea id="f-notes" placeholder="Pairing goal, line you're working"></textarea></div>
+    <div class="field" style="margin-top:12px;"><label>Notes</label><textarea id="f-notes" placeholder="Pairing goal, line you're working">${esc(existing?existing.notes||'':'')}</textarea></div>
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save plan</button></div>`);
   function upd(){
     const d=does.find(x=>x.id===document.getElementById('f-doe').value), b=bucks.find(x=>x.id===document.getElementById('f-buck').value);
@@ -7009,12 +7386,14 @@ function openAddPlannedSheet(presetDoeId){
     const rel=relatednessSummary(d.name,b.name); box.className='relate-box'; box.innerHTML=relateBoxHTML(rel)+warnBoxHTML(d,b);
   }
   document.getElementById('f-doe').onchange=upd; document.getElementById('f-buck').onchange=upd;
-  if(presetDoeId) upd();
+  if(presetDoeId||existing) upd();
   document.getElementById('f-save').onclick=()=>{
     const di=document.getElementById('f-doe').value, bi=document.getElementById('f-buck').value;
     if(!di||!bi){ showToast('Pick a doe and a buck'); return; }
-    planned.push({ id:uid(), doeId:di, buckId:bi, doeName:(does.find(x=>x.id===di)||{}).name, buckName:(bucks.find(x=>x.id===bi)||{}).name,
-      targetDate:csvParseDate(document.getElementById('f-date').value)||todayStr(), notes:document.getElementById('f-notes').value });
+    const rec={ doeId:di, buckId:bi, doeName:(does.find(x=>x.id===di)||{}).name||(existing&&existing.doeId===di?existing.doeName:''), buckName:(bucks.find(x=>x.id===bi)||{}).name||(existing&&existing.buckId===bi?existing.buckName:''),
+      targetDate:csvParseDate(document.getElementById('f-date').value)||todayStr(), notes:document.getElementById('f-notes').value };
+    if(existing){ Object.assign(existing,rec); savePlanned(); closeSheet(); render(); showToast('Plan updated'); return; }
+    planned.push(Object.assign({id:uid()},rec));
     savePlanned(); closeSheet(); currentTab='planned'; render(); showToast('Breeding planned');
   };
 }
@@ -7033,25 +7412,28 @@ function openShowsSheet(){
       <div class="card no-tap">
         <div class="card-top"><div><div class="card-name">${esc(s.name)}</div>
         <div class="card-sub">Entries close ${fmtDate(s.entryDeadline)}${s.showDate?' &middot; show '+fmtDate(s.showDate):''}</div></div></div>
-        <div class="card-actions"><button class="btn btn-danger btn-sm" data-delshow="${s.id}">Remove</button></div>
+        <div class="card-actions"><button class="btn btn-secondary btn-sm" data-editshow="${s.id}">Edit</button><button class="btn btn-danger btn-sm" data-delshow="${s.id}">Remove</button></div>
       </div>`).join('') : `<div class="card no-tap"><div class="card-detail">No shows added yet.</div></div>`}`);
   document.getElementById('addShowBtn').onclick = openAddShowSheet;
+  document.querySelectorAll('[data-editshow]').forEach(b=>b.onclick=()=>{ const x=shows.find(q=>q.id===b.dataset.editshow); if(x) openAddShowSheet(x); });
   document.querySelectorAll('[data-delshow]').forEach(b=>b.onclick=()=>{
     shows = shows.filter(s=>s.id!==b.dataset.delshow); saveShows(); openShowsSheet(); render();
   });
 }
-function openAddShowSheet(){
+function openAddShowSheet(existing){
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
-    <h2>Add a show</h2>
-    <div class="field"><label>Show name</label><input type="text" id="f-showname" placeholder="Southern MD ARBA Show"></div>
-    <div class="field"><label>Entry deadline</label><input type="date" id="f-showdeadline" value="${esc(todayStr())}"></div>
-    <div class="field"><label>Show date (optional)</label><input type="date" id="f-showdate"></div>
+    <h2>${existing?'Edit show':'Add a show'}</h2>
+    <div class="field"><label>Show name</label><input type="text" id="f-showname" placeholder="Southern MD ARBA Show" value="${esc(existing?existing.name:'')}"></div>
+    <div class="field"><label>Entry deadline</label><input type="date" id="f-showdeadline" value="${esc(existing?existing.entryDeadline:todayStr())}"></div>
+    <div class="field"><label>Show date (optional)</label><input type="date" id="f-showdate" value="${esc(existing?existing.showDate||'':'')}"></div>
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="openShowsSheet()">Cancel</button><button class="btn btn-primary" id="f-saveshow">Save show</button></div>`);
   document.getElementById('f-saveshow').onclick = ()=>{
     const name = document.getElementById('f-showname').value.trim();
     const deadline = csvParseDate(document.getElementById('f-showdeadline').value);
     if(!name || !deadline){ showToast('Add a show name and entry deadline'); return; }
-    shows.push({ id:uid(), name, entryDeadline:deadline, showDate:csvParseDate(document.getElementById('f-showdate').value)||'' });
+    const sd=csvParseDate(document.getElementById('f-showdate').value)||'';
+    if(existing){ existing.name=name; existing.entryDeadline=deadline; existing.showDate=sd; saveShows(); openShowsSheet(); render(); showToast('Show updated'); return; }
+    shows.push({ id:uid(), name, entryDeadline:deadline, showDate:sd });
     saveShows(); openShowsSheet(); render(); showToast('Show added');
   };
 }
@@ -7258,7 +7640,7 @@ function openAncestorCleanupSheet(){
   };
 }
 async function openMoreSheet(){
-  const items=[...(litterUiOn?[['kittags','Kit tags'],['waitlist','Waitlist']]:[]),['add','Add rabbit'],['import','Import from CSV'],['importpdf','Import from Pedigree PDF'],['planned','Planned breedings'],['forsale','For sale'],['shows','Upcoming shows'],['reminders','Reminders'],['colors','Colors'],['pedigreesettings','Pedigree settings'],['ancestors','Ancestors'],['cleanup','Move herd rabbits to Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['trash','Recently deleted'],['backup','Backup and restore']];
+  const items=[...(litterUiOn?[['kittags','Kit tags'],['waitlist','Waitlist']]:[]),['add','Add rabbit'],['import','Import from CSV'],['importpdf','Import from Pedigree PDF'],['planned','Planned breedings'],['forsale','For sale'],['shows','Upcoming shows'],['myreminders','My reminders'],['reminders','Reminders'],['colors','Colors'],['pedigreesettings','Pedigree settings'],['ancestors','Ancestors'],['cleanup','Move herd rabbits to Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['trash','Recently deleted'],['backup','Backup and restore']];
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>More</h2>
     <div style="background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:12px;">
       <div class="section-label" style="margin:0 0 3px;">SIGNED IN AS</div>
@@ -7278,6 +7660,7 @@ async function openMoreSheet(){
     else if(k==='kittags') openKitTagsSettings();
     else if(k==='waitlist') openWaitlistSheet();
     else if(k==='colors') openPaletteSheet();
+    else if(k==='myreminders') openMyRemindersSheet();
     else if(k==='reminders') openRemindersSheet();
     else if(k==='pedigreesettings') openPedigreeSettingsSheet();
     else if(k==='merge') openMergeSheet();
@@ -7295,6 +7678,20 @@ async function openMoreSheet(){
   };
 }
 
+function openRabbitPickSheet(title, list, onPick, note){
+  const sorted=list.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>${esc(title)}</h2>
+    ${note?`<div class="card-sub" style="margin-bottom:6px;">${esc(note)}</div>`:''}
+    <div class="field"><input id="rp-q" placeholder="Search name or ear #" autocomplete="off"></div>
+    <div id="rp-list"></div>`);
+  const draw=()=>{
+    const q=nameKey(document.getElementById('rp-q').value);
+    const hits=sorted.filter(r=>!q||nameKey(r.name).includes(q)||(r.earNumber&&nameKey(r.earNumber)===q)||(r.alias&&nameKey(r.alias).includes(q)));
+    document.getElementById('rp-list').innerHTML = hits.length ? hits.map(r=>`<button class="suggest-item" style="display:block;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;" data-rp="${r.id}"><b>${esc(r.name)}</b> <span style="opacity:.7;font-size:12.5px;">${subLine(r)}</span></button>`).join('') : '<div class="empty">No rabbits match.</div>';
+    document.querySelectorAll('[data-rp]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.rp); if(r) onPick(r); });
+  };
+  document.getElementById('rp-q').addEventListener('input',draw); draw();
+}
 function renderForSale(main){
   const rabbitsForSale = rabbits.filter(r=>r.forSale && r.status!=='sold' && !isArchived(r) && r.status!=='external');
   const litterKitRows = [];
@@ -7804,7 +8201,7 @@ function renderBackup(main){
       const out = text ? addBackFromBackup(text) : {error:'That file could not be read.'};
       if(out.error){ showToast(out.error); return; }
       await saveData(); await savePlanned(); await saveEvents(); await saveShows(); await saveExpenses();
-      await saveWaitlist(); await saveProjects(); await saveTraits(); await saveQuickPicks(); await saveKitTags();
+      await saveWaitlist(); await saveProjects(); await saveTraits(); await saveQuickPicks(); await saveKitTags(); await saveReminders();
       render();
       const total = out.nr+out.np+out.ne+out.ns+out.nx+(out.nk||0);
       showToast(total ? ('Added back '+out.nr+' rabbit'+(out.nr===1?'':'s')+(total-out.nr?' and '+(total-out.nr)+' other item'+((total-out.nr)===1?'':'s'):'')) : 'Nothing was missing — everything in that file is already here');
@@ -7895,18 +8292,18 @@ function renderBackup(main){
 /* ---------------- RABBIT PROFILE (full screen) ---------------- */
 function contextualActions(r){
   const acts=[];
-  if(r.status==='pregnant'){ acts.push(['kindled','Record litter'],['lost','Not bred']); }
+  if(r.status==='pregnant'){ acts.push(['kindled','Kindled'],['lost','Not bred']); }
   else if(r.status==='nursing'){ if(canRebred(r)) acts.push(['rebred','Rebred']); acts.push(['wean','Weaned'],['editlitter','Edit litter']); }
   else if(isArchived(r)){ acts.push(['unarchive','Return to roster']); }
   else if(r.status==='growing'){ acts.push(['graduate','Move to '+(r.sex==='doe'?'Does':'Bucks')]); }
-  else if(r.sex==='doe'){ acts.push(['bred','Record breeding'],['plan','Plan a breeding']); if(r.status==='open'||r.status==='resting') acts.push(['kindled','Record litter']); }
+  else if(r.sex==='doe'){ acts.push(['bred','Record breeding'],['plan','Plan a breeding']); if(r.status==='open'||r.status==='resting') acts.push(['kindled','Kindled']); }
   acts.push(['win','Add win']);
   acts.push(['relatives','Relatives']);
   return acts;
 }
 function profileTabsFor(r){
   const tabs=[['overview','Overview']];
-  if(r.sex==='doe' && r.status!=='growing' && r.status!=='external'){ tabs.push(['breeding','Breeding'],['litters','Litters']); }
+  if((r.sex==='doe'||r.sex==='buck') && r.status!=='growing' && r.status!=='external'){ tabs.push(['breeding','Breeding']); }
   tabs.push(['pedigree','Pedigree'],['photos','Photos'],['notes','Notes']);
   return tabs;
 }
@@ -7920,6 +8317,7 @@ function renderProfile(){
   const r = rabbits.find(x=>x.id===profileRabbitId);
   const view = document.getElementById('profileView');
   if(!r){ closeProfile(); return; }
+  if(profileTab==='litters') profileTab='breeding';   // Litters is now part of the Breeding tab
   const tabs = profileTabsFor(r);
   if(!tabs.some(t=>t[0]===profileTab)) profileTab='overview';
   view.innerHTML = `
@@ -7944,7 +8342,7 @@ function renderProfile(){
   if(profileTab==='overview') body.innerHTML = overviewTabHTML(r);
   else if(profileTab==='breeding') body.innerHTML = breedingTabHTML(r);
   else if(profileTab==='litters') body.innerHTML = littersTabHTML(r);
-  else if(profileTab==='pedigree') body.innerHTML = `${pedigreeTreeHTML(r)}<div class="sheet-actions" style="flex-wrap:wrap;"><button class="btn btn-primary" style="flex:1;" id="profOfficialPdf">Print / Save PDF</button></div>`;
+  else if(profileTab==='pedigree') body.innerHTML = `${pedigreeTreeHTML(r)}<div class="sheet-actions" style="flex-wrap:wrap;"><button class="btn btn-secondary" style="flex:1;" id="profPedPreview">Preview</button><button class="btn btn-primary" style="flex:1;" id="profOfficialPdf">Print / Save PDF</button></div>`;
   else if(profileTab==='photos') body.innerHTML = photosTabHTML(r);
   else if(profileTab==='notes') body.innerHTML = notesTabHTML(r);
   wireProfileTab(r);
@@ -7965,9 +8363,74 @@ function overviewTabHTML(r){
     ${r.flag?`<div class="flag">${esc(r.flag)}</div>`:''}
     <div class="overview-grid">${rows.map(([l,v])=>`<div class="ov-cell"><div class="ov-label">${l.toUpperCase()}</div><div class="ov-val">${esc(v)}</div></div>`).join('')}</div>
     ${weightsCardHTML(r)}
+    ${profileRemindersHTML(r)}
     <button class="btn btn-secondary" style="width:100%;margin-top:12px;" data-pa="edit">Edit details</button>`;
 }
+function profileRemindersHTML(r){
+  const mine=customReminders.filter(x=>remActive(x)&&x.rabbitId===r.id).sort((a,b)=>remEffDate(a).localeCompare(remEffDate(b)));
+  return `<div class="lit-card" style="margin-top:12px;"><div class="card-name" style="font-size:16px;">Reminders</div>
+    ${mine.map(x=>`<div style="display:flex;align-items:center;gap:10px;padding:6px 0;"><div style="flex:1;min-width:0;"><b>${esc(x.title)}</b><div class="card-sub">${esc(shortD(remEffDate(x)))}${remRepeatLabel(x)?' · '+remRepeatLabel(x):''}</div></div><button class="btn btn-secondary btn-sm" data-premedit="${x.id}">Edit</button></div>`).join('')}
+    <button class="btn btn-secondary btn-sm" style="margin-top:6px;" data-pa="remind">+ Remind me</button></div>`;
+}
+// ===== BREEDING TAB START =====
+// Kit counts show LIVING kits only. Losses are stated separately and never added into the count.
+function lostCount(dead){ const d=dead||{}; return (d.DOA||0)+(d.peanut||0)+(d.passed||0); }
+function kitCountText(kits,dead){ const n=(kits||[]).length, l=lostCount(dead); return n+' kit'+(n===1?'':'s')+(l?' &middot; '+l+' lost':''); }
+function timelineHTML(stops){
+  const t=todayStr();
+  const list=stops.filter(x=>x.date).sort((a,b)=>a.date.localeCompare(b.date));
+  return `<div class="tl">${list.map(x=>`<div class="tl-stop ${x.date<=t?'past':''}"><div class="tl-dot"></div><div class="tl-l">${x.label}</div><div class="tl-d">${esc(fmtShort(x.date))}</div></div>`).join('')}</div>`;
+}
+function palpateLineHTML(r){
+  if(!(r.palpate && r.palpate.key===palpateKey(r))) return '';
+  if(r.palpate.state==='positive') return `Palpated positive ${esc(fmtShort(r.palpate.date))}`;
+  if(r.palpate.next) return `Snoozed &middot; palpate again ${esc(fmtShort(r.palpate.next))}`;
+  return '';
+}
+function breedingNowHTML(r){
+  if(r.status==='pregnant'){
+    const d=daysToDue(r);
+    const when = d===null?'':(d===0?'due today':d>0?`due in ${d} day${d===1?'':'s'}`:`${-d} day${-d===1?'':'s'} overdue`);
+    const pal=palpateLineHTML(r);
+    let relHTML='';
+    try{ const rel=relatednessSummary(r.name,r.partner); if(rel && rel.any) relHTML=`<div class="relate-box" style="margin-top:8px;">${relateBoxHTML(rel)}</div>`; }catch(e){}
+    const stops=[{label:'Bred',date:r.bredDate},{label:(r.palpate&&r.palpate.key===palpateKey(r)&&r.palpate.state==='positive')?'Palpated ✓':'Palpate',date:(r.palpate&&r.palpate.key===palpateKey(r)&&r.palpate.state==='positive'&&r.palpate.date)?r.palpate.date:addDays(r.bredDate,palpateDays())},{label:'Nest box',date:r.dueDate?addDays(r.dueDate,-nestDays()):null},{label:'Due',date:r.dueDate}];
+    return `<div class="card no-tap"><div class="card-name" style="font-size:16px;">Current breeding</div>
+      <div class="card-detail">Bred to <b>${esc(r.partner||'?')}</b> on ${fmtDate(r.bredDate)}${when?' &middot; <b>'+when+'</b>':''}${pal?'<br>'+pal:''}</div>
+      ${timelineHTML(stops)}${relHTML}
+      <div class="card-actions"><button class="btn btn-primary btn-sm" data-pa="kindled">Kindled</button><button class="btn btn-danger btn-sm" data-pa="lost">Not bred</button></div></div>`;
+  }
+  if(r.status==='nursing'){
+    const stops=[{label:'Born',date:r.litterBornDate},{label:'Wean',date:r.weanDate},{label:'Ready',date:r.sellDate},{label:'Rebreed',date:r.rebreedDate}];
+    return `<div class="card no-tap"><div class="card-name" style="font-size:16px;">On a litter</div>
+      <div class="card-detail">${kitCountText(r.litterKits,r.litterDead)} &middot; born ${fmtDate(r.litterBornDate)}${r.litterBornDate?' ('+esc(ageText(r.litterBornDate))+' old)':''}</div>
+      ${timelineHTML(stops)}
+      <div class="card-actions">${litterUiOn?'<button class="btn btn-secondary btn-sm" data-pa="openlitter">Open litter</button>':''}<button class="btn btn-primary btn-sm" data-pa="wean">Wean litter</button>${canRebred(r)?'<button class="btn btn-secondary btn-sm" data-pa="rebred">Rebred</button>':''}</div></div>`;
+  }
+  if(r.sex==='doe' && r.status!=='growing'){
+    return `<div class="card no-tap"><div class="card-detail">Currently open — not bred.</div>
+      <div class="card-actions"><button class="btn btn-primary btn-sm" data-pa="bred">Record breeding</button><button class="btn btn-secondary btn-sm" data-pa="plan">Plan a breeding</button></div></div>`;
+  }
+  return '';
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('[data-again]'); if(!b) return;
+  const [damId,entryId]=b.dataset.again.split(':');
+  const dam=rabbits.find(x=>x.id===damId), en=dam&&(dam.breedingHistory||[]).find(x=>x.id===entryId); if(!dam||!en||!en.partner) return;
+  closeSheet(); openBreedSheet(dam, en.partner);
+});
 function breedingTabHTML(r){
+  if(r.sex==='buck'){
+    const rows=[]; rabbits.forEach(d=>{ if(d.sex==='doe') (d.breedingHistory||[]).forEach(e=>{ if(e.partner && nameKey(e.partner)===nameKey(r.name)) rows.push({dam:d,e}); }); });
+    rows.sort((a,b)=>(b.e.bredDate||'').localeCompare(a.e.bredDate||''));
+    return `<div class="section-label">BREEDING HISTORY</div>`+(rows.length?rows.map(x=>historyEntryHTML(x.dam,x.e)).join(''):`<div class="empty">No breedings logged yet for ${esc(r.name)}.</div>`);
+  }
+  const hist=(r.breedingHistory||[]).slice().sort((a,b)=>(b.bredDate||'').localeCompare(a.bredDate||''));
+  const histHTML = hist.length ? hist.map(e=>historyEntryHTML(r,e)).join('') : `<div class="empty">No breedings logged yet.</div>`;
+  return `${breedingNowHTML(r)}<div class="section-label">BREEDING HISTORY</div>${histHTML}`;
+}
+// ===== BREEDING TAB END =====
+function oldBreedingTabHTML(r){
   let cur='';
   if(r.status==='pregnant'){
     const d=daysToDue(r);
@@ -8031,7 +8494,7 @@ function wireProfileTab(r){
       else if(a==='lost') armConfirm(b,'Tap again to confirm',()=>{ markLitterLost(r); saveData(); renderProfile(); render(); showToast(r.name+' marked open'); });
       else if(a==='rebred'||a==='bred') openBreedSheet(r);
       else if(a==='plan'){ openAddPlannedSheet(r.id); }
-      else if(a==='wean'){ r.status='open'; saveData(); renderProfile(); render(); showToast(r.name+' weaned'); }
+      else if(a==='wean'){ if(litterUiOn){ openWeanPlanSheet(r); } else { r.status='open'; saveData(); renderProfile(); render(); showToast(r.name+' weaned'); } }
       else if(a==='graduate'){ if(isUnderSixMonths(r)){ showToast(r.name+' stays in Juniors until '+fmtDate(sixMonthDate(r.dob))); return; } r.status=r.sex==='doe'?'open':'available'; saveData(); renderProfile(); render(); showToast(r.name+' moved to '+(r.sex==='doe'?'Does':'Bucks')); }
       else if(a==='unarchive') openUnarchive(r);
       else if(a==='edit') openEditSheet(r, renderProfile);
@@ -8039,11 +8502,14 @@ function wireProfileTab(r){
       else if(a==='addweight'){ openAddWeightSheet(r); }
       else if(a==='addphoto'){ profileTab='photos'; renderProfile(); }
       else if(a==='addnote'){ profileTab='notes'; renderProfile(); }
-      else if(a==='litters'){ profileTab='litters'; renderProfile(); }
+      else if(a==='litters'){ profileTab='breeding'; renderProfile(); }
+      else if(a==='openlitter'){ openLitterPage(r.id); }
       else if(a==='win'){ openWinsSheet(r); }
       else if(a==='relatives'){ openRelativesSheet(r); }
+      else if(a==='remind'){ openReminderSheet(null, renderProfile, r.id); }
     };
   });
+  document.querySelectorAll('[data-premedit]').forEach(b=>b.onclick=()=>{ const x=customReminders.find(q=>q.id===b.dataset.premedit); if(x) openReminderSheet(x, renderProfile); });
   if(profileTab==='breeding'){
     document.querySelectorAll('[data-histedit]').forEach(b=>b.onclick=()=>{
       const [damId,entryId]=b.dataset.histedit.split(':');
@@ -8054,6 +8520,7 @@ function wireProfileTab(r){
   if(profileTab==='pedigree'){
     wirePedigreeTaps(document.getElementById('profileBody'), r, renderProfile);
     const pob=document.getElementById('profOfficialPdf'); if(pob) pob.onclick=()=>downloadOfficialPedigreePDF(r);
+    const ppv=document.getElementById('profPedPreview'); if(ppv) ppv.onclick=()=>downloadOfficialPedigreePDF(r,{preview:true});
   }
   if(profileTab==='litters'){ attachCardEvents(); }
   if(profileTab==='photos'){
