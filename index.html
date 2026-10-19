@@ -583,6 +583,9 @@
     #main.card-grid > .todo-row,
     #main.card-grid > .todo-nestgroup,
     #main.card-grid > .action-row,
+    #main.card-grid > .pj-bar,
+    #main.card-grid > .pj-summary,
+    #main.card-grid > .pj-selbar,
     #main.card-grid > button{
       grid-column:1 / -1;
     }
@@ -1905,6 +1908,19 @@ function repointName(oldName, newName){
   if(typeof planned!=='undefined') planned.forEach(p=>{ if(p.doeName && nameKey(p.doeName)===o) p.doeName=newName; if(p.buckName && nameKey(p.buckName)===o) p.buckName=newName; });
   if(typeof savePlanned==='function') savePlanned();
 }
+// ----- prefix (herd tag) kept separate from the call name; r.name stays the full name so every link by name keeps working -----
+function knownPrefixes(){ const m=new Map(); rabbits.forEach(r=>{ const p=(r.prefix||'').trim(); if(p) m.set(p, (m.get(p)||0)+1); }); return [...m.entries()].sort((a,b)=>b[1]-a[1]).map(x=>x[0]); }
+function fullName(prefix, base){
+  prefix=(prefix||'').trim(); base=(base||'').trim();
+  if(!prefix) return base;
+  if(base.toLowerCase().startsWith(prefix.toLowerCase()+' ') || base.toLowerCase()===prefix.toLowerCase()) return base;   // already typed in the name box
+  return (prefix+' '+base).trim();
+}
+function baseNameOf(r){
+  const p=(r.prefix||'').trim(), n=r.name||'';
+  return (p && n.toLowerCase().startsWith(p.toLowerCase()+' ')) ? n.slice(p.length+1).trim() : n;
+}
+function prefixDatalistHTML(){ return `<datalist id="prefix-options">${knownPrefixes().map(p=>`<option value="${esc(p)}">`).join('')}</datalist>`; }
 function ensureAncestor(name, sexHint){
   let r = findByName(name);
   if(!r){ r = blankRabbit({name, sex:sexHint||'doe', status:'external', external:true}); rabbits.push(r); saveData(); }
@@ -1952,6 +1968,7 @@ async function loadData(){
   kitTagsSafe=false; try{ const kt = JSON.parse((await window.storage.get(KIT_TAGS_KEY,false)).value); customKitTags = Array.isArray(kt)?kt.filter(x=>typeof x==='string'):DEFAULT_CUSTOM_KIT_TAGS.slice(); kitTagsSafe=Array.isArray(kt); }catch(e){ customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); kitTagsSafe = /not found/i.test(String(e&&e.message)); }
   projectsSafe=false; try{ const pj = JSON.parse((await window.storage.get(PROJECTS_KEY,false)).value); projects = Array.isArray(pj)?pj.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; projectsSafe=Array.isArray(pj); }catch(e){ projects = []; projectsSafe = /not found/i.test(String(e&&e.message)); }
   traitsSafe=false; try{ const tr = JSON.parse((await window.storage.get(TRAITS_KEY,false)).value); traits = Array.isArray(tr)?tr.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; traitsSafe=Array.isArray(tr); }catch(e){ traits = []; traitsSafe = /not found/i.test(String(e&&e.message)); }
+  alertsSafe=false; try{ const ap = JSON.parse((await window.storage.get(ALERTS_KEY,false)).value); if(ap && typeof ap==='object' && !Array.isArray(ap)){ alertPrefs={off:(ap.off&&typeof ap.off==='object')?ap.off:{},nestDays:ap.nestDays,palpateDays:ap.palpateDays}; alertsSafe=true; } else { alertPrefs={off:{},nestDays:3,palpateDays:14}; } }catch(e){ alertPrefs={off:{},nestDays:3,palpateDays:14}; alertsSafe = /not found/i.test(String(e&&e.message)); }
   quickPicksSafe=false; try{ const qp = JSON.parse((await window.storage.get(QUICKPICKS_KEY,false)).value); quickPicks = Array.isArray(qp)?qp.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; quickPicksSafe=Array.isArray(qp); }catch(e){ quickPicks = []; quickPicksSafe = /not found/i.test(String(e&&e.message)); }
   try{ const tv = JSON.parse((await window.storage.get(TRASH_KEY,false)).value); trash = Array.isArray(tv) ? tv : []; }catch(e){ trash = []; }
   await hydratePhotos();
@@ -2189,7 +2206,7 @@ function wireRemovedLitterItems(main){
 function backupAccountId(){ return (currentUser && currentUser.id) ? String(currentUser.id) : 'local'; }
 function fullBackupObject(){
   return { app:'HerdNerd Pro', version:1, savedAt:new Date().toISOString(), accountId: backupAccountId(),
-    rabbits, planned, events:customEvents, shows, expenses, pedigreeSettings, trash, waitlist, kitTags:customKitTags, projects, traits, quickPicks };
+    rabbits, planned, events:customEvents, shows, expenses, pedigreeSettings, trash, waitlist, kitTags:customKitTags, projects, traits, quickPicks, alertPrefs };
 }
 function downloadFullBackup(){
   const blob = new Blob([JSON.stringify(fullBackupObject())], {type:'application/json'});
@@ -2207,9 +2224,21 @@ function addBackFromBackup(text){
   b.rabbits.forEach(r=>{ if(r && r.id && !have.has(r.id)){ rabbits.push(r); have.add(r.id); nr++; } });
   const addMissing = (arr,list)=>{ const ids=new Set(list.map(x=>x.id)); let n=0; (Array.isArray(arr)?arr:[]).forEach(x=>{ if(x && x.id && !ids.has(x.id)){ list.push(x); ids.add(x.id); n++; } }); return n; };
   addMissing(b.waitlist,waitlist);
+  // Projects, Carries, Quick picks, kit tags: add-only, never replace or remove what is here
+  const nk0 = projects.length+traits.length+quickPicks.length+customKitTags.length;
+  addMissing(b.projects,projects); addMissing(b.traits,traits); addMissing(b.quickPicks,quickPicks);
+  (Array.isArray(b.kitTags)?b.kitTags:[]).forEach(t=>{ if(typeof t==='string' && t && !customKitTags.includes(t)) customKitTags.push(t); });
+  // Rabbits already here: fill in only what is blank (never overwrite)
+  const bById = new Map(b.rabbits.filter(x=>x&&x.id).map(x=>[x.id,x]));
+  rabbits.forEach(r=>{ const o=bById.get(r.id); if(!o||o===r) return;
+    if(Array.isArray(o.projects)&&o.projects.length){ r.projects=Array.isArray(r.projects)?r.projects:[]; o.projects.forEach(id=>{ if(!r.projects.includes(id)) r.projects.push(id); }); }
+    if(o.carries&&typeof o.carries==='object'){ r.carries=r.carries||{}; Object.keys(o.carries).forEach(k=>{ if(!(k in r.carries)) r.carries[k]=o.carries[k]; }); }
+    if(Array.isArray(o.weightLog)&&o.weightLog.length){ r.weightLog=Array.isArray(r.weightLog)?r.weightLog:[]; const ids=new Set(r.weightLog.map(w=>w.id)); o.weightLog.forEach(w=>{ if(w&&w.id&&!ids.has(w.id)) r.weightLog.push(w); }); }
+  });
+  const nk = projects.length+traits.length+quickPicks.length+customKitTags.length-nk0;
   const np=addMissing(b.planned,planned), ne=addMissing(b.events,customEvents), ns=addMissing(b.shows,shows), nx=addMissing(b.expenses,expenses);
   ensureRabbitFieldDefaults();
-  return {nr,np,ne,ns,nx};
+  return {nr,np,ne,ns,nx,nk};
 }
 // ===== FULL BACKUP END =====
 // ===== NEW VERSION NUDGE START =====
@@ -2217,7 +2246,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-18-hint';
+const APP_VERSION = '2026-10-18-palpate';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2536,6 +2565,92 @@ function carriesHint(r, trait){
 
 // ===== QUICK PICKS START =====
 // Saved Herd views: a tab (does/bucks/juniors) + optional project + optional trait filter. Only stores ids; never touches rabbit data.
+// ===== REMINDER SETTINGS START =====
+// Which Home reminders show, and how many days before a due date the nest-box reminder starts.
+// Stored on its own key (alerts_v1); a failed load can never overwrite what is stored.
+const ALERTS_KEY='alerts_v1';
+const ALERT_TYPES=[
+  ['overdue','Doe is overdue','A pregnant doe is past her due date'],
+  ['pickup','Pickup overdue','A buyer pickup date has passed'],
+  ['palpate','Palpate check','A bred doe is due to be palpated'],
+  ['nest','Add nest box','A doe is close to her due date'],
+  ['weigh','Weigh litter','A litter is due for a weigh-in'],
+  ['convert','Litter is 8 weeks old','A nursing litter still has kits to place'],
+  ['reb','Ready to rebreed','A nursing doe reaches her rebreed date'],
+  ['graduate','Turned 6 months','A junior moved up to Does or Bucks']
+];
+let alertPrefs={off:{},nestDays:3,palpateDays:14}, alertsSafe=false;
+function palpateDays(){ const n=+alertPrefs.palpateDays; return (n>=7&&n<=28)?Math.round(n):14; }
+function alertOn(type){ return !(alertPrefs.off&&alertPrefs.off[type]); }
+function nestDays(){ const n=+alertPrefs.nestDays; return (n>=1&&n<=14)?Math.round(n):3; }
+async function saveAlertPrefs(){
+  if(!alertsSafe){ showToast("Your reminder settings didn't load, so they can't be changed right now. Refresh and try again."); return false; }
+  try{ await window.storage.set(ALERTS_KEY, JSON.stringify(alertPrefs), false); return true; }
+  catch(e){ showToast("Couldn't save — check your connection and try again."); return false; }
+}
+// A bred doe gets a palpate check N days after breeding. Positive ends it; Not bred opens her up; Unsure asks again later.
+function palpateKey(r){ return r.activeBreedingId || r.bredDate || ''; }
+function palpateDueDate(r){
+  if(r.palpate && r.palpate.key===palpateKey(r) && r.palpate.next) return r.palpate.next;
+  return addDays(r.bredDate, palpateDays());
+}
+function palpateNeeded(r){
+  if(r.sex!=='doe' || r.status!=='pregnant' || !r.bredDate) return false;
+  if(r.palpate && r.palpate.key===palpateKey(r) && r.palpate.state==='positive') return false;
+  const t=todayStr(); if(t<palpateDueDate(r)) return false;
+  const d=daysToDue(r); if(d!==null && d<0) return false;   // already overdue: that reminder takes over
+  return true;
+}
+function openPalpateLaterSheet(r){
+  const pick=(days)=>{ setPalpate(r,'unsure',addDays(todayStr(),days)); closeSheet(); render(); if(profileRabbitId) renderProfile(); showToast('Okay — I will ask again '+(days===1?'tomorrow':'in '+days+' days')); };
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Check again</h2>
+    <div class="card-sub" style="margin-bottom:10px;">When should I remind you to palpate ${esc(shortName(r.name))} again?</div>
+    <div class="nn-chips"><button type="button" class="nn-chip" data-pl="1">Tomorrow</button><button type="button" class="nn-chip" data-pl="3">3 days</button><button type="button" class="nn-chip" data-pl="5">5 days</button><button type="button" class="nn-chip" data-pl="7">1 week</button></div>
+    <div class="field" style="margin-top:12px;"><label>Or pick a date</label><input type="date" id="pl-date" min="${todayStr()}"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="pl-go">Remind me then</button></div>`);
+  document.querySelectorAll('[data-pl]').forEach(b=>b.onclick=()=>pick(+b.dataset.pl));
+  document.getElementById('pl-go').onclick=()=>{
+    const v=document.getElementById('pl-date').value;
+    if(!v || v<=todayStr()){ showToast('Pick a day after today'); return; }
+    setPalpate(r,'unsure',v); closeSheet(); render(); if(profileRabbitId) renderProfile(); showToast('Okay — I will ask again '+fmtDate(v));
+  };
+}
+function setPalpate(r,state,next){
+  const key=palpateKey(r), prev=(r.palpate&&r.palpate.key===key)?r.palpate:{};
+  r.palpate={key,state,date:todayStr(),next:next||null,checks:(prev.checks||0)+1};
+  const e=(r.breedingHistory||[]).find(x=>x.id===r.activeBreedingId);
+  if(e){ e.palpated=state==='positive'?'positive':'unsure'; e.palpatedDate=todayStr(); }
+  saveData();
+}
+function openRemindersSheet(){
+  const draw=()=>{
+    openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Reminders</h2>
+      <div class="card-sub" style="margin-bottom:10px;">Choose what shows under Needs attention on Home.</div>
+      ${ALERT_TYPES.map(([k,l,d])=>`<div class="lit-card" style="display:flex;align-items:center;gap:10px;"><div style="flex:1"><b>${l}</b><div class="card-sub">${d}</div>
+        ${k==='palpate'?`<div style="margin-top:6px;font-size:13px;">Remind me <select id="al-pdays">${Array.from({length:22},(_,i)=>i+7).map(n=>`<option value="${n}" ${n===palpateDays()?'selected':''}>${n}</option>`).join('')}</select> days after she is bred</div>`:''}
+        ${k==='nest'?`<div style="margin-top:6px;font-size:13px;">Start <select id="al-days">${Array.from({length:14},(_,i)=>i+1).map(n=>`<option value="${n}" ${n===nestDays()?'selected':''}>${n}</option>`).join('')}</select> day${nestDays()===1?'':'s'} before she is due</div>`:''}</div>
+        <button type="button" class="nn-chip ${alertOn(k)?'on':''}" data-al="${k}" style="min-width:56px;">${alertOn(k)?'On':'Off'}</button></div>`).join('')}
+      <div class="sheet-actions"><button class="btn btn-primary" onclick="closeSheet()">Done</button></div>`);
+    document.querySelectorAll('[data-al]').forEach(b=>b.onclick=async()=>{
+      const k=b.dataset.al, was=!!alertPrefs.off[k];
+      if(was) delete alertPrefs.off[k]; else alertPrefs.off[k]=true;
+      if(!(await saveAlertPrefs())){ if(was) alertPrefs.off[k]=true; else delete alertPrefs.off[k]; }
+      draw(); render();
+    });
+    const pd=document.getElementById('al-pdays'); if(pd) pd.onchange=async()=>{
+      const old=alertPrefs.palpateDays; alertPrefs.palpateDays=+pd.value;
+      if(!(await saveAlertPrefs())) alertPrefs.palpateDays=old;
+      draw(); render();
+    };
+    const dd=document.getElementById('al-days'); if(dd) dd.onchange=async()=>{
+      const old=alertPrefs.nestDays; alertPrefs.nestDays=+dd.value;
+      if(!(await saveAlertPrefs())) alertPrefs.nestDays=old;
+      draw(); render();
+    };
+  };
+  draw();
+}
+// ===== REMINDER SETTINGS END =====
 const QUICKPICKS_KEY='quickpicks_v1';
 const MAX_QUICKPICKS=10;
 async function saveQuickPicks(){
@@ -2663,7 +2778,7 @@ function openProjectWarnSheet(pid){
 
 // ===== ACCOUNT SWITCH CLEAN-UP START =====
 function clearAccountMemory(){
-  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; quickPicks = []; quickPicksSafe = false; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
+  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; quickPicks = []; quickPicksSafe = false; alertPrefs = {off:{},nestDays:3,palpateDays:14}; alertsSafe = false; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
   rabbits = []; planned = []; customEvents = []; shows = []; expenses = [];
   pedigreeSettings = defaultPedigreeSettings();
   trash = [];
@@ -3006,7 +3121,7 @@ function litterAgeDays(r){ return daysBetween(r.litterBornDate, todayStr()); }
 function isRebreedReady(r){ return r.status==='nursing' && !!r.rebreedDate && todayStr() >= r.rebreedDate; }
 function canRebred(r){ return r.status==='nursing' && (isRebreedReady(r) || !r.litterKits || r.litterKits.length===0); }
 function daysToDue(r){ return r.dueDate ? daysBetween(todayStr(), r.dueDate) : null; }
-function needsNestBox(r){ const d=daysToDue(r); return r.status==='pregnant' && d!==null && d<=3; }
+function needsNestBox(r){ const d=daysToDue(r); return r.status==='pregnant' && d!==null && d<=nestDays(); }
 function isOverdue(r){ const d=daysToDue(r); return r.status==='pregnant' && d!==null && d<0; }
 function ageDays(r){ return r.dob ? daysBetween(r.dob, todayStr()) : null; }
 // Friendly age: "5 days", "6 weeks 2 days", "6 months 3 days", "1 yr 2 mo".
@@ -3366,7 +3481,9 @@ function cardHTML(r, forceUrgent, origin){
     const d=daysToDue(r);
     const t = d===0?'due today':d>0?`due in ${d} day${d===1?'':'s'}`:`${-d} day${-d===1?'':'s'} overdue`;
     detail = `Bred to <b>${esc(r.partner||'?')}</b> ${fmtDate(r.bredDate)} &middot; <b>${t}</b> (${fmtDate(r.dueDate)})`;
-    if(needsNestBox(r)) detail += `<br><b>Give her a nest box</b> — due in 3 days.`;
+    if(r.palpate && r.palpate.key===palpateKey(r) && r.palpate.state==='positive') detail += `<br>Palpated positive ${fmtShort(r.palpate.date)}`;
+    else if(r.palpate && r.palpate.key===palpateKey(r) && r.palpate.next) detail += `<br>Unsure at last check &middot; palpate again ${fmtShort(r.palpate.next)}`;
+    if(needsNestBox(r)) detail += `<br><b>Give her a nest box</b> — due ${d<=0?'now':d===1?'tomorrow':'in '+d+' days'}.`;
   } else if(r.status==='nursing'){
     const age=litterAgeDays(r), rem=r.rebreedDate?daysBetween(todayStr(),r.rebreedDate):null;
     detail = `${r.litterKits?r.litterKits.length:0} kits, born ${fmtDate(r.litterBornDate)} (${ageText(r.litterBornDate)} old) &middot; wean ${fmtDate(r.weanDate)} &middot; sell ${fmtDate(r.sellDate)}<br>rebreed target ${r.rebreedDate?fmtDate(r.rebreedDate):'not set'}${rem===null?'':' — '+(rem<=0?'<b>ready now</b>':'ready in '+rem+' day'+(rem===1?'':'s'))}`;
@@ -3478,7 +3595,7 @@ function litterSireName(r){
   return (he && he.partner) || r.partner || '';
 }
 // call name for titles: drops a leading herd prefix like "ANR's " (the full name is shown underneath)
-function shortName(n){ n=String(n||''); const m=n.match(/^.+?['\u2019]s\s+(.+)$/); return m?m[1]:n; }
+function shortName(n){ n=String(n||''); for(const pf of knownPrefixes()){ if(n.toLowerCase().startsWith(pf.toLowerCase()+' ') && n.length>pf.length+1) return n.slice(pf.length+1).trim(); } const m=n.match(/^.+?['\u2019]s\s+(.+)$/); return m?m[1]:n; }
 function litterAgeText(born){ return ageText(born); }
 // short date for the new litter screens: "Sep 15" (adds the year only when it isn't this year)
 function fmtShort(d){ if(!d) return ''; const dt=new Date(d+'T00:00:00'); const o={month:'short',day:'numeric'}; if(dt.getFullYear()!==new Date().getFullYear()) o.year='numeric'; return dt.toLocaleDateString('en-US',o); }
@@ -3497,12 +3614,13 @@ function newNurseryCardHTML(r, mode){
   const age=litterAgeDays(r);
   const lost=r.litterDead?((r.litterDead.DOA||0)+(r.litterDead.peanut||0)+(r.litterDead.passed||0)):0;
   const forSale=kits.filter(k=>k.tag==='For sale'||(!k.tag&&k.forSale)).length, reserved=kits.filter(k=>k.tag==='Reserved').length;
+  const kitList = mode==='ready' ? readyKitsListHTML(r) : '';
   const wean = r.status==='nursing' ? `<button class="btn ${age>=42?'btn-primary':'btn-secondary'}" data-nnwean="${r.id}">Wean litter</button>` : '';
   const actions = wean+`<button class="btn btn-secondary" data-nnped="${r.id}">Pedigree</button>`;
-  return `<div class="card nn-card" data-nnopen="${r.id}" style="cursor:pointer;"><div class="nn-top"><div><div class="card-name">${esc(shortName(r.name))}${litterSireName(r)?' &times; '+esc(shortName(litterSireName(r))):''}&rsquo;s Litter</div><div class="card-sub">Born ${nb(fmtShort(r.litterBornDate))}</div></div>
-      <div class="nn-age">${esc(litterAgeText(r.litterBornDate))} old<span class="nn-chev" aria-hidden="true">&rsaquo;</span></div></div>
-    <div class="nn-row"><span class="nn-num">${n} ${n===1?'kit':'kits'}</span>${forSale?`<em class="nn-tag t-sale">${forSale} for sale</em>`:''}${reserved?`<em class="nn-tag t-res">${reserved} reserved</em>`:''}${r.status==='nursing'?'':'<em class="nn-tag t-keep">Weaned</em>'}</div>
-    ${(mode==='ready' && readyKitsListHTML(r)) || `<div class="card-sub">Wean ${nb(fmtShort(r.weanDate))} &middot; Ready to go ${nb(fmtShort(r.sellDate))}</div>`}
+  return `<div class="card nn-card" data-nnopen="${r.id}" style="cursor:pointer;"><div class="nn-top"><div><div class="card-name">${esc(shortName(r.name))}${litterSireName(r)?' &times; '+esc(shortName(litterSireName(r))):''}&rsquo;s Litter</div><div class="card-sub">Born ${nb(fmtShort(r.litterBornDate))} &middot; <b>${nb(esc(litterAgeText(r.litterBornDate))+' old')}</b></div></div>
+      <div class="nn-age"><span class="nn-chev" aria-hidden="true">&rsaquo;</span></div></div>
+    <div class="nn-row"><span class="nn-num">${n} ${n===1?'kit':'kits'}</span>${(!kitList&&forSale)?`<em class="nn-tag t-sale">${forSale} for sale</em>`:''}${(!kitList&&reserved)?`<em class="nn-tag t-res">${reserved} reserved</em>`:''}${r.status==='nursing'?'':'<em class="nn-tag t-keep">Weaned</em>'}</div>
+    ${kitList || `<div class="card-sub">Wean ${nb(fmtShort(r.weanDate))} &middot; Ready to go ${nb(fmtShort(r.sellDate))}</div>`}
     <div class="nn-actions">${actions}</div></div>`;
 }
 function openNurseryMore(r){
@@ -3797,40 +3915,39 @@ function openKitTagSheet(damId, idx){
 }
 function openWeanPlanSheet(r){
   const kits=(r.litterKits||[]);
-  const plan = kits.map((k,i)=>({k,i,choice:k.individualId?'done':'',name:'',sex:k.sex||''}));
-  const open = plan.filter(x=>x.choice!=='done');
+  // Weaning moves EVERY kit that is still a kit up to Juniors. Sold / culled kits stay in the litter record.
+  const plan = kits.map((k,i)=>({k,i,tag:(k.tag==='For sale'||k.tag==='Reserved'||k.tag==='Keeping')?k.tag:'',name:'',sex:k.sex||''}));
+  const open = plan.filter(x=>!x.k.individualId && x.k.tag!=='Sold' && x.k.tag!=='Cull');
+  const autoName=x=>`${r.name} x ${litterSireName(r)||'?'} — ${x.sex==='buck'?'Buck':x.sex==='doe'?'Doe':'Kit'} ${x.k.num||x.i+1}`;
   const draw=()=>{
-    openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Weaning plan — ${esc(r.name)}'s litter</h2>
-      <div class="card-sub" style="margin-bottom:10px;">Give each kit a plan. “Decide later” leaves it as is.</div>
-      ${open.length?`<button class="btn btn-secondary btn-sm" id="wp-all" style="margin-bottom:10px;">All to juniors</button>`:''}
+    openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Wean ${esc(shortName(r.name))}’s litter</h2>
+      <div class="card-sub" style="margin-bottom:10px;">${open.length?'All '+open.length+' kit'+(open.length===1?'':'s')+' move to Juniors. Names are optional — you can rename them later.':'Every kit is already placed.'}</div>
       ${open.map(x=>`<div class="lit-card"><b>#${x.k.num||x.i+1}</b> &middot; ${x.k.sex==='buck'?'Buck':x.k.sex==='doe'?'Doe':'Sex?'} &middot; ${esc(x.k.color||'color?')}
-        <div class="nn-chips" style="margin-top:8px;">${['Keeping','For sale','Reserved','Decide later'].map(c=>`<button type="button" class="nn-chip ${x.choice===c?'on':''}" data-wp="${x.i}" data-c="${c}">${c}</button>`).join('')}</div>
-        ${x.choice==='Keeping'?`<div class="field" style="margin-top:10px;"><label>Name</label><input data-wpname="${x.i}" value="${esc(x.name)}" placeholder="Name this junior" autocomplete="off"></div>
-          ${x.k.sex==='buck'||x.k.sex==='doe'?'':`<div class="field"><label>Sex</label><select data-wpsex="${x.i}"><option value="">Pick…</option><option value="doe" ${x.sex==='doe'?'selected':''}>Doe</option><option value="buck" ${x.sex==='buck'?'selected':''}>Buck</option></select></div>`}`:''}</div>`).join('')}
-      <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="wp-go">Mark weaned</button></div>`);
-    document.querySelectorAll('[data-wp]').forEach(b=>b.onclick=()=>{ const x=plan[+b.dataset.wp]; x.choice=(x.choice===b.dataset.c?'':b.dataset.c); draw(); });
+          ${x.k.sex==='buck'||x.k.sex==='doe'?'':`<div class="field"><label>Sex</label><select data-wpsex="${x.i}"><option value="">Pick…</option><option value="doe" ${x.sex==='doe'?'selected':''}>Doe</option><option value="buck" ${x.sex==='buck'?'selected':''}>Buck</option></select></div>`}
+          <div class="field" style="margin-top:8px;"><label>Name</label><input data-wpname="${x.i}" value="${esc(x.name)}" placeholder="${esc(autoName(x))}" autocomplete="off"></div>
+          <div class="nn-chips" style="margin-top:8px;">${['For sale','Reserved'].map(c=>`<button type="button" class="nn-chip ${x.tag===c?'on':''}" data-wp="${x.i}" data-c="${c}">${c}</button>`).join('')}</div></div>`).join('')}
+      <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="wp-go">Wean litter</button></div>`);
+    document.querySelectorAll('[data-wp]').forEach(b=>b.onclick=()=>{ const x=plan[+b.dataset.wp]; x.tag=(x.tag===b.dataset.c?'':b.dataset.c); draw(); });
     document.querySelectorAll('[data-wpname]').forEach(i=>i.oninput=()=>{ plan[+i.dataset.wpname].name=i.value; });
     document.querySelectorAll('[data-wpsex]').forEach(i=>i.onchange=()=>{ plan[+i.dataset.wpsex].sex=i.value; });
-    const all=document.getElementById('wp-all'); if(all) all.onclick=()=>{ open.forEach(x=>{ x.choice='Keeping'; }); draw(); };
     document.getElementById('wp-go').onclick=()=>{
       for(const x of open){
-        if(x.choice==='Keeping'){
-          if(!(x.name||'').trim()){ showToast('Give kit #'+(x.k.num||x.i+1)+' a name to keep it'); return; }
-          if(x.sex!=='buck' && x.sex!=='doe'){ showToast('Pick a sex for kit #'+(x.k.num||x.i+1)+' to keep it'); return; }
-          if(rabbits.some(z=>nameKey(z.name)===nameKey(x.name.trim()))){ showToast('A rabbit named “'+x.name.trim()+'” already exists — pick another name'); return; }
-        }
+        if(x.sex!=='buck' && x.sex!=='doe'){ showToast('Pick a sex for kit #'+(x.k.num||x.i+1)); return; }
+        const nm=(x.name||'').trim();
+        if(nm && rabbits.some(z=>nameKey(z.name)===nameKey(nm))){ showToast('A rabbit named “'+nm+'” already exists — pick another name'); return; }
       }
       const names=new Set();
-      for(const x of open){ if(x.choice==='Keeping'){ const nk=nameKey(x.name.trim()); if(names.has(nk)){ showToast('Two kits have the same name'); return; } names.add(nk); } }
+      for(const x of open){ const nm=(x.name||'').trim(); if(nm){ const nk=nameKey(nm); if(names.has(nk)){ showToast('Two kits have the same name'); return; } names.add(nk); } }
       open.forEach(x=>{
-        if(x.choice==='Keeping'){
-          x.k.sex=x.sex;
-          const kit=blankRabbit({ name:x.name.trim(), sex:x.sex, breed:r.breed, color:x.k.color||'', dob:r.litterBornDate, sireName:litterSireName(r), damName:r.name, status:'growing' });
-          rabbits.push(kit); x.k.individualId=kit.id; carryKitHistory(r,x.k,kit); kit.kitHistoryCopied=true; setKitTag(x.k,'Keeping');
-        } else if(x.choice==='For sale' || x.choice==='Reserved'){ setKitTag(x.k,x.choice); }
+        x.k.sex=x.sex;
+        let nm=(x.name||'').trim() || autoName(x);
+        if(!(x.name||'').trim() && rabbits.some(z=>nameKey(z.name)===nameKey(nm))) nm+=` (${r.litterBornDate})`;
+        const kit=blankRabbit({ name:nm, sex:x.sex, breed:r.breed, color:x.k.color||'', dob:r.litterBornDate, sireName:litterSireName(r), damName:r.name, status:'growing', forSale:(x.tag==='For sale') });
+        rabbits.push(kit); x.k.individualId=kit.id; carryKitHistory(r,x.k,kit); kit.kitHistoryCopied=true;
+        setKitTag(x.k, x.tag || ((x.k.tag && x.k.tag!=='For sale' && x.k.tag!=='Reserved') ? x.k.tag : 'Keeping'));
       });
       r.status='open'; r.litterKits=kits; syncLitterEntry(r);
-      saveData(); closeSheet(); render(); showToast(r.name+' weaned');
+      saveData(); closeSheet(); render(); showToast(r.name+' weaned — '+open.length+' kit'+(open.length===1?'':'s')+' moved to Juniors');
     };
   };
   draw();
@@ -4122,7 +4239,7 @@ function nestGroupHTML(nest){
   return `<div class="todo-nestgroup">
     <div class="todo-row" data-nesttoggle="1" style="cursor:pointer;">
       <div class="todo-text" style="flex:1;"><b>Add nest box</b> — ${nest.length} doe${nest.length===1?'':'s'}
-        <div class="todo-sub-text">Due to kindle within 3 days</div></div>
+        <div class="todo-sub-text">Due to kindle within ${nestDays()} day${nestDays()===1?'':'s'}</div></div>
       <button class="todo-chevron" data-nesttoggle="1" aria-label="Expand">${CHEVRON_SVG}</button>
     </div>
     <div class="todo-sub nestgroup-body" style="display:none;">
@@ -4178,6 +4295,9 @@ function openAttentionSheet(rowsHtml){
   attachCardEvents();
 }
 function wireConvertButtons(root){
+  root.querySelectorAll('[data-palpos]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.palpos); if(!r) return; setPalpate(r,'positive'); closeSheet(); render(); showToast(r.name+' palpated positive'); });
+  root.querySelectorAll('[data-palunsure]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.palunsure); if(r) openPalpateLaterSheet(r); });
+  root.querySelectorAll('[data-palno]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.palno); if(!r) return; armConfirm(b,'Tap again',()=>{ markLitterLost(r); saveData(); closeSheet(); render(); showToast(r.name+' moved to open does'); }); });
   root.querySelectorAll('[data-weighlitter]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.weighlitter); if(r) openWeighSheet(r); });
   root.querySelectorAll('[data-convertyes]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.convertyes); if(r) convertLitterToIndividuals(r.id); });
   root.querySelectorAll('[data-convertno]').forEach(b=>b.onclick=()=>{ const r=rabbits.find(x=>x.id===b.dataset.convertno); if(r){ r.litterConvertAckDate=todayStr(); saveData(); render(); } });
@@ -4188,13 +4308,14 @@ function renderHome(main){
   const t = todayStr();
   const nursingDoes = rabbits.filter(r=>r.sex==='doe'&&r.status==='nursing');
 
-  const nest = rabbits.filter(r=>r.sex==='doe'&&needsNestBox(r)&&r.nestBoxAckDate!==t&&!snoozed(r,'nest')).sort((a,b)=>daysToDue(a)-daysToDue(b));
-  const overdueDoes = rabbits.filter(r=>r.sex==='doe'&&isOverdue(r)&&!snoozed(r,'overdue')).sort((a,b)=>daysToDue(a)-daysToDue(b));
-  const pickupOverdue = rabbits.filter(r=>r.sale&&r.sale.pickupDate&&r.sale.pickupDate<t&&!r.sale.pickupAckDate&&!snoozed(r,'pickup'));
-  const convert = rabbits.filter(r=>r.sex==='doe'&&r.status==='nursing'&&r.sellDate&&r.sellDate<=t&&r.litterConvertAckDate!==t&&(r.litterKits||[]).some(k=>!k.individualId)&&!snoozed(r,'convert'));
+  const nest = !alertOn('nest') ? [] : rabbits.filter(r=>r.sex==='doe'&&needsNestBox(r)&&r.nestBoxAckDate!==t&&!snoozed(r,'nest')).sort((a,b)=>daysToDue(a)-daysToDue(b));
+  const overdueDoes = !alertOn('overdue') ? [] : rabbits.filter(r=>r.sex==='doe'&&isOverdue(r)&&!snoozed(r,'overdue')).sort((a,b)=>daysToDue(a)-daysToDue(b));
+  const pickupOverdue = !alertOn('pickup') ? [] : rabbits.filter(r=>r.sale&&r.sale.pickupDate&&r.sale.pickupDate<t&&!r.sale.pickupAckDate&&!snoozed(r,'pickup'));
+  const convert = !alertOn('convert') ? [] : rabbits.filter(r=>r.sex==='doe'&&r.status==='nursing'&&r.sellDate&&r.sellDate<=t&&r.litterConvertAckDate!==t&&(r.litterKits||[]).some(k=>!k.individualId)&&!snoozed(r,'convert'));
   const convertReady = x=>(x.litterKits||[]).some(k=>!k.individualId&&(k.sex==='buck'||k.sex==='doe'));
-  const reb = rabbits.filter(r=>r.sex==='doe'&&isRebreedReady(r)&&!snoozed(r,'reb'));
-  const recentGraduates = rabbits.filter(r=>r.graduatedDate && !r.juniorAckDone && daysBetween(r.graduatedDate,t)<=14 && !snoozed(r,'graduate')).sort((a,b)=>a.graduatedDate.localeCompare(b.graduatedDate));
+  const palp = !alertOn('palpate') ? [] : rabbits.filter(r=>palpateNeeded(r)&&!snoozed(r,'palpate'));
+  const reb = !alertOn('reb') ? [] : rabbits.filter(r=>r.sex==='doe'&&isRebreedReady(r)&&!snoozed(r,'reb'));
+  const recentGraduates = !alertOn('graduate') ? [] : rabbits.filter(r=>r.graduatedDate && !r.juniorAckDone && daysBetween(r.graduatedDate,t)<=14 && !snoozed(r,'graduate')).sort((a,b)=>a.graduatedDate.localeCompare(b.graduatedDate));
 
   // Build attention rows — nest box prep collapses into one group row; everything else is one row per rabbit.
   const rows = [];
@@ -4221,6 +4342,14 @@ function renderHome(main){
       snoozeId:r.id, snoozeType:'convert'
     })});
   });
+  palp.forEach(r=>{
+    const since=daysBetween(r.bredDate,t);
+    rows.push({ urgent:false, sortKey:3, html: attnRowHTML({
+      text:`Palpate <b>${esc(r.name)}</b> — bred ${since} day${since===1?'':'s'} ago`,
+      sub:`Bred to ${esc(r.partner||'?')} ${fmtDate(r.bredDate)}`,
+      buttons:`<button class="btn btn-primary btn-sm" data-palpos="${r.id}">Positive</button><button class="btn btn-secondary btn-sm" data-palunsure="${r.id}">Unsure</button><button class="btn btn-danger btn-sm" data-palno="${r.id}">Not bred</button>`
+    })});
+  });
   reb.forEach(r=>{
     rows.push({ urgent:false, sortKey:6, html: attnRowHTML({
       text:`<b>${esc(r.name)}</b> is ready to rebreed`,
@@ -4235,7 +4364,7 @@ function renderHome(main){
       snoozeId:r.id, snoozeType:'graduate'
     })});
   });
-  if(litterUiOn) rabbits.forEach(r=>{
+  if(litterUiOn && alertOn('weigh')) rabbits.forEach(r=>{
     const wd=litterWeighDue(r); if(!wd || snoozed(r,'weigh')) return;
     rows.push({ urgent:false, sortKey:4, html: attnRowHTML({
       text:`Weigh <b>${esc(r.name)}'s litter</b> — ${wd.label} old`,
@@ -5311,8 +5440,11 @@ function openEditSheet(r, origin){
   const known = rabbits.filter(x=>x.id!==r.id).map(x=>x.name);
   openSheet(`<button class="close-x" id="f-cancel-x">&times;</button>
     <h2>Edit ${esc(r.name)}</h2>
-    <div class="field"><label>Name</label><input id="f-name" value="${esc(r.name)}"></div>
-    <div class="field"><label>Also known as (optional)</label><input id="f-alias" value="${esc(r.alias||'')}" placeholder="Nickname or previous name"></div>
+    <div class="row2">
+      <div class="field" style="flex:0 0 32%;"><label>Prefix</label><input id="f-prefix" list="prefix-options" value="${esc(r.prefix||'')}" placeholder="CJM" autocomplete="off">${prefixDatalistHTML()}</div>
+      <div class="field"><label>Name</label><input id="f-name" value="${esc(baseNameOf(r))}"></div>
+    </div>
+    <div class="field"><label>Nickname (optional)</label><input id="f-alias" value="${esc(r.alias||'')}" placeholder="Nickname or previous name"></div>
     <div class="field"><label>Sex</label><div class="seg" id="f-sex">
       <button data-v="doe" class="${r.sex==='doe'?'on':''}">Doe</button><button data-v="buck" class="${r.sex==='buck'?'on':''}">Buck</button></div></div>
     <div class="row2">
@@ -5361,7 +5493,7 @@ function openEditSheet(r, origin){
     };
     check(sire, finalSire=>check(dam, finalDam=>{
       const oldRName=r.name;
-      r.name=document.getElementById('f-name').value.trim()||r.name;
+      { const pf=document.getElementById('f-prefix').value.trim(), nb2=document.getElementById('f-name').value.trim(); r.prefix=pf; if(nb2) r.name=fullName(pf, nb2); }
       repointName(oldRName, r.name);
       r.alias=document.getElementById('f-alias').value.trim();
       r.sex=sex; r.breed=document.getElementById('f-breed').value; r.color=document.getElementById('f-color').value;
@@ -5410,9 +5542,15 @@ function breedDatalistHTML(){
   return `<datalist id="breed-options">${RABBIT_BREEDS.map(b=>`<option value="${esc(b)}">`).join('')}</datalist>`;
 }
 function openAddSheet(){
+  const projPick = projects.length ? `<div class="pj-pick" id="f-projs">${projects.map(p=>`<button type="button" class="pj-opt" data-fp="${p.id}">${esc(p.name)}</button>`).join('')}</div>` : '<div class="card-sub">No projects yet. Make them from any rabbit’s + Project button.</div>';
+  const carryPick = traits.length ? traits.map(t=>`<div style="margin-bottom:8px;"><div style="font-weight:700;font-size:14px;margin-bottom:4px;">${esc(t.name)}</div><div class="cy-seg" data-ft="${t.id}">${[['yes','Carries'],['no',"Doesn't"],['unknown','Unknown']].map(([k,l])=>`<button type="button" class="${k==='unknown'?'on':''}" data-fv="${k}">${l}</button>`).join('')}</div></div>`).join('') : '<div class="card-sub">No traits yet. Add them from any rabbit’s + Project button.</div>';
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>Add rabbit</h2>
-    <div class="field"><label>Name</label><input id="f-name" placeholder="CJM Clover"></div>
+    <div class="row2">
+      <div class="field" style="flex:0 0 32%;"><label>Prefix</label><input id="f-prefix" list="prefix-options" placeholder="CJM" autocomplete="off">${prefixDatalistHTML()}</div>
+      <div class="field"><label>Name</label><input id="f-name" placeholder="Clover"></div>
+    </div>
+    <div class="field"><label>Nickname (optional)</label><input id="f-alias" placeholder="What you call her or him"></div>
     <div class="field"><label>Sex</label><div class="seg" id="f-sex"><button data-v="doe" class="on">Doe</button><button data-v="buck">Buck</button></div></div>
     <div class="row2">
       <div class="field"><label>Breed</label><input id="f-breed" list="breed-options" placeholder="Start typing…">${breedDatalistHTML()}</div>
@@ -5420,43 +5558,86 @@ function openAddSheet(){
     </div>
     <div class="row2">
       <div class="field"><label>Ear #</label><input id="f-ear"></div>
-      <div class="field"><label>Weight (lbs)</label><input id="f-weight"></div>
+      <div class="field"><label>Date of birth</label><input type="date" id="f-dob"></div>
     </div>
-    <div class="field"><label>Date of birth</label><input type="date" id="f-dob"></div>
-    <div class="field"><label>Status</label><select id="f-status">
-        <option value="open">Open / available</option><option value="growing">Junior (growing)</option>
-        <option value="pregnant">Bred</option>
-        <option value="retired">Retired (archive)</option><option value="deceased">Deceased (archive)</option></select></div>
+    <div id="f-earwarn" class="card-sub" style="margin:-6px 0 8px;" hidden></div>
     <div class="row2">
       <div class="field"><label>Sire</label><input id="f-sire"></div>
       <div class="field"><label>Dam</label><input id="f-dam"></div>
     </div>
+    <details class="lp-fold" id="f-more"><summary>More details <span>optional</span></summary>
+      <div class="lit-label" style="margin:4px 0 6px;">Projects</div>${projPick}
+      <div class="lit-label" style="margin:10px 0 6px;">Carries</div>${carryPick}
+      <div class="row2" style="margin-top:8px;">
+        <div class="field"><label>Registration #</label><input id="f-reg"></div>
+        <div class="field"><label>GC #</label><input id="f-gc"></div>
+      </div>
+      <div class="field"><label>Legs</label><input id="f-legs"></div>
+      <div class="lit-label" style="margin:4px 0 6px;">Weight</div>
+      <div class="row2">
+        <div class="field"><input id="f-weight" inputmode="decimal" placeholder="e.g. 3.5"></div>
+        <div class="field"><input type="date" id="f-wdate" value="${esc(todayStr())}"></div>
+      </div>
+      <div class="seg" id="f-wunit" style="margin-bottom:12px;"><button type="button" class="on" data-u="lb">lb</button><button type="button" data-u="oz">oz</button></div>
+      <div class="lit-label" style="margin:4px 0 6px;">Where did this rabbit come from?</div>
+      <div class="seg" id="f-origin" style="margin-bottom:8px;"><button type="button" data-o="bred">Bred here</button><button type="button" data-o="bought">Came from elsewhere</button></div>
+      <div id="f-originmore" hidden>
+        <div class="field"><label>Breeder / seller</label><input id="f-from"></div>
+        <div class="field"><label>Date acquired</label><input type="date" id="f-acq"></div>
+      </div>
+      <div class="field"><label>Photo</label><input type="file" id="f-photo" accept="image/*"></div>
+      <div class="field"><label>Notes</label><textarea id="f-notes" placeholder="Anything worth remembering"></textarea></div>
+    </details>
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Add</button></div>`);
   attachSuggest(document.getElementById('f-color'), allKnownColors);
   attachSuggest(document.getElementById('f-sire'), ()=>rabbits.filter(x=>x.sex==='buck').map(x=>x.name));
   attachSuggest(document.getElementById('f-dam'), ()=>rabbits.filter(x=>x.sex==='doe').map(x=>x.name));
   attachNameMatchSuggest(document.getElementById('f-name'));
-  let sex='doe';
+  let sex='doe', unit='lb', origin='';
   document.querySelectorAll('#f-sex button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#f-sex button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); sex=b.dataset.v; });
+  document.querySelectorAll('#f-wunit button').forEach(b=>b.onclick=()=>{ unit=b.dataset.u; document.querySelectorAll('#f-wunit button').forEach(x=>x.classList.toggle('on',x===b)); });
+  document.querySelectorAll('#f-origin button').forEach(b=>b.onclick=()=>{
+    origin = origin===b.dataset.o ? '' : b.dataset.o;   // tap again to clear
+    document.querySelectorAll('#f-origin button').forEach(x=>x.classList.toggle('on',x.dataset.o===origin));
+    document.getElementById('f-originmore').hidden = origin!=='bought';
+  });
+  document.querySelectorAll('#f-projs [data-fp]').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
+  document.querySelectorAll('[data-ft]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{ g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); }));
+  const earIn=document.getElementById('f-ear'), earWarn=document.getElementById('f-earwarn');
+  earIn.addEventListener('input',()=>{
+    const v=earIn.value.trim().toLowerCase(); const hit=v&&rabbits.find(x=>!x.external && x.earNumber && String(x.earNumber).trim().toLowerCase()===v);
+    earWarn.hidden=!hit; if(hit) earWarn.textContent='Ear # '+earIn.value.trim()+' is already on '+hit.name+'.';
+  });
+  const val=id=>document.getElementById(id).value;
+  const gather=()=>{
+    const carries={}; document.querySelectorAll('[data-ft]').forEach(g=>{ const on=g.querySelector('button.on'); if(on && on.dataset.fv!=='unknown') carries[g.dataset.ft]=on.dataset.fv; });
+    const w=parseFloat(val('f-weight'));
+    return {
+      breed:val('f-breed'), color:val('f-color'), earNumber:val('f-ear'), dob:csvParseDate(val('f-dob'))||null,
+      sireName:val('f-sire').trim(), damName:val('f-dam').trim(),
+      registrationNumber:val('f-reg').trim(), gcNumber:val('f-gc').trim(), legsWins:val('f-legs').trim(),
+      projectIds:[...document.querySelectorAll('#f-projs [data-fp].on')].map(b=>b.dataset.fp), carries,
+      weightLbs:isFinite(w)&&w>0?(unit==='oz'?Math.round(w/16*100)/100:w):null, weightOz:isFinite(w)&&w>0?(unit==='oz'?w:Math.round(w*16*10)/10):null, weightDate:val('f-wdate')||todayStr(),
+      origin: origin?{type:origin, from:origin==='bought'?val('f-from').trim():'', acquired:origin==='bought'?(val('f-acq')||''):''}:null,
+      notes:val('f-notes').trim(), photo:(document.getElementById('f-photo').files||[])[0]||null
+    };
+  };
   document.getElementById('f-save').onclick=()=>{
-    const name=document.getElementById('f-name').value.trim();
-    if(!name){ showToast('Enter a name'); return; }
+    const base=document.getElementById('f-name').value.trim();
+    if(!base){ showToast('Enter a name'); return; }
+    const prefix=document.getElementById('f-prefix').value.trim();
+    const name=fullName(prefix, base);
+    const d=gather(); d.prefix=prefix; d.alias=val('f-alias').trim();
     const m=fuzzyMatches(name);
     if(m.length){
       openDuplicateSheet(name, m, chosen=>{
         if(chosen){
           const ex=findByName(chosen);
           if(ex){
-            // Even if this turns out to have been the wrong call, nothing
-            // typed here is lost: any blank fields on the existing record
-            // get filled in from what was just entered, and it opens
-            // straight into editing so it can be fixed right away.
-            const typed = {
-              breed:document.getElementById('f-breed').value, color:document.getElementById('f-color').value,
-              earNumber:document.getElementById('f-ear').value, weight:document.getElementById('f-weight').value,
-              dob:csvParseDate(document.getElementById('f-dob').value)||null,
-              sireName:document.getElementById('f-sire').value.trim(), damName:document.getElementById('f-dam').value.trim()
-            };
+            // Even if this turns out to have been the wrong call, nothing typed here is lost: any blank fields on the
+            // existing record get filled in from what was just entered, and it opens straight into editing.
+            const typed = { breed:d.breed, color:d.color, earNumber:d.earNumber, dob:d.dob, sireName:d.sireName, damName:d.damName,
+              registrationNumber:d.registrationNumber, gcNumber:d.gcNumber, legsWins:d.legsWins, weight:d.weightLbs?String(d.weightLbs):'', alias:d.alias||'', prefix:d.prefix||'' };
             Object.keys(typed).forEach(k=>{ if(!ex[k] && typed[k]) ex[k]=typed[k]; });
             saveData();
             closeSheet();
@@ -5464,27 +5645,33 @@ function openAddSheet(){
             return;
           }
         }
-        commitAdd(name, sex);
+        commitAdd(name, sex, d);
       });
       return;
     }
-    commitAdd(name, sex);
+    commitAdd(name, sex, d);
   };
 }
-function commitAdd(name, sex){
-  let status=document.getElementById('f-status').value;
-  if(sex==='buck'&&status==='open') status='available';
-  const sire=document.getElementById('f-sire').value.trim(), dam=document.getElementById('f-dam').value.trim();
-  const newRabbit = blankRabbit({ name, sex, status, breed:document.getElementById('f-breed').value,
-    color:document.getElementById('f-color').value, earNumber:document.getElementById('f-ear').value,
-    weight:document.getElementById('f-weight').value, dob:csvParseDate(document.getElementById('f-dob').value)||null,
-    sireName:sire, damName:dam });
+function commitAdd(name, sex, d){
+  d = d || {};
+  // status is worked out, not asked: under 6 months goes to Juniors, otherwise open (does) / available (bucks)
+  let status = (d.dob && isUnderSixMonths({dob:d.dob})) ? 'growing' : (sex==='buck'?'available':'open');
+  const sire=d.sireName||'', dam=d.damName||'';
+  const newRabbit = blankRabbit({ name, sex, status, breed:d.breed||'', color:d.color||'', earNumber:d.earNumber||'',
+    weight:d.weightLbs?String(d.weightLbs):'', dob:d.dob||null, sireName:sire, damName:dam,
+    registrationNumber:d.registrationNumber||'', gcNumber:d.gcNumber||'', legsWins:d.legsWins||'', prefix:d.prefix||'', alias:d.alias||'' });
+  newRabbit.projects=(d.projectIds||[]).filter(id=>projects.some(p=>p.id===id));
+  newRabbit.carries=Object.assign({}, d.carries||{});
+  if(d.weightOz) newRabbit.weightLog=[{id:uid(), date:d.weightDate||todayStr(), oz:d.weightOz, source:'manual'}];
+  if(d.origin) newRabbit.origin=d.origin;
+  if(d.notes) newRabbit.notesLog=[{id:uid(), date:todayStr(), text:d.notes}];
   rabbits.push(newRabbit);
   if(sire) ensureAncestor(sire,'buck');
   if(dam) ensureAncestor(dam,'doe');
   saveData(); closeSheet(); render();
   openRabbitProfile(newRabbit);
   showToast(name+' added');
+  if(d.photo){ addPhotoToRabbit(newRabbit, d.photo, 'Primary').then(ok=>{ if(profileRabbitId===newRabbit.id) renderProfile(); }); }
 }
 
 function pedBox(node,path,role){
@@ -7071,7 +7258,7 @@ function openAncestorCleanupSheet(){
   };
 }
 async function openMoreSheet(){
-  const items=[...(litterUiOn?[['kittags','Kit tags'],['waitlist','Waitlist']]:[]),['add','Add rabbit'],['import','Import from CSV'],['importpdf','Import from Pedigree PDF'],['planned','Planned breedings'],['forsale','For sale'],['shows','Upcoming shows'],['colors','Colors'],['pedigreesettings','Pedigree settings'],['ancestors','Ancestors'],['cleanup','Move herd rabbits to Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['trash','Recently deleted'],['backup','Backup and restore']];
+  const items=[...(litterUiOn?[['kittags','Kit tags'],['waitlist','Waitlist']]:[]),['add','Add rabbit'],['import','Import from CSV'],['importpdf','Import from Pedigree PDF'],['planned','Planned breedings'],['forsale','For sale'],['shows','Upcoming shows'],['reminders','Reminders'],['colors','Colors'],['pedigreesettings','Pedigree settings'],['ancestors','Ancestors'],['cleanup','Move herd rabbits to Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['trash','Recently deleted'],['backup','Backup and restore']];
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>More</h2>
     <div style="background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:12px;">
       <div class="section-label" style="margin:0 0 3px;">SIGNED IN AS</div>
@@ -7091,6 +7278,7 @@ async function openMoreSheet(){
     else if(k==='kittags') openKitTagsSettings();
     else if(k==='waitlist') openWaitlistSheet();
     else if(k==='colors') openPaletteSheet();
+    else if(k==='reminders') openRemindersSheet();
     else if(k==='pedigreesettings') openPedigreeSettingsSheet();
     else if(k==='merge') openMergeSheet();
     else if(k==='import') openImportCsvSheet();
@@ -7616,8 +7804,9 @@ function renderBackup(main){
       const out = text ? addBackFromBackup(text) : {error:'That file could not be read.'};
       if(out.error){ showToast(out.error); return; }
       await saveData(); await savePlanned(); await saveEvents(); await saveShows(); await saveExpenses();
+      await saveWaitlist(); await saveProjects(); await saveTraits(); await saveQuickPicks(); await saveKitTags();
       render();
-      const total = out.nr+out.np+out.ne+out.ns+out.nx;
+      const total = out.nr+out.np+out.ne+out.ns+out.nx+(out.nk||0);
       showToast(total ? ('Added back '+out.nr+' rabbit'+(out.nr===1?'':'s')+(total-out.nr?' and '+(total-out.nr)+' other item'+((total-out.nr)===1?'':'s'):'')) : 'Nothing was missing — everything in that file is already here');
     };
   }
@@ -7769,6 +7958,7 @@ function overviewTabHTML(r){
     ['Status', r.status], ['Registration', r.registrationNumber||'—'],
     ['Sire', r.sireName||'—'], ['Dam', r.damName||'—']
   ];
+  if(r.origin) rows.push(['Origin', r.origin.type==='bought' ? ('From '+(r.origin.from||'elsewhere')+(r.origin.acquired?' · '+fmtShort(r.origin.acquired):'')) : 'Bred here']);
   return `
     ${primary?`<img class="primary-photo" src="${primary.dataUrl}" alt="${esc(r.name)}">`:''}
     ${acts.length?`<div class="qa-row">${acts.map(([a,l])=>`<button class="btn btn-secondary btn-sm" data-pa="${a}">${l}</button>`).join('')}</div>`:''}
