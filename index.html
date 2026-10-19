@@ -549,6 +549,52 @@
     body.look-ribbon nav.bottom button.on svg{ stroke:var(--rb-nav-on-ink); }
     body.look-ribbon nav.bottom button.on svg text{ fill:var(--rb-nav-on-ink); }
   }
+  /* Needs attention groups */
+  body.look-ribbon .rb-grp{ background:var(--card); border-radius:22px; box-shadow:0 6px 18px var(--rb-shadow); margin-bottom:12px; overflow:hidden; }
+  body.look-ribbon .rb-gh{ display:flex; align-items:center; gap:10px; width:100%; min-height:56px; padding:12px 16px; background:none; border:none; cursor:pointer; text-align:left; color:var(--ink); }
+  body.look-ribbon .rb-gt{ flex:1; font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:21px; }
+  body.look-ribbon .rb-gn{ font-weight:800; font-size:13px; color:#fff; background:var(--navy); border-radius:999px; padding:3px 10px; }
+  html[data-theme="dark"] body.look-ribbon .rb-gn{ background:#4A3A52; }
+  body.look-ribbon .rb-gn.urg{ background:var(--rust); color:#fff; }
+  body.look-ribbon .rb-gc{ width:20px; text-align:center; color:var(--ink-soft); font-size:18px; }
+  body.look-ribbon .rb-gb{ padding:0 8px 4px; }
+  body.look-ribbon .rb-gb .swipe-wrap, body.look-ribbon .rb-gb .todo-row{ border-radius:16px; box-shadow:none; }
+  body.look-ribbon .rb-gb .todo-row{ border-top:1px solid var(--line); border-radius:0; padding:10px 8px; margin:0; background:var(--card); box-shadow:none; }
+  body.look-ribbon .rb-gb .swipe-wrap{ margin-bottom:0; border-radius:0; }
+  /* every row: text on the left, one action in a fixed column, the snooze clock always at the far right */
+  body.look-ribbon .rb-gb .todo-main{ display:grid; grid-template-columns:minmax(0,1fr) 108px 44px; align-items:center; gap:6px 8px; }
+  body.look-ribbon .rb-gb .todo-top{ display:contents; }
+  body.look-ribbon .rb-gb .todo-text{ grid-column:1; grid-row:1; min-width:0; }
+  body.look-ribbon .rb-gb .todo-acts{ grid-column:2; grid-row:1; margin:0; display:flex; gap:8px; }
+  body.look-ribbon .rb-gb .todo-clock{ grid-column:3; grid-row:1; width:44px; height:44px; justify-content:center; padding:0; }
+  body.look-ribbon .rb-gb .todo-acts .btn{ flex:1 1 0; width:100%; min-width:0; padding-left:6px; padding-right:6px; }
+  /* rows with two or three buttons: buttons get their own full-width line, clock stays at the far right of the first line */
+  body.look-ribbon .rb-gb .todo-main:has(.todo-acts .btn:nth-child(2)){ grid-template-columns:minmax(0,1fr) 44px; }
+  body.look-ribbon .rb-gb .todo-main:has(.todo-acts .btn:nth-child(2)) .todo-acts{ grid-column:1 / -1; grid-row:2; }
+  body.look-ribbon .rb-gb .todo-main:has(.todo-acts .btn:nth-child(2)) .todo-clock{ grid-column:2; }
+  /* rows with no buttons */
+  body.look-ribbon .rb-gb .todo-main:not(:has(.todo-acts)){ grid-template-columns:minmax(0,1fr) 44px; }
+  body.look-ribbon .rb-gb .todo-main:not(:has(.todo-acts)) .todo-clock{ grid-column:2; }
+  body.look-ribbon .rb-gb .todo-text{ font-size:15px; }
+  body.look-ribbon .rb-more{ display:flex; justify-content:space-between; align-items:center; padding:2px 12px 8px; border-top:1px solid var(--line); }
+  body.look-ribbon .rb-more .attn-viewall{ width:auto; padding:10px 6px; }
+  body.look-ribbon .rb-chips{ display:flex; flex-wrap:wrap; gap:6px; padding:0 16px 14px; }
+  body.look-ribbon .rb-chips span{ font-size:12px; font-weight:700; background:var(--line); color:var(--ink); border-radius:999px; padding:6px 12px; }
+  /* icons that show on hover where there is a mouse (touch screens swipe instead) */
+  body.look-ribbon .todo-clock{ opacity:1; }
+  @media (hover:hover) and (pointer:fine){
+    body.look-ribbon .todo-row .todo-clock{ opacity:.35; transition:opacity .15s; }
+    body.look-ribbon .todo-row:hover .todo-clock, body.look-ribbon .todo-clock:focus-visible{ opacity:1; }
+  }
+  @media screen and (min-width:900px){
+    body.look-ribbon #main .rb-grp{ max-width:760px; }
+    body.look-ribbon .rb-gb .todo-main:has(.todo-acts .btn:nth-child(2)) .todo-acts{ max-width:440px; }
+  }
+  body.look-ribbon .rb-addmenu{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:6px 0 10px; }
+  body.look-ribbon .rb-addmenu button{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:96px; border:none; border-radius:22px; background:var(--card); color:var(--ink); box-shadow:0 6px 18px var(--rb-shadow); font-family:'Manrope','Public Sans',sans-serif; font-weight:800; font-size:15px; cursor:pointer; border:1.5px solid var(--line); }
+  body.look-ribbon .rb-addmenu button span{ color:var(--rb-coral); height:28px; display:flex; align-items:center; }
+  body.look-ribbon .rb-addmenu button:first-child{ background:var(--rb-coral); color:var(--rb-coral-ink); border-color:transparent; }
+  body.look-ribbon .rb-addmenu button:first-child span{ color:var(--rb-coral-ink); }
   /* ===== RIBBON LOOK END ===== */
   @media print{
     /* display:none (not visibility:hidden) so the rest of the app
@@ -2408,7 +2454,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-19-ribbonhome';
+const APP_VERSION = '2026-10-19-addmenu';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2782,7 +2828,8 @@ function openPalpateLaterSheet(r){
     <div class="card-sub" style="margin-bottom:10px;">When should I remind you to palpate ${esc(shortName(r.name))} again?</div>
     <div class="nn-chips"><button type="button" class="nn-chip" data-pl="1">Tomorrow</button><button type="button" class="nn-chip" data-pl="3">3 days</button><button type="button" class="nn-chip" data-pl="5">5 days</button><button type="button" class="nn-chip" data-pl="7">1 week</button></div>
     <div class="field" style="margin-top:12px;"><label>Or pick a date</label><input type="date" id="pl-date" min="${todayStr()}"></div>
-    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="pl-go">Remind me then</button></div>`);
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-secondary" id="pl-dismiss">Dismiss</button><button class="btn btn-primary" id="pl-go">Remind me then</button></div>`);
+  document.getElementById('pl-dismiss').onclick=()=>{ closeSheet(); attnDismissFor(r.id,'palpate'); };
   document.querySelectorAll('[data-pl]').forEach(b=>b.onclick=()=>pick(+b.dataset.pl));
   document.getElementById('pl-go').onclick=()=>{
     const v=document.getElementById('pl-date').value;
@@ -2849,13 +2896,14 @@ function completeReminder(x){
   else { x.done=true; x.doneDate=todayStr(); }
   return ()=>{ x.date=snap.date; x.done=snap.done; x.doneDate=snap.doneDate; x.snoozeUntil=snap.snoozeUntil; };
 }
-function openSnoozeSheet(label, apply){
+function openSnoozeSheet(label, apply, onDismiss){
   const pick=(date)=>{ closeSheet(); apply(date); };
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Snooze</h2>
     <div class="card-sub" style="margin-bottom:10px;">${esc(label)} — remind me again:</div>
     <div class="nn-chips"><button type="button" class="nn-chip" data-sz="1">Tomorrow</button><button type="button" class="nn-chip" data-sz="3">3 days</button><button type="button" class="nn-chip" data-sz="7">1 week</button></div>
     <div class="field" style="margin-top:12px;"><label>Or pick a date</label><input type="date" id="sz-date" min="${addDays(todayStr(),1)}"></div>
-    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="sz-go">Snooze</button></div>`);
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button>${onDismiss?'<button class="btn btn-secondary" id="sz-dismiss">Dismiss</button>':''}<button class="btn btn-primary" id="sz-go">Snooze</button></div>`);
+  if(onDismiss && document.getElementById('sz-dismiss')) document.getElementById('sz-dismiss').onclick=()=>{ closeSheet(); onDismiss(); };
   document.querySelectorAll('[data-sz]').forEach(b=>b.onclick=()=>pick(addDays(todayStr(),+b.dataset.sz)));
   document.getElementById('sz-go').onclick=()=>{ const v=document.getElementById('sz-date').value; if(!v||v<=todayStr()){ showToast('Pick a day after today'); return; } pick(v); };
 }
@@ -3354,6 +3402,7 @@ function applyPalette(id){
   const p = PALETTES.find(x=>x.id===id) || PALETTES[0];
   currentPaletteId = p.id;
   document.body.classList.toggle('look-ribbon', !!p.look);
+  { const ab=document.getElementById('addRabbitTopBtn'); if(ab){ ab.setAttribute('aria-label', p.look?'Add':'Add a rabbit'); ab.title = p.look?'Add':'Add a rabbit'; } }
   let el = document.getElementById('paletteStyle');
   const meta = document.querySelector('meta[name="theme-color"]');
   if(p.id==='heritage'){
@@ -4524,13 +4573,13 @@ const QA_TAG_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" 
 const QA_SCALE_SVG = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8.5 10a3.5 3.5 0 0 1 7 0"/><path d="M12 10l1.5-1.5"/></svg>`;
 const CLOCK_SVG = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>`;
 const CHEVRON_SVG = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>`;
-function attnRowHTML({ urgent=false, text, sub='', buttons='', circleId=null, circleType='', circleLabel='', snoozeId=null, snoozeType='', openId=null, swId=null, swType='' }){
+function attnRowHTML({ urgent=false, text, sub='', buttons='', circleId=null, circleType='', circleLabel='', snoozeId=null, snoozeType='', openId=null, openTab='', swId=null, swType='' }){
   const circle = circleId ? `<div class="todo-circle ${urgent?'overdue':''}" data-circledone="${circleId}" data-circletype="${circleType}" data-circlelabel="${esc(circleLabel)}"></div>` : '';
   const clock = snoozeId ? `<button class="todo-clock" data-snooze="${snoozeId}" data-snoozetype="${snoozeType}" aria-label="Snooze">${CLOCK_SVG}</button>` : '';
   const acts = buttons ? `<div class="todo-acts">${buttons}</div>` : '';
   const sid = swId||snoozeId, sty = swType||snoozeType;
   const canDone = !!(circleId || snoozeType==='rem');
-  const row = `<div class="todo-row roomy ${urgent?'overdue':''}" ${openId?`data-openrow="${openId}"`:''}>
+  const row = `<div class="todo-row roomy ${urgent?'overdue':''}" ${openId?`data-openrow="${openId}"${openTab?` data-opentab="${openTab}"`:''}`:''}>
     ${circle}
     <div class="todo-main"><div class="todo-top"><div class="todo-text" style="flex:1;">${text}${sub?`<div class="todo-sub-text">${sub}</div>`:''}</div>${clock}</div>${acts}</div>
   </div>`;
@@ -4590,7 +4639,7 @@ function wireAttentionRows(root){
     if(ev.target.closest('button,.todo-circle,[data-nesttoggle]')) return;
     const r=rabbits.find(x=>x.id===row.dataset.openrow); if(!r) return;
     try{ closeSheet(); }catch(e){}
-    openRabbitProfile(r);
+    openRabbitProfile(r, row.dataset.opentab || undefined);
   }));
   root.querySelectorAll('[data-remdone]').forEach(b=>b.onclick=async()=>{
     const x=customReminders.find(q=>q.id===b.dataset.remdone); if(!x) return;
@@ -4604,10 +4653,10 @@ function wireAttentionRows(root){
   wireSwipeRows(root);
 }
 function attnSnoozeFor(id,type){
-  if(type==='rem'){ const x=customReminders.find(q=>q.id===id); if(!x) return; openSnoozeSheet(x.title, date=>{ const old=x.snoozeUntil; x.snoozeUntil=date; saveReminders().then(ok=>{ if(!ok) x.snoozeUntil=old; render(); if(ok) showToast('Snoozed until '+shortD(date)); }); }); return; }
+  if(type==='rem'){ const x=customReminders.find(q=>q.id===id); if(!x) return; openSnoozeSheet(x.title, date=>{ const old=x.snoozeUntil; x.snoozeUntil=date; saveReminders().then(ok=>{ if(!ok) x.snoozeUntil=old; render(); if(ok) showToast('Snoozed until '+shortD(date)); }); }, ()=>attnDismissFor(id,'rem')); return; }
   const r=rabbits.find(x=>x.id===id); if(!r) return;
   if(type==='palpate'){ openPalpateLaterSheet(r); return; }
-  openSnoozeSheet(r.name, date=>{ r.attnSnooze = r.attnSnooze || {}; r.attnSnooze[type] = date; saveData(); render(); showToast('Snoozed until '+shortD(date)); });
+  openSnoozeSheet(r.name, date=>{ r.attnSnooze = r.attnSnooze || {}; r.attnSnooze[type] = date; saveData(); render(); showToast('Snoozed until '+shortD(date)); }, ()=>attnDismissFor(id,type));
 }
 // Dismiss hides just this one alert. Nothing is deleted: a rabbit alert comes back for her next breeding/litter, a reminder can be restored from My reminders.
 function attnDismissFor(id,type){
@@ -4711,15 +4760,88 @@ function ribbonHomeHTML(t, attnTotal){
     + `</div>`;
   if(due.length===1){
     const r=due[0], d=daysToDue(r);
-    h+=`<div class="rb-ringcard" data-openrow="${r.id}">${rbRingSVG(96,gday(r),31,r.name+' '+ribbonDueLabel(d))}
+    h+=`<div class="rb-ringcard" data-openrow="${r.id}" data-opentab="breeding">${rbRingSVG(96,gday(r),31,r.name+' '+ribbonDueLabel(d))}
       <div class="rb-ringtxt"><div class="rb-eyebrow">${esc(ribbonDueLabel(d))}</div><div class="rb-ringname">${esc(r.name)}</div><div class="rb-ringsub">Bred to ${esc(r.partner||'?')}</div>
       ${d<=0?`<button class="btn btn-primary btn-sm" data-act="kindled" data-id="${r.id}">Kindled</button>`:''}</div></div>`;
   } else if(due.length>1){
     const shown=due.slice(0,5);
-    h+=`<div class="rb-ringcard rb-multi"><div class="rb-eyebrow" style="margin:0 6px 8px;">${due.length} does due soon</div><div class="rb-rings">${shown.map(r=>`<div class="rb-ring" data-openrow="${r.id}" role="button" tabindex="0">${rbRingSVG(56,gday(r),31,r.name+' '+ribbonDueLabel(daysToDue(r)))}<span>${esc(r.name)}</span><small>${daysToDue(r)<0?'over':daysToDue(r)===0?'today':daysToDue(r)+'d'}</small></div>`).join('')}</div>
+    h+=`<div class="rb-ringcard rb-multi"><div class="rb-eyebrow" style="margin:0 6px 8px;">${due.length} does due soon</div><div class="rb-rings">${shown.map(r=>`<div class="rb-ring" data-openrow="${r.id}" data-opentab="breeding" role="button" tabindex="0">${rbRingSVG(56,gday(r),31,r.name+' '+ribbonDueLabel(daysToDue(r)))}<span>${esc(r.name)}</span><small>${daysToDue(r)<0?'over':daysToDue(r)===0?'today':daysToDue(r)+'d'}</small></div>`).join('')}</div>
       ${due.length>5?`<button class="attn-viewall" data-hometile="pregnant">See all ${due.length} due soon &rarr;</button>`:''}</div>`;
   }
   return h;
+}
+// Needs attention, grouped by kind (Ribbon only). Every row is the same row as before, so Done, Snooze,
+// Dismiss, swipe and all the buttons work exactly the same; this only decides where rows sit.
+let attnGrpOpen = {overdue:true}, attnGrpAll = {}, kq = null;
+const RB_GROUPS = [['overdue','Overdue does'],['palpate','Palpate'],['reb','Ready to rebreed'],['other','Everything else']];
+function rbRowName(html){ const m=/<b>([^<]*)<\/b>/.exec(html||''); return m?m[1].replace(/&#39;|&apos;/g,"'").replace(/&amp;/g,'&'):'Item'; }
+function ribbonAttnHTML(rows){
+  const nestRows = rows.filter(r=>r.grp==='nest');
+  let h = nestRows.map(r=>r.html).join('');
+  RB_GROUPS.forEach(([g,title])=>{
+    const list = rows.filter(r=>(r.grp||'other')===g && r.grp!=='nest'); if(!list.length) return;
+    const open = !!attnGrpOpen[g], all = !!attnGrpAll[g], CAP = 3;
+    const shown = (all||list.length<=CAP+1) ? list : list.slice(0,CAP);
+    h += `<div class="rb-grp" data-grp="${g}">
+      <button class="rb-gh" data-grptoggle="${g}" aria-expanded="${open}"><span class="rb-gt">${esc(title)}</span><span class="rb-gn ${g==='overdue'?'urg':''}">${list.length}</span><span class="rb-gc">${open?'&#8963;':'&#8964;'}</span></button>`;
+    if(open){
+      h += `<div class="rb-gb">${shown.map(r=>r.html).join('')}</div>`;
+      const hidden = list.length - shown.length;
+      if(hidden>0 || g==='overdue' && list.length>1) h += `<div class="rb-more">${hidden>0?`<button class="attn-viewall" data-grpmore="${g}">Show ${hidden} more</button>`:'<span></span>'}${g==='overdue'&&list.length>1?`<button class="attn-viewall" data-kindledall="1">Kindled all in order</button>`:''}</div>`;
+      if(all && list.length>CAP+1) h += `<div class="rb-more"><button class="attn-viewall" data-grpless="${g}">Show fewer</button></div>`;
+    } else {
+      const names = list.slice(0,4).map(r=>rbRowName(r.html));
+      h += `<div class="rb-chips">${names.map(n=>`<span>${esc(n)}</span>`).join('')}${list.length>4?`<span>+${list.length-4}</span>`:''}</div>`;
+    }
+    h += `</div>`;
+  });
+  return h;
+}
+function wireRibbonAttn(main, rows){
+  main.querySelectorAll('[data-grptoggle]').forEach(b=>b.onclick=()=>{ const g=b.dataset.grptoggle; attnGrpOpen[g]=!attnGrpOpen[g]; render(); });
+  main.querySelectorAll('[data-grpmore]').forEach(b=>b.onclick=()=>{ attnGrpAll[b.dataset.grpmore]=true; render(); });
+  main.querySelectorAll('[data-grpless]').forEach(b=>b.onclick=()=>{ attnGrpAll[b.dataset.grpless]=false; render(); });
+  main.querySelectorAll('[data-kindledall]').forEach(b=>b.onclick=()=>{
+    const ids = rabbits.filter(r=>r.sex==='doe'&&isOverdue(r)&&!snoozed(r,'overdue')).sort((a,b)=>daysToDue(a)-daysToDue(b)).map(r=>r.id);
+    if(!ids.length) return;
+    kq = {ids, i:0}; const first=rabbits.find(r=>r.id===ids[0]); if(first) openKindledSheet(first); else kq=null;
+  });
+}
+// Steps through the "Kindled all in order" list: when a Kindled sheet closes and that doe is no longer bred, open the next one.
+// Closing a sheet without saving (still bred) ends the run, so it never pushes a sheet on you.
+(function(){
+  const base = closeSheet;
+  closeSheet = function(){
+    base.apply(this, arguments);
+    if(!kq) return;
+    setTimeout(()=>{
+      if(!kq) return;
+      if(document.getElementById('sheetBackdrop').classList.contains('on')) return;
+      const cur = rabbits.find(r=>r.id===kq.ids[kq.i]);
+      if(cur && cur.status==='pregnant'){ kq=null; return; }
+      let next=null;
+      while(++kq.i < kq.ids.length){ const r=rabbits.find(x=>x.id===kq.ids[kq.i]); if(r && r.status==='pregnant'){ next=r; break; } }
+      if(next) openKindledSheet(next); else { kq=null; showToast('All of them are done'); }
+    }, 250);
+  };
+})();
+// The + in the top bar opens a short menu (Ribbon only). Each choice opens the same sheet it always did.
+function openAddMenu(){
+  const TASK_SVG='<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>';
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Add</h2>
+    <div class="rb-addmenu">
+      <button type="button" data-addm="rabbit"><span>${QA_BUNNY_SVG}</span>Rabbit</button>
+      <button type="button" data-addm="breeding"><span>${QA_PLUS_SVG}</span>Breeding</button>
+      <button type="button" data-addm="task"><span>${TASK_SVG}</span>Task</button>
+      <button type="button" data-addm="weight"><span>${QA_SCALE_SVG}</span>Weight</button>
+    </div>`);
+  document.querySelectorAll('[data-addm]').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.addm;
+    if(k==='rabbit') openAddSheet();
+    else if(k==='breeding') openQuickBreedSheet();
+    else if(k==='task') openReminderSheet(null);
+    else openRabbitPickSheet('Add weight — which rabbit?', rabbits.filter(r=>isActive(r)&&r.status!=='external'), r=>openAddWeightSheet(r), '');
+  });
 }
 // ===== RIBBON HOME END =====
 
@@ -4738,11 +4860,11 @@ function renderHome(main){
 
   // Build attention rows — nest box prep collapses into one group row; everything else is one row per rabbit.
   const rows = [];
-  if(nest.length) rows.push({ urgent:false, sortKey:-1, html: nestGroupHTML(nest) });
+  if(nest.length) rows.push({ grp:'nest', urgent:false, sortKey:-1, html: nestGroupHTML(nest) });
   overdueDoes.forEach(r=>{
     const d=daysToDue(r);
-    rows.push({ urgent:true, sortKey:d, html: attnRowHTML({
-      urgent:true, text:`<b>${esc(r.name)}</b> is overdue — ${-d} day${-d===1?'':'s'} past due`, sub:bredDueSub(r), openId:r.id,
+    rows.push({ grp:'overdue', urgent:true, sortKey:d, html: attnRowHTML({
+      urgent:true, text:`<b>${esc(r.name)}</b> is overdue — ${-d} day${-d===1?'':'s'} past due`, sub:bredDueSub(r), openId:r.id, openTab:'breeding',
       buttons:`<button class="btn btn-primary btn-sm" data-act="kindled" data-id="${r.id}">Kindled</button>`,
       snoozeId:r.id, snoozeType:'overdue'
     })});
@@ -4763,15 +4885,15 @@ function renderHome(main){
   });
   palp.forEach(r=>{
     const since=daysBetween(r.bredDate,t);
-    rows.push({ urgent:false, sortKey:3, html: attnRowHTML({
-      openId:r.id, swId:r.id, swType:'palpate', text:`Palpate <b>${esc(r.name)}</b> — bred ${since} day${since===1?'':'s'} ago`,
+    rows.push({ grp:'palpate', urgent:false, sortKey:3, html: attnRowHTML({
+      openId:r.id, openTab:'breeding', swId:r.id, swType:'palpate', text:`Palpate <b>${esc(r.name)}</b> — bred ${since} day${since===1?'':'s'} ago`,
       sub:`Bred to ${esc(r.partner||'?')} ${fmtDate(r.bredDate)}`,
       buttons:`<button class="btn btn-primary btn-sm" data-palpos="${r.id}">Positive</button><button class="btn btn-secondary btn-sm" data-palunsure="${r.id}">Snooze</button><button class="btn btn-danger btn-sm" data-palno="${r.id}">Not bred</button>`
     })});
   });
   reb.forEach(r=>{
-    rows.push({ urgent:false, sortKey:6, html: attnRowHTML({
-      openId:r.id, sub:r.litterBornDate?'Kindled '+shortD(r.litterBornDate):'', text:`<b>${esc(r.name)}</b> is ready to rebreed`,
+    rows.push({ grp:'reb', urgent:false, sortKey:6, html: attnRowHTML({
+      openId:r.id, openTab:'breeding', sub:r.litterBornDate?'Kindled '+shortD(r.litterBornDate):'', text:`<b>${esc(r.name)}</b> is ready to rebreed`,
       buttons:`<button class="btn btn-primary btn-sm" data-act="rebred" data-id="${r.id}">Rebred</button>`,
       snoozeId:r.id, snoozeType:'reb'
     })});
@@ -4862,6 +4984,8 @@ function renderHome(main){
   </div>`;
   if(!attnTotal){
     h += `<div class="card no-tap"><div class="card-detail">Nothing needs attention right now.</div></div>`;
+  } else if(lookRibbonOn()){
+    h += ribbonAttnHTML(rows);
   } else {
     h += visibleRows.map(r=>r.html).join('');
     if(hiddenCount>0) h += `<button class="attn-viewall" id="attnViewAll">View all (${attnTotal}) &rarr;</button>`;
@@ -4906,6 +5030,7 @@ function renderHome(main){
   wireAttentionRows(main);
   wireConvertButtons(main);
   attachCardEvents();
+  if(lookRibbonOn()) wireRibbonAttn(main, rows);
 }
 
 function renderRabbits(main){
@@ -5120,7 +5245,7 @@ function setSearchMode(m){
   render(); window.scrollTo(0,0);
 }
 document.querySelectorAll('#searchModeSeg button').forEach(b=>b.onclick=()=>setSearchMode(b.dataset.smode));
-document.getElementById('addRabbitTopBtn').onclick=()=>openAddSheet();
+document.getElementById('addRabbitTopBtn').onclick=()=>{ if(lookRibbonOn()) openAddMenu(); else openAddSheet(); };
 function renderSearch(main){
   const q=nameKey(searchQuery);
   const scored = rabbits.map(r=>{
