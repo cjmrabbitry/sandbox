@@ -497,6 +497,10 @@
   .pp-portrait.pp-simple .pp-simple-box-name{ font-size:11px; }
   .pp-portrait.pp-simple .pp-simple-box-color{ font-size:8.8px; }
   .pp-portrait.pp-simple .pp-pill{ font-size:7.6px; }
+  .hc-band, .hc-ring, .pj-dot{ display:none; }
+  .pj-colors{ display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
+  .pj-sw{ width:38px; height:38px; border-radius:50%; border:3px solid transparent; cursor:pointer; padding:0; box-shadow:inset 0 0 0 1px rgba(0,0,0,.18); }
+  .pj-sw.on{ border-color:var(--ink); }
   /* ===== RIBBON LOOK START ===== (everything here is scoped to body.look-ribbon, so it only affects accounts that pick the Ribbon colors) */
   body.look-ribbon{ font-family:'Manrope','Public Sans',sans-serif; }
   body.look-ribbon .wordmark, body.look-ribbon header.top h1, body.look-ribbon .card-name, body.look-ribbon .cu-name, body.look-ribbon .cu-dd .n, body.look-ribbon .stat .n{ font-family:'Newsreader',Georgia,serif; }
@@ -549,6 +553,19 @@
     body.look-ribbon nav.bottom button.on svg{ stroke:var(--rb-nav-on-ink); }
     body.look-ribbon nav.bottom button.on svg text{ fill:var(--rb-nav-on-ink); }
   }
+  /* Herd cards: project color band on the left, a gestation ring on bred does */
+  body.look-ribbon .card.hc{ position:relative; padding-left:24px; border-radius:22px; overflow:hidden; }
+  body.look-ribbon .hc-band{ display:flex; flex-direction:column; position:absolute; left:0; top:0; bottom:0; width:10px; }
+  body.look-ribbon .hc-band i{ flex:1; display:block; }
+  body.look-ribbon .hc-ring{ display:block; flex:0 0 auto; margin:-2px 0 -4px; }
+  body.look-ribbon .hc-ring:empty{ display:none; }
+  body.look-ribbon .hc-top:has(.hc-ring:not(:empty)) .hc-chev{ display:none; }
+  body.look-ribbon .pj-dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:0; }
+  body.look-ribbon .pj-chip{ background:var(--line); color:var(--ink); }
+  body.look-ribbon .hc .card-name{ font-size:22px; }
+  body.look-ribbon .seg{ border-radius:999px; }
+  body.look-ribbon .seg button{ border-radius:999px; }
+  body.look-ribbon .pj-fchip{ border-radius:999px; font-family:'Manrope','Public Sans',sans-serif; font-weight:700; }
   /* Needs attention groups */
   body.look-ribbon .rb-grp{ background:var(--card); border-radius:22px; box-shadow:0 6px 18px var(--rb-shadow); margin-bottom:12px; overflow:hidden; }
   body.look-ribbon .rb-gh{ display:flex; align-items:center; gap:10px; width:100%; min-height:56px; padding:12px 16px; background:none; border:none; cursor:pointer; text-align:left; color:var(--ink); }
@@ -1997,6 +2014,11 @@ function fontSegHTML(id, current, fallback){
 let pedigreeSettings = defaultPedigreeSettings();
 const THEME_KEY = 'theme_v1';
 const PALETTE_KEY = 'palette_v1';
+// A second copy of the look you picked (colors + light/dark), kept on this device and tied to YOUR sign-in id,
+// so it still comes back if the online copy was slow or failed to save. Never used for another account or when viewing a customer.
+function lookCopyKey(w){ return (currentUser && currentUser.id && !viewingAsCustomer) ? 'herdnerd_look_'+w+'_'+currentUser.id : null; }
+function lookCopySet(w,v){ try{ const k=lookCopyKey(w); if(k) localStorage.setItem(k,v); }catch(e){} }
+function lookCopyGet(w){ try{ const k=lookCopyKey(w); return k?localStorage.getItem(k):null; }catch(e){ return null; } }
 let rabbits = [], planned = [], customEvents = [], shows = [], expenses = [], currentTab = 'home', searchQuery = '', doesFilter = 'all', juniorsFilter = 'all', rabbitsGroup = 'does', currentMoneyPeriod = 'thismonth';
 let profileRabbitId = null, profileTab = 'overview', photoActiveCategory = 'Primary';
 let expandedLitters = new Set();
@@ -2146,9 +2168,9 @@ async function loadData(){
   // own choices every time — and fall back to the standard look when the
   // account has never picked any (so one account's colors never carry over
   // to the next one, including when an admin views a customer).
-  let savedTheme=null; try{ savedTheme=(await window.storage.get(THEME_KEY,false)).value; }catch(e){}
+  let savedTheme=null; try{ savedTheme=(await window.storage.get(THEME_KEY,false)).value; }catch(e){ savedTheme=lookCopyGet('theme'); }
   if(savedTheme==='dark') document.documentElement.setAttribute('data-theme','dark'); else document.documentElement.removeAttribute('data-theme');
-  let savedPalette=null; try{ savedPalette=(await window.storage.get(PALETTE_KEY,false)).value; }catch(e){}
+  let savedPalette=null; try{ savedPalette=(await window.storage.get(PALETTE_KEY,false)).value; }catch(e){ savedPalette=lookCopyGet('palette'); }
   applyPalette(savedPalette);
   render();
   // In the background (so the app opens right away): shrink any saved photos
@@ -2454,7 +2476,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-19-addmenu';
+const APP_VERSION = '2026-10-19-lookkeep2';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2489,22 +2511,31 @@ async function saveProjects(){
   try{ await window.storage.set(PROJECTS_KEY, JSON.stringify(projects), false); return true; }
   catch(e){ showToast("Couldn't save — check your connection and try again."); return false; }
 }
+// Each project can have a color (an optional field, p.color). Projects saved before this have none, so they get one by position; nothing is rewritten until you pick one.
+const PJ_COLORS=['#6C4AB6','#0F8B8D','#C98A1B','#B8456B','#3B7DD8','#5E8C3A','#C2583A','#7A6F8C'];
+function projColor(p){ if(p && /^#[0-9a-f]{6}$/i.test(p.color||'')) return p.color; const i=p?projects.findIndex(x=>x.id===p.id):-1; return PJ_COLORS[(i<0?0:i)%PJ_COLORS.length]; }
+function projBandHTML(r){ const ps=projOf(r), cols=ps.length?ps.slice(0,3).map(projColor):['var(--line-strong)']; return `<span class="hc-band" aria-hidden="true">${cols.map(c=>`<i style="background:${c}"></i>`).join('')}</span>`; }
+function hcRingHTML(r){ return `<span class="hc-ring">${(r.sex==='doe'&&r.status==='pregnant'&&r.bredDate&&typeof rbRingSVG==='function')?rbRingSVG(54,daysBetween(r.bredDate,todayStr()),31,r.name+' gestation day'):''}</span>`; }
+function projColorPickerHTML(sel,attr){ return `<div class="pj-colors">${PJ_COLORS.map(c=>`<button type="button" class="pj-sw ${sel===c?'on':''}" style="background:${c}" ${attr}="${c}" aria-label="Color ${c}"></button>`).join('')}</div>`; }
 function projOf(r){ return (r.projects||[]).map(id=>projects.find(p=>p.id===id)).filter(Boolean); }
 function inProject(r,id){ return (r.projects||[]).includes(id); }
 function projChipsHTML(r){
-  const chips = projOf(r).map(p=>`<span class="pj-chip">${esc(p.name)}</span>`).join('');
+  const chips = projOf(r).map(p=>`<span class="pj-chip"><i class="pj-dot" style="background:${projColor(p)}"></i>${esc(p.name)}</span>`).join('');
   return `<div class="pj-row">${chips}<button class="pj-add" data-pjtag="${r.id}">${chips?'Edit':'+ Project'}</button></div>`+carryChipsHTML(r);
 }
 function addProjectFlow(done){
   if(projects.length>=MAX_PROJECTS){ showToast('Up to '+MAX_PROJECTS+' projects'); return; }
+  const used=new Set(projects.map(projColor)); let newColor=PJ_COLORS.find(c=>!used.has(c))||PJ_COLORS[projects.length%PJ_COLORS.length];
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>New project</h2>
     <div class="field"><label>Name</label><input id="pj-name" maxlength="24" placeholder="e.g. Vienna" autocomplete="off"></div>
+    <div class="field"><label>Color</label>${projColorPickerHTML(newColor,'data-pjnc')}</div>
     <div class="sheet-actions"><button class="btn btn-secondary" id="pj-cancel">Cancel</button><button class="btn btn-primary" id="pj-save">Add project</button></div>`);
+  document.querySelectorAll('[data-pjnc]').forEach(b=>b.onclick=()=>{ newColor=b.dataset.pjnc; document.querySelectorAll('[data-pjnc]').forEach(x=>x.classList.toggle('on',x===b)); });
   document.getElementById('pj-cancel').onclick=()=>{ closeSheet(); if(done) done(null); };
   document.getElementById('pj-save').onclick=async()=>{
     const v=document.getElementById('pj-name').value.trim(); if(!v) return;
     if(projects.some(p=>p.name.toLowerCase()===v.toLowerCase())){ showToast('That project already exists'); return; }
-    const np={id:uid(), name:v}; projects.push(np);
+    const np={id:uid(), name:v, color:newColor}; projects.push(np);
     if(!(await saveProjects())){ projects.pop(); return; }
     closeSheet(); if(done) done(np); else render();
   };
@@ -2544,11 +2575,17 @@ function openProjectsManage(after){
   const draw=()=>{
     openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Projects</h2>
       <div class="card-sub" style="margin-bottom:10px;">Removing a project only takes the label off. No rabbit is changed or deleted. Up to ${MAX_PROJECTS} projects.</div>
-      <div class="lit-card">${projects.length?projects.map(p=>`<div class="st-row" style="padding:6px 0;"><b>${esc(p.name)}</b> <span class="card-sub">${rabbits.filter(r=>inProject(r,p.id)).length}</span><span style="flex:1"></span><button class="btn btn-secondary btn-sm" data-pjwarn="${p.id}">Tell me about${(p.warn||[]).length?' ('+p.warn.length+')':''}</button> <button class="btn btn-secondary btn-sm" data-pjren="${p.id}">Rename</button> <button class="btn btn-secondary btn-sm" data-pjrm="${p.id}">Remove</button></div>`).join(''):'<div class="card-sub">No projects yet.</div>'}</div>
+      <div class="lit-card">${projects.length?projects.map(p=>`<div class="st-row" style="padding:6px 0;"><button type="button" class="pj-sw on" style="background:${projColor(p)};width:28px;height:28px;margin-right:8px;" data-pjcolor="${p.id}" aria-label="Change color for ${esc(p.name)}"></button><b>${esc(p.name)}</b> <span class="card-sub">${rabbits.filter(r=>inProject(r,p.id)).length}</span><span style="flex:1"></span><button class="btn btn-secondary btn-sm" data-pjwarn="${p.id}">Tell me about${(p.warn||[]).length?' ('+p.warn.length+')':''}</button> <button class="btn btn-secondary btn-sm" data-pjren="${p.id}">Rename</button> <button class="btn btn-secondary btn-sm" data-pjrm="${p.id}">Remove</button></div>`).join(''):'<div class="card-sub">No projects yet.</div>'}</div>
       <div class="sheet-actions"><button class="btn btn-secondary" id="pm-done">Done</button><button class="btn btn-primary" id="pm-add">+ New project</button></div>`);
     document.getElementById('pm-done').onclick=()=>{ closeSheet(); if(after) after(); else render(); };
     document.getElementById('pm-add').onclick=()=>addProjectFlow(()=>openProjectsManage(after));
     document.querySelectorAll('[data-pjwarn]').forEach(b=>b.onclick=()=>openProjectWarnSheet(b.dataset.pjwarn));
+    document.querySelectorAll('[data-pjcolor]').forEach(b=>b.onclick=()=>{
+      const p=projects.find(x=>x.id===b.dataset.pjcolor); if(!p) return;
+      openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>${esc(p.name)} color</h2>${projColorPickerHTML(projColor(p),'data-pjpc')}<div class="sheet-actions"><button class="btn btn-secondary" id="pj-cc">Cancel</button></div>`);
+      document.getElementById('pj-cc').onclick=draw;
+      document.querySelectorAll('[data-pjpc]').forEach(x=>x.onclick=async()=>{ const old=p.color; p.color=x.dataset.pjpc; if(!(await saveProjects())){ p.color=old; return; } draw(); });
+    });
     document.querySelectorAll('[data-pjrm]').forEach(b=>b.onclick=async()=>{
       const i=projects.findIndex(p=>p.id===b.dataset.pjrm); if(i<0) return;
       const gone=projects.splice(i,1)[0];
@@ -3316,6 +3353,7 @@ document.getElementById('themeBtn').onclick = async ()=>{
   const dark = document.documentElement.getAttribute('data-theme')==='dark';
   if(dark) document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme','dark');
+  lookCopySet('theme', dark?'light':'dark');
   try{ await window.storage.set(THEME_KEY, dark?'light':'dark', false); }catch(e){}
 };
 
@@ -3429,8 +3467,10 @@ function openPaletteSheet(){
   document.querySelectorAll('[data-pal]').forEach(b=>b.onclick=async ()=>{
     if(viewingAsCustomer) return;
     const id=b.dataset.pal;
-    applyPalette(id);
+    applyPalette(id); lookCopySet('palette',id);
     try{ await window.storage.set(PALETTE_KEY, id, false); }catch(e){ showToast('Could not save your colors — check your connection'); return; }
+    // Read it back from your account to be sure it really reached the online copy.
+    try{ if(typeof sb!=='undefined' && sb && currentUser && !localSandboxMode){ const {data:chk}=await sb.from('barn_data').select('data').eq('user_id',currentUser.id).maybeSingle(); if(chk && chk.data && chk.data[PALETTE_KEY]!==id){ showToast('Your colors are saved on this device only — they did not reach your online account. Tell Claude.'); } } }catch(e){}
     document.querySelectorAll('.pal-opt').forEach(x=>{ const on=x.dataset.pal===id; x.classList.toggle('on',on); x.querySelector('.pal-check').innerHTML=on?'&#10003;':''; });
     showToast((PALETTES.find(x=>x.id===id)||{}).name+' colors on');
   });
@@ -3825,7 +3865,7 @@ function cardHTML(r, forceUrgent, origin){
   else if(isArchived(r)) primary=`<button class="btn btn-primary" data-act="unarchive" data-id="${r.id}">Return to roster</button>`;
   else if(r.sex==='doe') primary=`<button class="btn btn-primary" data-act="bred" data-id="${r.id}">Record breeding</button>`;
   const a = primary+`<button class="btn btn-secondary" data-act="pedigree" data-id="${r.id}">Pedigree</button><button class="btn btn-secondary" data-act="more" data-id="${r.id}" aria-label="More actions">More</button>`;
-  return `<div class="card hc ${urgent?'urgent':''}" data-openprofile="${r.id}"><div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div><span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
+  return `<div class="card hc ${urgent?'urgent':''}" data-openprofile="${r.id}">${projBandHTML(r)}<div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${hcRingHTML(r)}<span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
     <div class="hc-chips">${statusBadge(r)}${projChipsHTML(r)}</div>
     <div class="card-detail">${detail}</div>${flag}<div class="card-actions">${a}</div></div>`;
 }
@@ -3861,7 +3901,7 @@ function saleLine(r){
 function buckCardHTML(r){
   const cov=bucksCoverage(r.name);
   const txt = cov.length?'Currently paired with: '+cov.map(d=>esc(d.name)).join(', ') : (r.sale?saleLine(r):((r.sireName||r.damName)?`Sire: ${esc(r.sireName||'?')} &middot; Dam: ${esc(r.damName||'?')}`:'Not currently paired with anyone'));
-  return `<div class="card hc" data-openprofile="${r.id}"><div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div><span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
+  return `<div class="card hc" data-openprofile="${r.id}">${projBandHTML(r)}<div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div><span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
     <div class="hc-chips">${statusBadge(r)}${projChipsHTML(r)}</div>
     <div class="card-detail">${txt}</div>
     <div class="card-actions">
@@ -3876,7 +3916,7 @@ function juniorCardHTML(r){
   else if(!r.dob) d='No birthdate on file — add one to track breeding readiness.';
   else if(ready) d=`${ageText(r.dob)} old &middot; moving up to ${r.sex==='doe'?'Does':'Bucks'} automatically`;
   else { const left=daysBetween(todayStr(), sixMonthDate(r.dob)); d=`${ageText(r.dob)} old &middot; ready to breed in ${left} day${left===1?'':'s'} (${fmtDate(sixMonthDate(r.dob))})`; }
-  return `<div class="card hc ${ready?'urgent':''}" data-openprofile="${r.id}"><div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div><span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
+  return `<div class="card hc ${ready?'urgent':''}" data-openprofile="${r.id}">${projBandHTML(r)}<div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div><span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
     <div class="hc-chips">${statusBadge(r)}${projChipsHTML(r)}</div>
     <div class="card-detail">${d}</div>${r.flag?`<div class="flag">${esc(r.flag)}</div>`:''}
     <div class="card-actions">
