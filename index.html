@@ -77,6 +77,9 @@
   .add-btn{ flex:0 0 auto; width:50px; height:46px; border-radius:11px; border:none; background:var(--navy); color:var(--page); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; }
   .add-btn svg{ width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:2.6; stroke-linecap:round; }
   [data-theme="dark"] .add-btn{ background:var(--gold-deep); color:#0c1830; }
+  /* Keep the page the same width whether or not it is tall enough to scroll, so the search bar does not grow and shrink when you switch Herd / All. */
+  html{ scrollbar-gutter:stable; }
+  @supports not (scrollbar-gutter:stable){ html{ overflow-y:scroll; } }
   .search-mode{ flex:0 0 auto; flex-direction:column; gap:3px; padding:3px; width:64px; height:46px; box-sizing:border-box; border-radius:12px; border:1.5px solid var(--line,#CABB95); background:var(--card,#FFFDF8); }
   .search-mode button{ display:flex; align-items:center; justify-content:center; flex:1 1 0; width:100%; height:auto; align-self:stretch; min-height:0 !important; padding:0 !important; font-size:11px !important; font-weight:700 !important; line-height:1; letter-spacing:.01em; border-radius:8px !important; border:0 !important; background:transparent !important; color:var(--ink-soft,#475569) !important; white-space:nowrap; transition:background .15s,color .15s; }
   .search-mode button.on{ background:var(--navy) !important; color:var(--page,#F7F2E6) !important; }
@@ -112,6 +115,9 @@
   .rk-t{ flex:1; min-width:0; font-weight:600; }
   .rk-row .nn-tag{ margin:0; font-size:12px; padding:3px 10px; }
   .nn-actions{ display:flex; gap:8px; margin-top:12px; }
+  .nn-drop{ display:flex; align-items:center; justify-content:space-between; width:100%; min-height:44px; margin-top:10px; padding:0 14px; border-radius:12px; border:1px solid var(--line-strong); background:var(--card); color:var(--ink); font-family:'Jost',sans-serif; font-weight:700; font-size:14px; cursor:pointer; }
+  .nn-drop.on{ border-color:var(--navy); }
+  body.look-ribbon .nn-drop{ border-radius:999px; font-family:'Manrope','Public Sans',sans-serif; font-weight:800; color:var(--rb-outline); border:1.5px solid var(--rb-outline); }
   .nn-actions .btn{ flex:1; }
   .nn-more{ width:48px; flex:none; font-size:22px; line-height:1; padding:0; }
   .nn-toggle{ display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 14px; margin-bottom:12px; grid-column:1/-1; }
@@ -288,6 +294,8 @@
 
   .sheet-backdrop{ position:fixed; inset:0; background:rgba(12,24,48,.55); z-index:45; display:none; align-items:flex-end; }
   .sheet-backdrop.on{display:flex;}
+  .ped-tree.has-sel .ped-box:not(.sel):not(.pt-self){ opacity:.55; }
+  .ped-box.sel{ outline:3px solid var(--rust,#C93E28); outline-offset:2px; }
   .sheet{ background:var(--page); width:100%; border-radius:18px 18px 0 0; padding:18px 18px 26px; max-height:88vh; overflow-y:auto; -webkit-overflow-scrolling:touch; position:relative; }
   .sheet h2{ font-family:'Cormorant Garamond',serif; font-size:21px; color:var(--navy); margin:0 0 14px; padding-right:44px; }
   .field{margin-bottom:12px;}
@@ -414,6 +422,16 @@
   .ped-box .pn{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:14.5px; color:var(--navy); }
   .ped-box .pc{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
   .ped-box.unknown{opacity:.55;}
+  .ped-tree{ display:grid; grid-template-columns:minmax(120px,1.1fr) 26px minmax(130px,1fr) 26px minmax(130px,1fr) 26px minmax(130px,1fr); grid-template-rows:auto repeat(8,minmax(62px,auto)); row-gap:10px; align-items:stretch; }
+  .pt-head{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.06em; color:var(--gold-deep); padding-bottom:4px; }
+  .pt-cell{ display:flex; align-items:center; min-width:0; }
+  .pt-cell .ped-box{ width:100%; min-width:0; box-sizing:border-box; }
+  .pt-cell .ped-box .pn{ overflow-wrap:anywhere; }
+  .pt-self{ cursor:default; border-width:2px; padding:14px; }
+  .pt-self .pn{ font-size:20px; }
+  .pt-gap{ position:relative; }
+  .pt-gap i{ position:absolute; left:0; right:0; top:calc(25% - 5px); bottom:calc(25% - 5px); border:2px solid var(--line-strong); border-right:none; border-radius:8px 0 0 8px; }
+  .pt-gap i::before{ content:''; position:absolute; left:-2px; top:50%; width:0; }
   /* Phone pedigree: nested list, each generation sits under its child; great-grandparents open with a tap */
   .pdn-row{ display:flex; align-items:center; gap:10px; padding:9px 12px; background:var(--card); border:1px solid var(--line); border-radius:10px; cursor:pointer; }
   .pdn-row.anc{ background:var(--page); }
@@ -497,7 +515,7 @@
   .pp-portrait.pp-simple .pp-simple-box-name{ font-size:11px; }
   .pp-portrait.pp-simple .pp-simple-box-color{ font-size:8.8px; }
   .pp-portrait.pp-simple .pp-pill{ font-size:7.6px; }
-  .hc-band, .hc-ring, .pj-dot{ display:none; }
+  .hc-band, .hc-ring, .pj-dot, .rb-pring, .rb-thumbbar, .nn-ring{ display:none; }
   .pj-colors{ display:flex; flex-wrap:wrap; gap:10px; margin-top:6px; }
   .pj-sw{ width:38px; height:38px; border-radius:50%; border:3px solid transparent; cursor:pointer; padding:0; box-shadow:inset 0 0 0 1px rgba(0,0,0,.18); }
   .pj-sw.on{ border-color:var(--ink); }
@@ -566,6 +584,73 @@
   body.look-ribbon .seg{ border-radius:999px; }
   body.look-ribbon .seg button{ border-radius:999px; }
   body.look-ribbon .pj-fchip{ border-radius:999px; font-family:'Manrope','Public Sans',sans-serif; font-weight:700; }
+  body.look-ribbon .pt-head{ font-family:'Manrope','Public Sans',sans-serif; font-weight:800; font-size:11px; letter-spacing:.1em; color:var(--rb-text); }
+  body.look-ribbon .pt-gap i{ border-color:var(--rb-outline); opacity:.35; }
+  body.look-ribbon .pt-self{ background:var(--rb-outline); color:#fff; }
+  body.look-ribbon .ped-box.pt-self .pn, body.look-ribbon .ped-box.pt-self .pc{ color:#fff; }
+  /* Pedigree screen (colors and shapes only; the printed PDF is not touched) */
+  body.look-ribbon .ped-gen-label{ font-family:'Manrope','Public Sans',sans-serif; font-weight:800; font-size:12px; letter-spacing:.12em; color:var(--rb-text); margin:6px 0 8px; }
+  body.look-ribbon .ped-side-label{ font-family:'Manrope','Public Sans',sans-serif; font-weight:800; font-size:11px; letter-spacing:.08em; opacity:1; color:var(--ink-soft); border-left:4px solid var(--rb-coral); padding-left:8px; border-radius:2px; }
+  body.look-ribbon .ped-subgroup-label{ font-family:'Manrope','Public Sans',sans-serif; font-style:normal; font-weight:600; opacity:.85; }
+  body.look-ribbon .ped-box{ border:none; border-radius:18px; padding:12px 14px; box-shadow:0 4px 14px var(--rb-shadow); min-height:56px; }
+  body.look-ribbon .ped-box .pn{ font-family:'Newsreader',Georgia,serif; font-size:19px; font-weight:600; color:var(--ink); }
+  body.look-ribbon .ped-box .pc{ font-size:12px; font-weight:600; }
+  body.look-ribbon .ped-box.unknown{ opacity:.8; box-shadow:0 2px 8px var(--rb-shadow); }
+  /* Financials */
+  body.look-ribbon #main.rb-home .stats .stat{ border:none; border-radius:22px; box-shadow:0 6px 18px var(--rb-shadow); padding:16px 8px; }
+  body.look-ribbon #main.rb-home .stats .stat .n{ font-size:clamp(22px,6vw,34px); }
+  /* Calendar */
+  body.look-ribbon .rb-calnav{ width:44px !important; height:44px !important; border-radius:50% !important; border:1.5px solid var(--rb-outline) !important; color:var(--rb-outline) !important; font-size:20px !important; }
+  body.look-ribbon .rb-calnav + span{ font-family:'Manrope','Public Sans',sans-serif !important; font-weight:800 !important; font-size:14px !important; letter-spacing:.04em !important; }
+  body.look-ribbon .rb-cd > div:first-child{ font-family:'Manrope','Public Sans',sans-serif !important; font-weight:800 !important; letter-spacing:.08em; }
+  body.look-ribbon .rb-cdc{ border-radius:18px !important; padding:10px 0 8px !important; min-height:52px; box-shadow:0 4px 12px var(--rb-shadow); }
+  body.look-ribbon .rb-cdc > div:first-child{ font-family:'Newsreader',Georgia,serif !important; font-size:20px !important; font-weight:600 !important; }
+  body.look-ribbon .rb-cd.sel .rb-cdc{ background:var(--rb-outline) !important; border-color:var(--rb-outline) !important; }
+  body.look-ribbon .rb-cd.today:not(.sel) .rb-cdc{ border:2px solid var(--rb-coral) !important; }
+  body.look-ribbon .rb-cdc span{ background:var(--rb-coral) !important; width:6px !important; height:6px !important; }
+  body.look-ribbon .rb-cd.sel .rb-cdc span{ background:#fff !important; }
+  body.look-ribbon .rb-calh{ font-family:'Newsreader',Georgia,serif !important; font-size:26px !important; font-weight:600 !important; line-height:1.15; color:var(--ink) !important; margin-top:6px; }
+  body.look-ribbon .cal-row{ background:var(--card); border:none; border-radius:20px; box-shadow:0 6px 18px var(--rb-shadow); padding:14px 16px; margin-bottom:10px; position:relative; overflow:hidden; }
+  body.look-ribbon .cal-row .cal-dot{ display:none; }
+  body.look-ribbon .cal-row::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--rb-outline); }
+  body.look-ribbon .cal-row.rb-ct-due::before, body.look-ribbon .cal-row.overdue::before{ background:var(--rb-coral); }
+  body.look-ribbon .cal-row.rb-ct-custom::before, body.look-ribbon .cal-row.rb-ct-weigh::before{ background:var(--line-strong); }
+  body.look-ribbon .cal-row.rb-ct-wean::before, body.look-ribbon .cal-row.rb-ct-sell::before{ background:#5E8C3A; }
+  body.look-ribbon .cal-row .cal-row-text b{ font-family:'Newsreader',Georgia,serif; font-size:18px; font-weight:600; }
+  /* Nursery */
+  body.look-ribbon .nn-ring{ display:flex; flex-direction:column; align-items:center; flex:0 0 auto; }
+  body.look-ribbon .nn-ring small{ font-size:9.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); margin-top:-4px; }
+  body.look-ribbon .nn-card, body.look-ribbon .card.no-tap{ border-radius:22px; }
+  body.look-ribbon .nn-card .card-name{ font-size:22px; }
+  body.look-ribbon .nn-num{ font-family:'Newsreader',Georgia,serif; font-size:30px; font-weight:600; color:var(--ink); }
+  body.look-ribbon .nn-tag{ font-family:'Manrope','Public Sans',sans-serif; font-weight:800; }
+  body.look-ribbon .nn-actions .btn{ border-radius:999px; min-height:48px; }
+  body.look-ribbon .card-top .nn-ring{ margin:-2px 0; }
+  /* Doe profile */
+  body.look-ribbon .profile-head{ background:var(--rb-hero-bg); padding:14px 18px 0; }
+  body.look-ribbon .profile-head-name{ font-family:'Newsreader',Georgia,serif; font-size:32px; font-weight:600; letter-spacing:-.01em; }
+  body.look-ribbon .profile-head-sub{ font-family:'Manrope','Public Sans',sans-serif; font-size:12px; font-weight:700; letter-spacing:.06em; color:var(--rb-hero-dim); }
+  body.look-ribbon .profile-back{ border-radius:50%; }
+  body.look-ribbon .rb-pring{ display:flex; align-items:center; gap:16px; padding:14px 4px 6px; }
+  body.look-ribbon .rb-pring-big{ font-family:'Newsreader',Georgia,serif; font-size:30px; font-weight:600; line-height:1.05; }
+  body.look-ribbon .rb-pring-sm{ font-size:13px; font-weight:600; color:var(--rb-hero-dim); margin-top:4px; }
+  body.look-ribbon .rb-pring svg circle:first-child{ stroke:rgba(255,255,255,.22); }
+  body.look-ribbon .rb-pring svg text{ fill:#fff; }
+  body.look-ribbon .profile-tabs{ background:transparent; gap:6px; padding:12px 0 12px; }
+  body.look-ribbon .profile-tab-btn{ font-family:'Manrope','Public Sans',sans-serif; font-weight:800; font-size:13px; color:var(--rb-hero-dim); border:none; border-radius:999px; padding:9px 16px; min-height:40px; }
+  body.look-ribbon .profile-tab-btn.on{ background:#fff; color:var(--rb-outline); }
+  [data-theme="dark"] body.look-ribbon .profile-tab-btn.on{ background:var(--rb-coral); color:var(--rb-coral-ink); }
+  body.look-ribbon .profile-body{ background:var(--page); }
+  body.look-ribbon .overview-grid, body.look-ribbon .profile-body .card, body.look-ribbon .lit-card{ border-radius:20px; }
+  body.look-ribbon .ov-label{ font-family:'Manrope','Public Sans',sans-serif; font-weight:800; font-size:10px; letter-spacing:.1em; opacity:.8; }
+  body.look-ribbon .ov-val{ font-weight:700; }
+  body.look-ribbon .profile-view:has(.rb-thumbbar) .profile-body{ padding-bottom:calc(170px + env(safe-area-inset-bottom)); }
+  body.look-ribbon .rb-thumbbar{ display:block; position:absolute; left:16px; right:16px; bottom:calc(92px + env(safe-area-inset-bottom)); z-index:3; }
+  body.look-ribbon .rb-thumbbar .btn{ width:100%; min-height:54px; font-size:17px; box-shadow:0 10px 24px var(--rb-shadow); }
+  @media screen and (min-width:900px){
+    body.look-ribbon .rb-thumbbar{ bottom:20px; left:auto; right:28px; width:260px; }
+    body.look-ribbon .profile-view:has(.rb-thumbbar) .profile-body{ padding-bottom:100px; }
+  }
   /* Needs attention groups */
   body.look-ribbon .rb-grp{ background:var(--card); border-radius:22px; box-shadow:0 6px 18px var(--rb-shadow); margin-bottom:12px; overflow:hidden; }
   body.look-ribbon .rb-gh{ display:flex; align-items:center; gap:10px; width:100%; min-height:56px; padding:12px 16px; background:none; border:none; cursor:pointer; text-align:left; color:var(--ink); }
@@ -604,7 +689,13 @@
     body.look-ribbon .todo-row:hover .todo-clock, body.look-ribbon .todo-clock:focus-visible{ opacity:1; }
   }
   @media screen and (min-width:900px){
-    body.look-ribbon #main .rb-grp{ max-width:760px; }
+    /* Home on a computer: one centered column, the purple header becomes a rounded card, and the groups use the full column. */
+    body.look-ribbon #main.rb-home{ max-width:900px; margin-left:max(230px, calc(230px + (100vw - 230px - 900px) / 2)); margin-right:auto; }
+    body.look-ribbon #main.rb-home .rb-hero{ margin:0 0 14px; border-radius:28px; padding:20px 28px 22px; }
+    body.look-ribbon #main.rb-home .rb-hero:has(+ .rb-ringcard){ margin-bottom:0; padding-bottom:62px; }
+    body.look-ribbon #main.rb-home .rb-ringcard{ margin:-44px 18px 14px; }
+    body.look-ribbon #main.rb-home .rb-hero .rb-brand{ display:none; }
+    body.look-ribbon #main .rb-grp{ max-width:none; }
     body.look-ribbon .rb-gb .todo-main:has(.todo-acts .btn:nth-child(2)) .todo-acts{ max-width:440px; }
   }
   body.look-ribbon .rb-addmenu{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:6px 0 10px; }
@@ -773,6 +864,10 @@
     /* Sheets become a centered dialog instead of a bottom sheet. */
     .sheet-backdrop{ align-items:center; justify-content:center; }
     .sheet{ width:600px; max-width:88vw; max-height:85vh; border-radius:18px; }
+    /* Pedigree: the edit panel docks on the right so the family tree stays in view */
+    body.ped-dock .sheet-backdrop.on{ background:transparent; pointer-events:none; justify-content:flex-end; align-items:stretch; }
+    body.ped-dock .sheet{ pointer-events:auto; width:400px; max-width:400px; height:100vh; max-height:100vh; border-radius:22px 0 0 22px; box-shadow:-12px 0 32px rgba(0,0,0,.2); }
+    body.ped-dock .profile-view{ right:400px; }
   }
 </style>
 <style id="pp-page-size">@page{ size: landscape; margin: 0.15in; }</style>
@@ -978,7 +1073,8 @@ async function initCloudStorage(user, opts){
         sb.from('audit_log').insert({
           admin_id: adminSelf.id, customer_id: viewingAsCustomer.id,
           table_name: 'barn_data', row_id: key,
-          old_value: oldVal===undefined?null:oldVal, new_value: parsed
+          // Only the basics are recorded: who (admin_id), which account (customer_id), which item (row_id) and when (created_at). No copy of the data itself.
+          old_value: null, new_value: {changed:true}
         }).then(()=>{}, ()=>{});
       }
       return {ok:true};
@@ -2029,7 +2125,7 @@ function todayStr(){ return new Date().toISOString().slice(0,10); }
 function addDays(d,n){ const x=new Date(d+'T00:00:00'); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10); }
 function daysBetween(a,b){ return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000); }
 function fmtDate(d){ if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
-function fmtMoney(n){ n=Number(n)||0; return '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtMoney(n){ n=Number(n)||0; return (n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function parsePriceNum(v){ if(v==null) return 0; const n=parseFloat(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(n)?n:0; }
 const EXPENSE_CATEGORIES = ['Feed','Hay & bedding','Caging & wire','Vet & meds','Show & entry fees','ARBA & registration','Supplies','Shipping & travel','Other'];
 function moneyPeriodRange(period){
@@ -2476,7 +2572,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-19-lookkeep2';
+const APP_VERSION = '2026-10-19-pedpanel';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2521,7 +2617,7 @@ function projOf(r){ return (r.projects||[]).map(id=>projects.find(p=>p.id===id))
 function inProject(r,id){ return (r.projects||[]).includes(id); }
 function projChipsHTML(r){
   const chips = projOf(r).map(p=>`<span class="pj-chip"><i class="pj-dot" style="background:${projColor(p)}"></i>${esc(p.name)}</span>`).join('');
-  return `<div class="pj-row">${chips}<button class="pj-add" data-pjtag="${r.id}">${chips?'Edit':'+ Project'}</button></div>`+carryChipsHTML(r);
+  return `<div class="pj-row">${chips}<button class="pj-add" data-pjtag="${r.id}" aria-label="Add ${esc(r.name)} to a project">${chips?'Change':'+ Add to project'}</button></div>`+carryChipsHTML(r);
 }
 function addProjectFlow(done){
   if(projects.length>=MAX_PROJECTS){ showToast('Up to '+MAX_PROJECTS+' projects'); return; }
@@ -2610,7 +2706,7 @@ function openProjectsManage(after){
   draw();
 }
 function projectBar(list){
-  if(!projects.length) return `<div class="pj-bar"><button class="pj-chip pj-ghost" id="pj-first">+ Set up projects</button></div>`;
+  if(!projects.length) return `<div class="pj-bar"><button class="pj-chip pj-ghost" id="pj-first">+ Start a project (like a bloodline or breeding goal)</button></div>`;
   const chip=(id,l,n)=>`<button class="pj-fchip ${projectFilter===id?'on':''}" data-pjf="${id}">${esc(l)}${n==null?'':` <span>${n}</span>`}</button>`;
   return `<div class="pj-bar">${chip('all','All')}${projects.map(p=>chip(p.id,p.name,list.filter(r=>inProject(r,p.id)).length)).join('')}<button class="pj-fchip pj-ghost" id="pj-manage-top">Manage</button></div>`;
 }
@@ -3985,6 +4081,16 @@ function litterAgeText(born){ return ageText(born); }
 // short date for the new litter screens: "Sep 15" (adds the year only when it isn't this year)
 function fmtShort(d){ if(!d) return ''; const dt=new Date(d+'T00:00:00'); const o={month:'short',day:'numeric'}; if(dt.getFullYear()!==new Date().getFullYear()) o.year='numeric'; return dt.toLocaleDateString('en-US',o); }
 function nb(t){ return '<span style="white-space:nowrap">'+t+'</span>'; }   // keeps a date together on one line
+// Dropdown on each litter card: every kit that has at least a sex or a color filled in.
+const nnKitsOpen = new Set();
+function dropKitsOf(r){ return (r.litterKits||[]).map((k,i)=>({k,i})).filter(x=>x.k && (x.k.sex==='buck'||x.k.sex==='doe'||(x.k.color&&String(x.k.color).trim()))); }
+function allKitsListHTML(r){
+  return `<div class="rk-list">${dropKitsOf(r).map(({k,i})=>{
+    const lw=kitLastWeight(k), sx=k.sex==='buck'?'Buck':k.sex==='doe'?'Doe':'Kit';
+    const tg=k.individualId?'Own page':(k.tag||(k.forSale?'For sale':''));
+    return `<div class="rk-row"><span class="rk-n">${k.num||i+1}</span><span class="rk-t">${esc([sx,k.color].filter(Boolean).join(' · '))}</span>${lw?`<span class="lp-wt">${esc(ozText(lw.oz))}</span>`:''}${tg?`<em class="nn-tag ${k.individualId?'t-keep':tagClass(tg)}">${esc(tg)}</em>`:''}</div>`;
+  }).join('')}</div>`;
+}
 function readyKitsListHTML(r){
   const rows=(r.litterKits||[]).map((k,i)=>({k,i})).filter(x=>!x.k.individualId && (x.k.tag==='For sale'||x.k.tag==='Reserved'||(!x.k.tag&&x.k.forSale)));
   if(!rows.length) return '';
@@ -3994,18 +4100,28 @@ function readyKitsListHTML(r){
     return `<div class="rk-row"><span class="rk-n">${k.num||i+1}</span><span class="rk-t">${esc([sx,k.color].filter(Boolean).join(' · '))}${buyer}</span>${lw?`<span class="lp-wt">${esc(ozText(lw.oz))}</span>`:''}<em class="nn-tag ${tagClass(tg)}">${esc(tg)}</em></div>`;
   }).join('')}</div>`;
 }
+// Ribbon look only (hidden otherwise): a ring that fills as the kits grow toward 8 weeks old.
+function nnRingHTML(r){
+  if(!(r.litterBornDate && typeof rbRingSVG==='function')) return '';
+  const a=litterAgeDays(r); if(a===null||isNaN(a)||a<0) return '';
+  return `<span class="nn-ring">${rbRingSVG(56,a,56,'Kits are '+a+' days old, ring fills at 8 weeks')}<small>day</small></span>`;
+}
 function newNurseryCardHTML(r, mode){
   const kits=r.litterKits||[], n=kits.length;
   const age=litterAgeDays(r);
   const lost=r.litterDead?((r.litterDead.DOA||0)+(r.litterDead.peanut||0)+(r.litterDead.passed||0)):0;
   const forSale=kits.filter(k=>k.tag==='For sale'||(!k.tag&&k.forSale)).length, reserved=kits.filter(k=>k.tag==='Reserved').length;
-  const kitList = mode==='ready' ? readyKitsListHTML(r) : '';
+  const dk = dropKitsOf(r), dkOpen = dk.length && nnKitsOpen.has(r.id);
+  const kitList = (mode==='ready' && !dkOpen) ? readyKitsListHTML(r) : '';
+  const dropdown = dk.length ? `<button type="button" class="nn-drop ${dkOpen?'on':''}" data-nnkits="${r.id}" aria-expanded="${dkOpen?'true':'false'}">${dkOpen?'Hide':'Show'} all ${dk.length} ${dk.length===1?'kit':'kits'}<span aria-hidden="true">${dkOpen?'&#9652;':'&#9662;'}</span></button>${dkOpen?allKitsListHTML(r):''}` : '';
   const wean = r.status==='nursing' ? `<button class="btn ${age>=42?'btn-primary':'btn-secondary'}" data-nnwean="${r.id}">Wean litter</button>` : '';
   const actions = wean+`<button class="btn btn-secondary" data-nnped="${r.id}">Pedigree</button>`;
   return `<div class="card nn-card" data-nnopen="${r.id}" style="cursor:pointer;"><div class="nn-top"><div><div class="card-name">${esc(shortName(r.name))}${litterSireName(r)?' &times; '+esc(shortName(litterSireName(r))):''}&rsquo;s Litter</div><div class="card-sub">Born ${nb(fmtShort(r.litterBornDate))} &middot; <b>${nb(esc(litterAgeText(r.litterBornDate))+' old')}</b></div></div>
-      <div class="nn-age"><span class="nn-chev" aria-hidden="true">&rsaquo;</span></div></div>
+      <div class="nn-age">${nnRingHTML(r)}<span class="nn-chev" aria-hidden="true">&rsaquo;</span></div></div>
     <div class="nn-row"><span class="nn-num">${n} ${n===1?'kit':'kits'}</span>${(!kitList&&forSale)?`<em class="nn-tag t-sale">${forSale} for sale</em>`:''}${(!kitList&&reserved)?`<em class="nn-tag t-res">${reserved} reserved</em>`:''}${r.status==='nursing'?'':'<em class="nn-tag t-keep">Weaned</em>'}</div>
-    ${kitList || `<div class="card-sub">Wean ${nb(fmtShort(r.weanDate))} &middot; Ready to go ${nb(fmtShort(r.sellDate))}</div>`}
+    ${kitList || (dkOpen?'':`<div class="card-sub">Wean ${nb(fmtShort(r.weanDate))} &middot; Ready to go ${nb(fmtShort(r.sellDate))}</div>`)}
+    ${dropdown}
+    ${dkOpen?`<div class="card-sub" style="margin-top:8px;">Wean ${nb(fmtShort(r.weanDate))} &middot; Ready to go ${nb(fmtShort(r.sellDate))}</div>`:''}
     <div class="nn-actions">${actions}</div></div>`;
 }
 function openNurseryMore(r){
@@ -4040,6 +4156,7 @@ function renderNewNursery(main){
   const body = current.length ? current.map(x=>newNurseryCardHTML(x,'ready')).join('') : '<div class="empty">No litters in the nursery right now. Past litters are on each doe\'s profile, under Litters.</div>';
   main.innerHTML=`${litterToggleHTML()}${body}`;
   main.querySelectorAll('[data-nnopen]').forEach(c=>c.onclick=(ev)=>{ if(ev.target.closest('button')) return; openLitterPage(c.dataset.nnopen); });
+  main.querySelectorAll('[data-nnkits]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const id=b.dataset.nnkits; if(nnKitsOpen.has(id)) nnKitsOpen.delete(id); else nnKitsOpen.add(id); render(); });
   main.querySelectorAll('[data-nnwean]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const r=rabbits.find(x=>x.id===b.dataset.nnwean); if(r) openWeanPlanSheet(r); });
   main.querySelectorAll('[data-nnped]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const r=rabbits.find(x=>x.id===b.dataset.nnped); if(r) openLitterPedigreeSheet(r); });
   bindLitterToggle(main);
@@ -4511,7 +4628,7 @@ function nurseryCardHTML(r){
     ? (kits.length?kits.map((k,i)=>kitRowHTML(r,k,i)).join(''):'<span style="opacity:.6;">No kit detail logged</span>')
     : kitSummaryHTML(r, kits);
   const dead=r.litterDead?`${(r.litterDead.DOA||0)+(r.litterDead.peanut||0)+(r.litterDead.passed||0)} lost (${r.litterDead.DOA||0} DOA, ${r.litterDead.peanut||0} peanut, ${r.litterDead.passed||0} passed)`:'';
-  return `<div class="card no-tap ${isRebreedReady(r)?'urgent':''}"><div class="card-top"><div><div class="card-name">${esc(r.name)}'s litter</div><div class="card-sub">Sired by ${esc(r.partner||'?')} &middot; born ${fmtDate(r.litterBornDate)} (${ageText(r.litterBornDate)} old)</div></div>${statusBadge(r)}</div>
+  return `<div class="card no-tap ${isRebreedReady(r)?'urgent':''}"><div class="card-top"><div><div class="card-name">${esc(r.name)}'s litter</div><div class="card-sub">Sired by ${esc(r.partner||'?')} &middot; born ${fmtDate(r.litterBornDate)} (${ageText(r.litterBornDate)} old)</div></div>${nnRingHTML(r)}${statusBadge(r)}</div>
     <div class="card-detail" style="margin-top:10px;">${list}</div>
     ${kits.length?`<button class="btn btn-secondary btn-sm" style="margin-top:8px;" data-togglekits="${r.id}">${expanded?'Hide kits':'Manage kits'}</button>`:''}
     <div class="card-detail">Wean ${fmtDate(r.weanDate)} &middot; 8 weeks ${fmtDate(r.sellDate)}${dead?' &middot; '+dead:''}</div>
@@ -4565,6 +4682,7 @@ function renderMain(){
   { const nv=document.getElementById('nav'); if(nv) nv.style.visibility = (selectMode && currentTab==='rabbits' && !searchQuery.trim()) ? 'hidden' : ''; if(currentTab!=='rabbits' && selectMode){ selectMode=false; selectedIds=new Set(); } }
   const gridTabs = ['rabbits','litters','planned','ancestors','archive','forsale'];
   main.classList.toggle('card-grid', !!searchQuery.trim() || gridTabs.includes(currentTab));
+  main.classList.toggle('rb-home', (currentTab==='home'||currentTab==='money') && !searchQuery.trim());
   if(searchMode==='relatives'){ renderRelativesSearch(main); return; }
   if(searchQuery.trim()){ renderSearch(main); return; }
   if(currentTab==='home'){ renderHome(main); }
@@ -5124,13 +5242,14 @@ function renderRabbits(main){
     body = !allJr.length ? `<div class="empty">No juniors on file. They appear automatically after you log a litter.</div>`
       : jrRow + (it.length ? (selectMode?selectRowsHTML(it):it.map(juniorCardHTML).join('')) : `<div class="empty">No junior ${juniorsFilter==='buck'?'bucks':'does'} right now.</div>`);
   }
-  const actionRow = rabbitsGroup==='does'
+  // In the Ribbon look the + menu at the top already has "Breeding", so this big button is left out there only.
+  const actionRow = (rabbitsGroup==='does' && !lookRibbonOn())
     ? `<div class="action-row" style="display:flex; gap:10px; margin:10px 0 14px;">
          <button class="btn btn-primary" style="flex:1;" id="herdRecordBreedingBtn">+ Record a breeding</button>
        </div>`
     : '';
   if(projectFilter!=='all' && !projects.some(p=>p.id===projectFilter)) projectFilter='all';
-  const pjSummary = (projects.length && (shownList.length||projectFilter!=='all'||traitFilter)) ? `<div class="pj-summary"><span style="font-weight:600">${selectMode?(projectFilter==='all'?'Tap the rabbits to include':'Tap rabbits to add to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'')):projectFilter==='all'?'':`${shownList.length} in ${esc((projects.find(p=>p.id===projectFilter)||{}).name||'')}`}</span>${selectMode?`<span><a id="pj-selall">Select all</a> &nbsp; <a id="pj-cancel-sel">Cancel</a></span>`:`<a id="pj-select">${projectFilter==='all'?'Select several':'Add rabbits'}</a>`}</div>` : '';
+  const pjSummary = (projects.length && (shownList.length||projectFilter!=='all'||traitFilter)) ? `<div class="pj-summary"><span style="font-weight:600">${selectMode?(projectFilter==='all'?'Tap the rabbits to include':'Tap rabbits to add to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'')):projectFilter==='all'?'':`${shownList.length} in ${esc((projects.find(p=>p.id===projectFilter)||{}).name||'')}`}</span>${selectMode?`<span><a id="pj-selall">Select all</a> &nbsp; <a id="pj-cancel-sel">Cancel</a></span>`:`<button type="button" class="btn btn-secondary btn-sm" id="pj-select">${projectFilter==='all'?'Add several rabbits to a project':'+ Add rabbits to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'this project')}</button>`}</div>` : '';
   main.innerHTML = groupTabs + (selectMode?'':quickPickBar()) + projectBar(scopeList) + (selectMode?'':traitBar(scopeList)) + pjSummary + (selectMode?'':actionRow) + body + (selectMode?selectBarHTML()+'<div style="height:170px"></div>':'');
   wireProjects(main, shownList); wireTraits(); wireQuickPicks();
   document.querySelectorAll('[data-pjtarget]').forEach(b=>b.onclick=()=>{ window.__pjTarget=b.dataset.pjtarget; render(); });
@@ -5174,9 +5293,9 @@ function renderCalendar(main){
   const rangeLabel = fmtDate(calWeekStart).replace(/, \d{4}$/,'') + ' - ' + fmtDate(weekEnd);
 
   let strip = `<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-    <button id="calPrevWeek" aria-label="Previous week" style="width:32px; height:32px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); color:var(--navy); font-size:16px;">&lsaquo;</button>
+    <button id="calPrevWeek" class="rb-calnav" aria-label="Previous week" style="width:32px; height:32px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); color:var(--navy); font-size:16px;">&lsaquo;</button>
     <span style="font-size:12px; font-weight:500; color:var(--navy); letter-spacing:.03em; font-family:'Jost',sans-serif;">${rangeLabel}</span>
-    <button id="calNextWeek" aria-label="Next week" style="width:32px; height:32px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); color:var(--navy); font-size:16px;">&rsaquo;</button>
+    <button id="calNextWeek" class="rb-calnav" aria-label="Next week" style="width:32px; height:32px; border-radius:8px; border:1px solid var(--line-strong); background:var(--card); color:var(--navy); font-size:16px;">&rsaquo;</button>
   </div>
   <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:16px;">`;
 
@@ -5186,9 +5305,9 @@ function renderCalendar(main){
     const isToday = d===t;
     const dnum = new Date(d+'T00:00:00').getDate();
     const dotColors = [...new Set(dayEvents.map(e=> e.overdue ? 'var(--rust)' : (DOT[e.type]||'var(--ink-soft)')))].slice(0,3);
-    strip += `<button data-calday="${d}" style="text-align:center; background:none; border:none; padding:0; cursor:pointer;">
+    strip += `<button class="rb-cd ${isSel?'sel':''} ${isToday?'today':''}" data-calday="${d}" style="text-align:center; background:none; border:none; padding:0; cursor:pointer;">
       <div style="font-size:10px; color:var(--ink-soft); opacity:${isSel?'1':'.6'}; font-weight:${isSel?'600':'400'}; margin-bottom:4px; font-family:'Jost',sans-serif;">${dayLabels[i]}</div>
-      <div style="border-radius:10px; padding:7px 0 6px; background:${isSel?'var(--navbar)':'var(--card)'}; border:1px solid ${isSel?'var(--navbar)':(isToday?'var(--gold-deep)':'var(--line)')};">
+      <div class="rb-cdc" style="border-radius:10px; padding:7px 0 6px; background:${isSel?'var(--navbar)':'var(--card)'}; border:1px solid ${isSel?'var(--navbar)':(isToday?'var(--gold-deep)':'var(--line)')};">
         <div style="font-size:14px; font-weight:500; color:${isSel?'#fffdf8':'var(--navy)'}; font-family:'Jost',sans-serif;">${dnum}</div>
         <div style="display:flex; justify-content:center; gap:2px; margin-top:3px; height:4px;">
           ${dotColors.map(c=>`<span style="width:4px; height:4px; border-radius:50%; background:${c};"></span>`).join('')}
@@ -5204,7 +5323,7 @@ function renderCalendar(main){
   const dayEvents = events.filter(e=>e.date===calSelectedDate).sort((a,b)=>(a.overdue?0:1)-(b.overdue?0:1));
 
   let agenda = `<button class="btn btn-secondary" style="width:100%; margin-bottom:12px;" id="calAddBtn">+ Add an event</button>
-    <div style="font-family:'Cormorant Garamond',serif; font-weight:600; font-size:17px; color:var(--navy); margin-bottom:10px;">${weekdayFull}, ${dateFull}${calSelectedDate===t?' — Today':''}</div>`;
+    <div class="rb-calh" style="font-family:'Cormorant Garamond',serif; font-weight:600; font-size:17px; color:var(--navy); margin-bottom:10px;">${weekdayFull}, ${dateFull}${calSelectedDate===t?' — Today':''}</div>`;
 
   if(!dayEvents.length){
     agenda += `<div class="empty">Nothing on the calendar for this day.</div>`;
@@ -5238,7 +5357,7 @@ function renderCalendar(main){
   });
 }
 function calRowHTML(e, overdue){
-  return `<div class="cal-row ${overdue?'overdue':''}" ${e.id?`data-calopen="${e.id}"`:''}>
+  return `<div class="cal-row rb-ct-${e.type||'x'} ${overdue?'overdue':''}" ${e.id?`data-calopen="${e.id}"`:''}>
     <div class="cal-dot" style="background:${overdue?'var(--rust)':'var(--gold-deep)'};"></div>
     <div style="flex:1; min-width:0; overflow-wrap:anywhere;">
       <div class="cal-row-text"><b>${esc(e.label)}</b></div>
@@ -5457,7 +5576,7 @@ function attachCardEvents(){
 }
 
 function openSheet(html){ document.getElementById('sheet').innerHTML=html; document.getElementById('sheetBackdrop').classList.add('on'); document.getElementById('sheet').scrollTop=0; }
-function closeSheet(){ document.getElementById('sheetBackdrop').classList.remove('on'); }
+function closeSheet(){ document.getElementById('sheetBackdrop').classList.remove('on'); document.body.classList.remove('ped-dock'); document.querySelectorAll('.ped-box.sel').forEach(x=>x.classList.remove('sel')); document.querySelectorAll('.ped-tree.has-sel').forEach(x=>x.classList.remove('has-sel')); }
 document.getElementById('sheetBackdrop').addEventListener('click',e=>{ if(e.target.id==='sheetBackdrop') closeSheet(); });
 function done(origin){ closeSheet(); if(typeof origin==='function'){ origin(); } render(); if(profileRabbitId) renderProfile(); }
 
@@ -6438,6 +6557,22 @@ document.addEventListener('click',e=>{
 function pedigreeTreeHTML(r){
   if(window.matchMedia && window.matchMedia('(max-width:899px)').matches) return pedNestHTML(r);
   const g=p=>ancestorByPath(r.name,p);
+  // Computer layout: a family tree that reads left to right (this rabbit, parents, grandparents, great-grandparents).
+  // The boxes are the same ones as before, so tapping a name or "+ Add name" works exactly the same.
+  const cell=(html,col,row,span,extra)=>`<div class="pt-cell" style="grid-column:${col};grid-row:${row} / span ${span};${extra||''}">${html}</div>`;
+  const br=(col,row,span)=>`<div class="pt-gap" style="grid-column:${col};grid-row:${row} / span ${span};"><i></i></div>`;
+  const gens=[['', 's','d'],['ss','sd','ds','dd'],['sss','ssd','sds','sdd','dss','dsd','dds','ddd']];
+  const roleOf=(path)=>path.slice(-1)==='s'?(path.length===1?'Sire':path.length===2?'Grandsire':'Sire'):(path.length===1?'Dam':path.length===2?'Granddam':'Dam');
+  let tree = `<div class="pt-head" style="grid-column:1;grid-row:1;">THIS RABBIT</div><div class="pt-head" style="grid-column:3;grid-row:1;">PARENTS</div><div class="pt-head" style="grid-column:5;grid-row:1;">GRANDPARENTS</div><div class="pt-head" style="grid-column:7;grid-row:1;">GREAT-GRANDPARENTS</div>`;
+  tree += cell(`<div class="ped-box pt-self"><div class="pn">${esc(r.name)}</div><div class="pc">${esc([r.sex==='doe'?'Doe':'Buck', r.color].filter(Boolean).join(' · '))}</div></div>`,1,2,8);
+  ['s','d'].forEach((pth,i)=>{ tree += cell(pedBox(g(pth),pth,roleOf(pth)),3,2+i*4,4); });
+  ['ss','sd','ds','dd'].forEach((pth,i)=>{ tree += cell(pedBox(g(pth),pth,roleOf(pth)),5,2+i*2,2); });
+  ['sss','ssd','sds','sdd','dss','dsd','dds','ddd'].forEach((pth,i)=>{ tree += cell(pedBox(g(pth),pth,roleOf(pth)),7,2+i,1); });
+  tree += br(2,2,8);
+  ['s','d'].forEach((pth,i)=>{ tree += br(4,2+i*4,4); });
+  ['ss','sd','ds','dd'].forEach((pth,i)=>{ tree += br(6,2+i*2,2); });
+  return `<div class="card-sub" style="margin-bottom:10px;">Click any box to edit that rabbit, or "+ Add name" to fill a blank. The tree reads left to right.</div><div class="ped-tree">${tree}</div>`;
+  /* (the stacked list below is kept for reference and is not reached) */
   return `<div class="ped-gen"><div class="ped-gen-label">PARENTS</div><div class="ped-row">${pedBox(g('s'),'s','Sire')}${pedBox(g('d'),'d','Dam')}</div></div>
     <div class="ped-gen"><div class="ped-gen-label">GRANDPARENTS</div>
       <div class="ped-side-label">SIRE'S SIDE</div>
@@ -6456,15 +6591,35 @@ function pedigreeTreeHTML(r){
       <div class="ped-subgroup-label">Granddam's parents</div>
       <div class="ped-row">${pedBox(g('dds'),'dds','Sire')}${pedBox(g('ddd'),'ddd','Dam')}</div></div>`;
 }
+// On a computer the edit panel docks to the right so the tree stays visible; the tapped box is outlined and the rest fade.
+function pedDockOn(box){
+  const wide = window.matchMedia && window.matchMedia('(min-width:900px)').matches;
+  const tree = box && box.closest('.ped-tree');
+  if(!wide || !tree) return;
+  document.querySelectorAll('.ped-box.sel').forEach(x=>x.classList.remove('sel'));
+  box.classList.add('sel'); tree.classList.add('has-sel');
+  document.body.classList.add('ped-dock');
+}
+function pedExtraButtons(anc, back){
+  const bar=document.querySelector('#sheet .sheet-actions'); if(!bar || !anc || anc.external) return;
+  const row=document.createElement('div'); row.className='sheet-actions'; row.style.cssText='flex-wrap:wrap;margin-top:8px;';
+  row.innerHTML='<button type="button" class="btn btn-secondary" style="flex:1;" id="pedOpenProf">Open full profile</button><button type="button" class="btn btn-secondary" style="flex:1;" id="pedShowPed">Show their pedigree</button>';
+  bar.parentNode.insertBefore(row, bar.nextSibling);
+  document.getElementById('pedOpenProf').onclick=()=>{ closeSheet(); openRabbitProfile(anc); };
+  document.getElementById('pedShowPed').onclick=()=>{ closeSheet(); openRabbitProfile(anc,'pedigree'); };
+}
 function wirePedigreeTaps(container, r, back){
   container.querySelectorAll('[data-pedname]').forEach(b=>b.onclick=()=>{
-    const anc=findByName(b.dataset.pedname); if(anc) (anc.external?openAncestorSheet(anc,back):openEditSheet(anc,back));
+    const anc=findByName(b.dataset.pedname); if(!anc) return;
+    if(anc.external) openAncestorSheet(anc,back); else { openEditSheet(anc,back); pedExtraButtons(anc,back); }
+    pedDockOn(b);
   });
   container.querySelectorAll('[data-pedpath]').forEach(b=>b.onclick=()=>{
     const path=b.dataset.pedpath, rel=path.slice(-1), pp=path.slice(0,-1);
     const parent = pp===''?r:ancestorByPath(r.name,pp);
     if(!parent||!parent.name){ showToast('Fill in the closer generation first'); return; }
     openQuickNameSheet(ensureAncestor(parent.name), rel, back);
+    pedDockOn(b);
   });
 }
 function openPrintOptionsSheet(r, back){
@@ -6497,9 +6652,21 @@ function openQuickNameSheet(parent, rel, back){
       <div class="field"><label>Date of birth</label><input type="date" id="f-qdob"></div>
       <div class="field"><label>GC #</label><input id="f-qgc"></div>
     </div>
-    <div class="field"><label>Color / Variety</label><input id="f-qcolor"></div>
-    <div class="field"><label>Legs</label><input id="f-qlegs"></div>
-    <div class="field"><label>Registration #</label><input id="f-qreg"></div>
+    <div class="row2">
+      <div class="field"><label>Breed</label><input id="f-qbreed" list="breed-options" placeholder="Start typing…" autocomplete="off">${breedDatalistHTML()}</div>
+      <div class="field"><label>Color / Variety</label><input id="f-qcolor"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Legs</label><input id="f-qlegs"></div>
+      <div class="field"><label>Registration #</label><input id="f-qreg"></div>
+    </div>
+    <div class="field"><label>Nickname (optional)</label><input id="f-qalias" placeholder="Nickname or previous name" autocomplete="off"></div>
+    <div class="row2">
+      <div class="field"><label>Sire</label><input id="f-qsire" autocomplete="off"></div>
+      <div class="field"><label>Dam</label><input id="f-qdam" autocomplete="off"></div>
+    </div>
+    <div class="field"><label>Sex</label><div class="card-detail" style="padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);opacity:.85;">${rel==='s'?'Buck':'Doe'} &#128274;</div></div>
+    <div class="field"><label>General notes</label><textarea id="f-qnotes" rows="2"></textarea></div>
     <div class="card-sub" id="f-qnote" style="display:none;"></div>
     <div class="sheet-actions"><button class="btn btn-secondary" id="f-cancel">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>`);
   document.getElementById('f-cancel-x').onclick=()=>done(back);
@@ -6527,7 +6694,12 @@ function openQuickNameSheet(parent, rel, back){
       gcNumber: document.getElementById('f-qgc').value,
       color: document.getElementById('f-qcolor').value,
       legsWins: document.getElementById('f-qlegs').value,
-      registrationNumber: document.getElementById('f-qreg').value
+      registrationNumber: document.getElementById('f-qreg').value,
+      breed: document.getElementById('f-qbreed').value.trim(),
+      alias: document.getElementById('f-qalias').value.trim(),
+      sireName: document.getElementById('f-qsire').value.trim(),
+      damName: document.getElementById('f-qdam').value.trim(),
+      notes: document.getElementById('f-qnotes').value.trim()
     };
     const commit=(finalName)=>{
       if(rel==='s') parent.sireName=finalName; else parent.damName=finalName;
@@ -7873,8 +8045,6 @@ async function openAuditLogSheet(customerId, customerEmail){
       <div class="card no-tap">
         <div class="card-sub">${new Date(e.created_at).toLocaleString()}</div>
         <div class="card-detail" style="margin-top:4px;"><b>${esc(e.row_id)}</b> changed</div>
-        <div class="card-detail" style="margin-top:4px; font-size:12px; opacity:.8;">Before: ${esc(summarizeAuditValue(e.old_value))}</div>
-        <div class="card-detail" style="font-size:12px; opacity:.8;">After: ${esc(summarizeAuditValue(e.new_value))}</div>
       </div>`).join('') : `<div class="card no-tap"><div class="card-detail">No logged edits for this account yet.</div></div>`}
     <button class="btn btn-secondary" style="width:100%; margin-top:10px;" onclick="openAdminSheet()">Back to all accounts</button>`);
 }
@@ -8625,6 +8795,13 @@ function openRabbitProfile(r, startTab){
   renderProfile();
 }
 function closeProfile(){ profileRabbitId=null; document.getElementById('profileView').classList.remove('on'); render(); }
+// Ribbon look only (hidden otherwise): a large gestation ring in the profile header for a bred doe.
+function profRingHTML(r){
+  if(!(r.sex==='doe'&&r.status==='pregnant'&&r.bredDate&&typeof rbRingSVG==='function')) return '';
+  const d=daysToDue(r), day=daysBetween(r.bredDate,todayStr());
+  const when = d===null?'':(d===0?'Due today':d>0?`Due in ${d} day${d===1?'':'s'}`:`${-d} day${-d===1?'':'s'} overdue`);
+  return `<div class="rb-pring" data-pa-ring="1">${rbRingSVG(112,day,31,r.name+' gestation day '+day)}<div class="rb-pring-t"><div class="rb-pring-big">${esc(when)}</div><div class="rb-pring-sm">Bred to ${esc(r.partner||'?')} &middot; ${esc(fmtShort(r.bredDate))}</div></div></div>`;
+}
 function renderProfile(){
   const r = rabbits.find(x=>x.id===profileRabbitId);
   const view = document.getElementById('profileView');
@@ -8643,11 +8820,13 @@ function renderProfile(){
           <div class="profile-head-sub">${subLine(r)}${r.status?' &middot; '+esc(r.status.toUpperCase()):''}</div>
         </div>
       </div>
+      ${profRingHTML(r)}
       <div class="profile-tabs">
         ${tabs.map(([k,l])=>`<button class="profile-tab-btn ${profileTab===k?'on':''}" data-ptab="${k}">${l}</button>`).join('')}
       </div>
     </div>
-    <div class="profile-body" id="profileBody"></div>`;
+    <div class="profile-body" id="profileBody"></div>
+    ${(r.sex==='doe'&&r.status==='pregnant')?`<div class="rb-thumbbar"><button class="btn btn-primary" data-pa="kindled">Kindled</button></div>`:''}`;
   document.getElementById('profBack').onclick=closeProfile;
   document.querySelectorAll('[data-ptab]').forEach(b=>b.onclick=()=>{ profileTab=b.dataset.ptab; renderProfile(); });
   const body = document.getElementById('profileBody');
