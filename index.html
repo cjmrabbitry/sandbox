@@ -25,7 +25,7 @@
 <meta name="twitter:description" content="Rabbitry management, wherever you are.">
 <meta name="twitter:image" content="og-image.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Public+Sans:wght@400;500;600&family=Jost:wght@500;600&family=JetBrains+Mono:wght@500&family=Pinyon+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Public+Sans:wght@400;500;600&family=Jost:wght@500;600&family=JetBrains+Mono:wght@500&family=Pinyon+Script&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="pdf-lib.min.js"></script>
 <script src="fontkit.umd.min.js"></script>
@@ -497,6 +497,59 @@
   .pp-portrait.pp-simple .pp-simple-box-name{ font-size:11px; }
   .pp-portrait.pp-simple .pp-simple-box-color{ font-size:8.8px; }
   .pp-portrait.pp-simple .pp-pill{ font-size:7.6px; }
+  /* ===== RIBBON LOOK START ===== (everything here is scoped to body.look-ribbon, so it only affects accounts that pick the Ribbon colors) */
+  body.look-ribbon{ font-family:'Manrope','Public Sans',sans-serif; }
+  body.look-ribbon .wordmark, body.look-ribbon header.top h1, body.look-ribbon .card-name, body.look-ribbon .cu-name, body.look-ribbon .cu-dd .n, body.look-ribbon .stat .n{ font-family:'Newsreader',Georgia,serif; }
+  body.look-ribbon .btn, body.look-ribbon .qa-btn, body.look-ribbon .attn-viewall, body.look-ribbon .cu-day, body.look-ribbon .cu-pill, body.look-ribbon nav.bottom span, body.look-ribbon .sw-done, body.look-ribbon .sw-acts button, body.look-ribbon .seg button{ font-family:'Manrope','Public Sans',sans-serif; }
+  body.look-ribbon .section-label{ font-family:'Manrope','Public Sans',sans-serif; font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; opacity:1; color:var(--ink-soft); margin:22px 4px 8px; }
+  body.look-ribbon .btn{ border-radius:999px; font-weight:800; }
+  body.look-ribbon .btn-primary, html[data-theme="dark"] body.look-ribbon .btn-primary{ background:var(--rb-coral); color:var(--rb-coral-ink); }
+  body.look-ribbon .btn-secondary{ border:1.5px solid var(--rb-outline); color:var(--rb-outline); background:transparent; }
+  body.look-ribbon .btn-danger{ border-width:1.5px; }
+  body.look-ribbon .card, body.look-ribbon .cu-row, body.look-ribbon .done-row{ border:none; border-radius:20px; box-shadow:0 6px 18px var(--rb-shadow); }
+  body.look-ribbon .todo-row{ border:none; border-radius:20px; box-shadow:inset 5px 0 0 var(--rb-coral), 0 6px 18px var(--rb-shadow); }
+  body.look-ribbon .todo-row.overdue{ box-shadow:inset 5px 0 0 var(--rust), 0 6px 18px var(--rb-shadow); }
+  body.look-ribbon .swipe-wrap{ border-radius:20px; }
+  body.look-ribbon .home-sum{ display:none; }
+  body.look-ribbon .home-tiles .stat{ border:none; border-radius:20px; box-shadow:0 6px 18px var(--rb-shadow); padding:12px 4px 10px; }
+  body.look-ribbon .stat .n{ font-size:34px; font-weight:600; line-height:1; color:var(--ink); }
+  body.look-ribbon .stat .l{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:800; margin-top:4px; }
+  body.look-ribbon .qa-btn{ border:none; border-radius:20px; box-shadow:0 6px 18px var(--rb-shadow); font-size:11.5px; font-weight:800; }
+  body.look-ribbon .qa-primary, html[data-theme="dark"] body.look-ribbon .qa-primary{ background:var(--rb-coral); color:var(--rb-coral-ink); }
+  body.look-ribbon .show-banner{ background:var(--rb-hero-bg); color:var(--rb-hero-ink); border-radius:22px; }
+  body.look-ribbon .cu-day, body.look-ribbon .cu-dd .w, body.look-ribbon .attn-viewall, body.look-ribbon .cu-chev{ color:var(--rb-text); }
+  body.look-ribbon .cu-day{ font-weight:800; letter-spacing:.14em; }
+  body.look-ribbon header.top{ background:var(--rb-hero-bg); }
+  /* Home header: big count, then a ring card for does due soon */
+  body.look-ribbon .rb-hero{ background:var(--rb-hero-bg); color:var(--rb-hero-ink); margin:-8px -14px 0; padding:14px 22px 62px; }
+  body.look-ribbon .rb-hero-top{ display:flex; justify-content:space-between; align-items:center; }
+  body.look-ribbon .rb-date{ font-size:13px; font-weight:800; letter-spacing:.1em; color:var(--rb-hero-dim); }
+  body.look-ribbon .rb-brand{ display:none; }
+  body.look-ribbon .searchwrap input{ border-radius:999px; }
+  body.look-ribbon .add-btn{ border-radius:50%; width:46px; background:var(--rb-coral); color:var(--rb-coral-ink); }
+  body.look-ribbon .rb-count{ display:flex; align-items:flex-end; gap:14px; margin-top:10px; }
+  body.look-ribbon .rb-n{ font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:92px; line-height:.9; letter-spacing:-3px; }
+  body.look-ribbon .rb-cap{ font-family:'Newsreader',Georgia,serif; font-size:25px; line-height:1.1; padding-bottom:8px; }
+  body.look-ribbon .rb-clear{ font-size:34px; padding:4px 0 6px; }
+  body.look-ribbon .rb-ringcard{ position:relative; margin:-44px 0 14px; background:var(--card); border-radius:28px; padding:16px; box-shadow:0 12px 30px var(--rb-shadow); display:flex; gap:16px; align-items:center; cursor:pointer; }
+  body.look-ribbon .rb-ringcard.rb-multi{ display:block; cursor:default; padding:14px 10px 10px; }
+  body.look-ribbon .rb-ringtxt{ flex:1; min-width:0; }
+  body.look-ribbon .rb-eyebrow{ font-size:12px; letter-spacing:.12em; text-transform:uppercase; font-weight:800; color:var(--rb-text); }
+  body.look-ribbon .rb-ringname{ font-family:'Newsreader',Georgia,serif; font-weight:600; font-size:28px; line-height:1.1; margin-top:2px; color:var(--ink); }
+  body.look-ribbon .rb-ringsub{ font-size:13.5px; color:var(--ink-soft); margin:2px 0 8px; }
+  body.look-ribbon .rb-rings{ display:flex; justify-content:space-between; gap:2px; }
+  body.look-ribbon .rb-ring{ flex:1 1 0; min-width:0; text-align:center; cursor:pointer; padding:2px 0; min-height:44px; }
+  body.look-ribbon .rb-ring span{ display:block; font-size:12px; font-weight:700; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  body.look-ribbon .rb-ring small{ display:block; font-size:11px; font-weight:800; color:var(--rb-text); }
+  @media screen and (max-width:899.98px){
+    body.look-ribbon nav.bottom{ left:12px; right:12px; bottom:12px; padding:6px; border-radius:999px; background:var(--rb-nav); box-shadow:0 10px 28px var(--rb-shadow); }
+    body.look-ribbon nav.bottom button{ min-height:48px; border-radius:999px; justify-content:center; }
+    body.look-ribbon nav.bottom button.on{ background:var(--rb-nav-on); }
+    body.look-ribbon nav.bottom button.on span{ color:var(--rb-nav-on-ink); }
+    body.look-ribbon nav.bottom button.on svg{ stroke:var(--rb-nav-on-ink); }
+    body.look-ribbon nav.bottom button.on svg text{ fill:var(--rb-nav-on-ink); }
+  }
+  /* ===== RIBBON LOOK END ===== */
   @media print{
     /* display:none (not visibility:hidden) so the rest of the app
        contributes zero layout height during print — otherwise the
@@ -2035,7 +2088,7 @@ async function loadData(){
   alertsSafe=false; try{ const ap = JSON.parse((await window.storage.get(ALERTS_KEY,false)).value); if(ap && typeof ap==='object' && !Array.isArray(ap)){ alertPrefs={off:(ap.off&&typeof ap.off==='object')?ap.off:{},nestDays:ap.nestDays,palpateDays:ap.palpateDays}; alertsSafe=true; } else { alertPrefs={off:{},nestDays:3,palpateDays:14}; } }catch(e){ alertPrefs={off:{},nestDays:3,palpateDays:14}; alertsSafe = /not found/i.test(String(e&&e.message)); }
   remindersSafe=false; try{ const cr = JSON.parse((await window.storage.get(REMINDERS_KEY,false)).value); customReminders = Array.isArray(cr)?cr.filter(x=>x&&typeof x.id==='string'&&typeof x.title==='string'&&typeof x.date==='string'):[]; remindersSafe=Array.isArray(cr); }catch(e){ customReminders = []; remindersSafe = /not found/i.test(String(e&&e.message)); }
   quickPicksSafe=false; try{ const qp = JSON.parse((await window.storage.get(QUICKPICKS_KEY,false)).value); quickPicks = Array.isArray(qp)?qp.filter(x=>x&&typeof x.id==='string'&&typeof x.name==='string'):[]; quickPicksSafe=Array.isArray(qp); }catch(e){ quickPicks = []; quickPicksSafe = /not found/i.test(String(e&&e.message)); }
-  try{ const tv = JSON.parse((await window.storage.get(TRASH_KEY,false)).value); trash = Array.isArray(tv) ? tv : []; }catch(e){ trash = []; }
+  trashSafe=false; try{ const tv = JSON.parse((await window.storage.get(TRASH_KEY,false)).value); trash = Array.isArray(tv) ? tv : []; trashSafe = Array.isArray(tv); }catch(e){ trash = []; trashSafe = /not found/i.test(String(e&&e.message)); }
   await hydratePhotos();
   if(!viewingAsCustomer){ try{ backfillKitHistory(); }catch(e){ console.error(e); } }   // never touches a customer's account while viewing it
   memoryOwner = accountMemoryId();
@@ -2135,8 +2188,9 @@ function photosPendingWrite(){
 // account's own owner can see or restore it.
 const TRASH_KEY = 'trash_v1';
 const TRASH_DAYS = 30;
-let trash = [];
+let trash = [], trashSafe = false;
 async function saveTrash(){
+  if(!trashSafe){ console.error('trash did not load; not saving'); return false; }
   try{ await window.storage.set(TRASH_KEY, JSON.stringify(trash), false); return true; }
   catch(e){ console.error(e); return false; }
 }
@@ -2151,6 +2205,36 @@ async function moveToTrash(x){
   const ok = await saveTrash();
   if(!ok){ trash.pop(); return false; }
   return true;
+}
+// Planned breedings, shows and calendar events are kept here too (kind + item) for the same 30 days.
+// The copy is saved to trash FIRST; the item is only taken off its list once that save worked.
+const TRASH_KINDS = {
+  planned:{ label:'Planned breeding', list:()=>planned, set:v=>{planned=v;}, save:()=>savePlanned() },
+  show:{ label:'Show', list:()=>shows, set:v=>{shows=v;}, save:()=>saveShows() },
+  event:{ label:'Calendar event', list:()=>customEvents, set:v=>{customEvents=v;}, save:()=>saveEvents() }
+};
+async function softRemoveItem(kind, id){
+  const k=TRASH_KINDS[kind]; if(!k) return false;
+  const gone=k.list().find(x=>x.id===id); if(!gone) return false;
+  const entry={ id:uid(), deletedAt:todayStr(), kind, item:JSON.parse(JSON.stringify(gone)) };
+  trash.push(entry);
+  if(!(await saveTrash())){ trash=trash.filter(t=>t!==entry); showToast("Couldn't remove — check your connection and try again."); return false; }
+  k.set(k.list().filter(x=>x.id!==id)); k.save();
+  return true;
+}
+async function restoreTrashItem(tid){
+  const t=trash.find(x=>x.id===tid); if(!t||!t.kind||!t.item) return false;
+  const k=TRASH_KINDS[t.kind]; if(!k) return false;
+  if(!k.list().some(x=>x.id===t.item.id)){ k.set(k.list().concat([JSON.parse(JSON.stringify(t.item))])); await k.save(); }
+  trash=trash.filter(x=>x.id!==tid); await saveTrash();
+  return true;
+}
+function trashItemTitle(t){
+  const x=t.item||{};
+  if(t.kind==='show') return x.name||'Show';
+  if(t.kind==='event') return x.title||x.name||'Calendar event';
+  const doe=(typeof rabbits!=='undefined'?rabbits:[]).find(r=>r.id===x.doeId);
+  return (doe?doe.name:'A doe')+(x.buckName?' × '+x.buckName:'');
 }
 function trashDrop(rabbitId){
   trash = trash.filter(t=>!(t.rabbit && t.rabbit.id===rabbitId));
@@ -2198,17 +2282,30 @@ async function purgeTrash(){
   await saveTrash();
 }
 function renderTrash(main){
-  const items = trash.slice().sort((a,b)=>(b.deletedAt||'').localeCompare(a.deletedAt||''));
+  const items = trash.filter(t=>t.rabbit).sort((a,b)=>(b.deletedAt||'').localeCompare(a.deletedAt||''));
+  const others = trash.filter(t=>!t.rabbit && t.kind && t.item).sort((a,b)=>(b.deletedAt||'').localeCompare(a.deletedAt||''));
+  const othersHTML = others.length ? `<div class="section-label" style="margin-top:16px;">PLANS, SHOWS AND EVENTS</div>`
+    + others.map(t=>{ const left=trashDaysLeft(t);
+        return `<div class="card no-tap"><div class="card-top"><div><div class="card-name">${esc(trashItemTitle(t))}</div><div class="card-sub">${esc((TRASH_KINDS[t.kind]||{}).label||'Item')}</div></div></div>
+          <div class="card-detail">Removed ${esc(t.deletedAt||'')} &middot; ${left} day${left===1?'':'s'} left</div>
+          <div class="card-actions"><button class="btn btn-primary btn-sm" data-restoreitem="${esc(t.id)}">Restore</button></div></div>`; }).join('') : '';
   main.innerHTML = `<div class="section-label">RECENTLY DELETED</div>
-    <div class="card-sub" style="margin-bottom:10px;">Rabbits you delete stay here for ${TRASH_DAYS} days, with their records and photos, so you can bring them back. After that they are removed for good.</div>`
+    <div class="card-sub" style="margin-bottom:10px;">Rabbits you delete stay here for ${TRASH_DAYS} days, with their records and photos, so you can bring them back. Planned breedings, shows and calendar events you remove are kept here for ${TRASH_DAYS} days too. After that they are removed for good.</div>`
     + (items.length ? items.map(t=>{
         const r=t.rabbit||{}; const left=trashDaysLeft(t);
         return `<div class="card no-tap"><div class="card-top"><div><div class="card-name">${esc(r.name||'Unnamed rabbit')}</div><div class="card-sub">${esc([r.sex,r.breed,r.color].filter(Boolean).join(' · '))}</div></div></div>
           <div class="card-detail">Deleted ${esc(t.deletedAt||'')} &middot; ${left} day${left===1?'':'s'} left</div>
           <div class="card-actions"><button class="btn btn-primary btn-sm" data-restore="${esc(t.id)}">Restore</button></div></div>`;
       }).join('') : `<div class="empty">Nothing deleted recently.</div>`)
+    + othersHTML
     + removedLitterItemsHTML();
   wireRemovedLitterItems(main);
+  main.querySelectorAll('[data-restoreitem]').forEach(b=>b.onclick=async ()=>{
+    b.disabled = true; b.textContent = 'Restoring…';
+    const ok = await restoreTrashItem(b.dataset.restoreitem);
+    showToast(ok ? 'Restored' : 'Could not restore — check your connection and try again');
+    renderTrash(main);
+  });
   main.querySelectorAll('[data-restore]').forEach(b=>b.onclick=async ()=>{
     b.disabled = true; b.textContent = 'Restoring…';
     const ok = await restoreFromTrash(b.dataset.restore);
@@ -2311,7 +2408,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-19-palsnooze';
+const APP_VERSION = '2026-10-19-ribbonhome';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2942,7 +3039,7 @@ function openProjectWarnSheet(pid){
 
 // ===== ACCOUNT SWITCH CLEAN-UP START =====
 function clearAccountMemory(){
-  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; quickPicks = []; quickPicksSafe = false; alertPrefs = {off:{},nestDays:3,palpateDays:14}; alertsSafe = false; customReminders = []; remindersSafe = false; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
+  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; quickPicks = []; quickPicksSafe = false; alertPrefs = {off:{},nestDays:3,palpateDays:14}; alertsSafe = false; customReminders = []; remindersSafe = false; trash = []; trashSafe = false; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
   rabbits = []; planned = []; customEvents = []; shows = []; expenses = [];
   pedigreeSettings = defaultPedigreeSettings();
   trash = [];
@@ -3185,7 +3282,18 @@ const PALETTES = [
   {id:'berry',      name:'Berry and mint',     main:'#8e2a6e', accent:'#8fe3c8'},
   {id:'grape',      name:'Grape and hot pink', main:'#5b2a86', accent:'#ff5fa2'},
   {id:'teal',       name:'Teal and peach',     main:'#0f7b7e', accent:'#ffab91'},
-  {id:'watermelon', name:'Watermelon',         main:'#1f7a4d', accent:'#ff8fb1'}
+  {id:'watermelon', name:'Watermelon',         main:'#1f7a4d', accent:'#ff8fb1'},
+  /* Ribbon: plum and coral with its own page, text and button colors (light + dark), plus a new Home layout
+     (look:true turns on body.look-ribbon). It only applies to an account that picks it. */
+  {id:'ribbon', name:'Ribbon (new look)', main:'#3F1B42', accent:'#E0533D', look:true,
+   light:{'--page':'#FBF8F6','--cream':'#FBF8F6','--card':'#ffffff','--ivory':'#ffffff','--ink':'#2A1F2D','--ink-soft':'#4A3B4E',
+     '--line':'#EADFE6','--line-strong':'#D6C5D1','--navy':'#3F1B42','--navy-deep':'#2A1130','--navbar':'#3F1B42','--gold':'#E0533D','--gold-deep':'#B93A26',
+     '--rb-coral':'#C93E28','--rb-coral-ink':'#ffffff','--rb-text':'#B93A26','--rb-outline':'#3F1B42','--rb-hero-bg':'#3F1B42','--rb-hero-ink':'#ffffff','--rb-hero-dim':'#E9D6EB',
+     '--rb-track':'#EFE3EE','--rb-nav':'#3F1B42','--rb-nav-on':'#ffffff','--rb-nav-on-ink':'#3F1B42','--rb-shadow':'rgba(63,27,66,.12)'},
+   dark:{'--page':'#17101A','--cream':'#17101A','--card':'#231A27','--ivory':'#231A27','--ink':'#F3EAF4','--ink-soft':'#C9B8CD',
+     '--line':'#33263A','--line-strong':'#4A3A52','--navbar':'#2A1A2E','--gold':'#FF7A63','--gold-deep':'#FF7A63',
+     '--rb-coral':'#FF7A63','--rb-coral-ink':'#2A0F0A','--rb-text':'#FF8C78','--rb-outline':'#D8C6F5','--rb-hero-bg':'linear-gradient(180deg,#2A1A2E,#17101A)','--rb-hero-ink':'#ffffff','--rb-hero-dim':'#B7A3BC',
+     '--rb-track':'#3B2C42','--rb-nav':'#2E2133','--rb-nav-on':'#F3EAF4','--rb-nav-on-ink':'#2A1A2E','--rb-shadow':'rgba(0,0,0,.45)'}}
 ];
 let currentPaletteId = 'heritage';
 function paletteMix(a,b,t){
@@ -3238,12 +3346,14 @@ function paletteCss(p){
     '--gold':paletteMix(p.accent,K,0.25), '--gold-light':accentLight, '--gold-deep':p.accent,
     '--navbar':paletteMix(p.main,K,0.75), '--navbar-dim':paletteMix(p.main,W,0.5), '--viewer':paletteMix(p.main,K,0.85)
   };
+  Object.assign(light, p.light||{}); Object.assign(dark, p.dark||{});
   const decl=o=>Object.keys(o).map(k=>k+':'+o[k]+';').join('');
   return ':root:not([data-theme="dark"]){'+decl(light)+'}\n[data-theme="dark"]{'+decl(dark)+'}';
 }
 function applyPalette(id){
   const p = PALETTES.find(x=>x.id===id) || PALETTES[0];
   currentPaletteId = p.id;
+  document.body.classList.toggle('look-ribbon', !!p.look);
   let el = document.getElementById('paletteStyle');
   const meta = document.querySelector('meta[name="theme-color"]');
   if(p.id==='heritage'){
@@ -4576,6 +4686,43 @@ function comingDayLabel(d,t){
 }
 let homeComingAll=false;
 
+// ===== RIBBON HOME START =====
+// Only drawn when the account has picked the Ribbon color style. Adds a header with the day's count and a
+// gestation ring for does due soon. It reads the rabbit records; it never changes them.
+function lookRibbonOn(){ return document.body.classList.contains('look-ribbon'); }
+function rbRingSVG(size, day, total, labelTop){
+  const r=size*0.4, c=2*Math.PI*r, d=Math.max(0,Math.min(day,total)), dash=(c*d/total).toFixed(1), cx=size/2, sw=Math.max(5,size*0.095);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${esc(labelTop||'')}">
+    <circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="var(--rb-track)" stroke-width="${sw}"/>
+    <circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="var(--rb-coral)" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="${dash} ${c.toFixed(1)}" transform="rotate(-90 ${cx} ${cx})"/>
+    <text x="${cx}" y="${cx+size*0.07}" text-anchor="middle" font-family="Newsreader, serif" font-weight="600" font-size="${size*0.3}" fill="var(--ink)">${d}</text>
+    ${size>=80?`<text x="${cx}" y="${cx+size*0.23}" text-anchor="middle" font-family="Manrope, sans-serif" font-weight="700" font-size="${size*0.095}" fill="var(--ink-soft)">OF ${total}</text>`:''}
+  </svg>`;
+}
+function ribbonDueLabel(d){ return d<0 ? (-d)+' day'+(d===-1?'':'s')+' over' : d===0 ? 'Due today' : 'Due in '+d+' day'+(d===1?'':'s'); }
+function ribbonHomeHTML(t, attnTotal){
+  const dt=new Date(t+'T00:00:00');
+  const dateLbl=dt.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'}).toUpperCase();
+  const due=rabbits.filter(r=>r.sex==='doe'&&r.status==='pregnant'&&r.dueDate&&isActive(r)&&daysToDue(r)<=3).sort((a,b)=>daysToDue(a)-daysToDue(b));
+  const gday=r=>r.bredDate?daysBetween(r.bredDate,t):31-daysToDue(r);
+  let h=`<div class="rb-hero"><div class="rb-hero-top"><span class="rb-date">${esc(dateLbl)}</span><span class="rb-brand">HerdNerd</span></div>`
+    + (attnTotal ? `<div class="rb-count"><span class="rb-n">${attnTotal}</span><span class="rb-cap">${attnTotal===1?'thing needs':'things need'}<br>you today</span></div>`
+                 : `<div class="rb-count"><span class="rb-cap rb-clear">All clear today</span></div>`)
+    + `</div>`;
+  if(due.length===1){
+    const r=due[0], d=daysToDue(r);
+    h+=`<div class="rb-ringcard" data-openrow="${r.id}">${rbRingSVG(96,gday(r),31,r.name+' '+ribbonDueLabel(d))}
+      <div class="rb-ringtxt"><div class="rb-eyebrow">${esc(ribbonDueLabel(d))}</div><div class="rb-ringname">${esc(r.name)}</div><div class="rb-ringsub">Bred to ${esc(r.partner||'?')}</div>
+      ${d<=0?`<button class="btn btn-primary btn-sm" data-act="kindled" data-id="${r.id}">Kindled</button>`:''}</div></div>`;
+  } else if(due.length>1){
+    const shown=due.slice(0,5);
+    h+=`<div class="rb-ringcard rb-multi"><div class="rb-eyebrow" style="margin:0 6px 8px;">${due.length} does due soon</div><div class="rb-rings">${shown.map(r=>`<div class="rb-ring" data-openrow="${r.id}" role="button" tabindex="0">${rbRingSVG(56,gday(r),31,r.name+' '+ribbonDueLabel(daysToDue(r)))}<span>${esc(r.name)}</span><small>${daysToDue(r)<0?'over':daysToDue(r)===0?'today':daysToDue(r)+'d'}</small></div>`).join('')}</div>
+      ${due.length>5?`<button class="attn-viewall" data-hometile="pregnant">See all ${due.length} due soon &rarr;</button>`:''}</div>`;
+  }
+  return h;
+}
+// ===== RIBBON HOME END =====
+
 function renderHome(main){
   const t = todayStr();
   const nursingDoes = rabbits.filter(r=>r.sex==='doe'&&r.status==='nursing');
@@ -4692,7 +4839,7 @@ function renderHome(main){
     + rabbits.reduce((n,d)=>n+((d.sex==='doe'&&d.litterKits)?d.litterKits.filter(k=>k.forSale&&!k.individualId).length:0),0);
   const cnt = k=>herdDoes.filter(r=>r.status===k).length;
   const tiles = [['pregnant','Bred',cnt('pregnant')],['nursing','On a litter',cnt('nursing')],['open','Open does',cnt('open')],['sale','For sale',forSaleN]];
-  let h = `<div class="home-sum"><b>${attnTotal}</b> ${attnTotal===1?'needs':'need'} attention · <b>${thisWeekN}</b> coming up this week · <b>${nursingDoes.length}</b> litter${nursingDoes.length===1?'':'s'} nursing</div>
+  let h = (lookRibbonOn()?ribbonHomeHTML(t,attnTotal):'') + `<div class="home-sum"><b>${attnTotal}</b> ${attnTotal===1?'needs':'need'} attention · <b>${thisWeekN}</b> coming up this week · <b>${nursingDoes.length}</b> litter${nursingDoes.length===1?'':'s'} nursing</div>
   <div class="stats home-tiles">${tiles.map(([k,l,n])=>`<div class="stat" data-hometile="${k}" role="button" tabindex="0"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('')}</div>
   <div class="quick-actions">
     <button class="qa-btn qa-primary" id="qaAddBreeding"><span class="qa-icon">${QA_PLUS_SVG}</span><span>Record breeding</span></button>
@@ -4915,14 +5062,14 @@ function renderCalendar(main){
   document.querySelectorAll('[data-caldel]').forEach(b=>b.onclick=(ev)=>{
     ev.stopPropagation();
     const gone = customEvents.find(x=>x.id===b.dataset.caldel); if(!gone) return;
-    customEvents = customEvents.filter(x=>x.id!==gone.id); saveEvents(); render();
-    showUndoToast('Event removed', ()=>{ customEvents.push(gone); saveEvents(); }, 6000);
+    softRemoveItem('event',gone.id).then(ok=>{ if(!ok) return; render();
+      showUndoToast('Event removed — kept in Recently deleted', async()=>{ const t=trash.find(q=>q.kind==='event'&&q.item&&q.item.id===gone.id); if(t) await restoreTrashItem(t.id); render(); }, 6000); });
   });
   document.querySelectorAll('[data-calplandel]').forEach(b=>b.onclick=(ev)=>{
     ev.stopPropagation();
     const gone = planned.find(x=>x.id===b.dataset.calplandel); if(!gone) return;
-    planned = planned.filter(x=>x.id!==gone.id); savePlanned(); render();
-    showUndoToast('Planned breeding removed', ()=>{ planned.push(gone); savePlanned(); }, 6000);
+    softRemoveItem('planned',gone.id).then(ok=>{ if(!ok) return; render();
+      showUndoToast('Planned breeding removed — kept in Recently deleted', async()=>{ const t=trash.find(q=>q.kind==='planned'&&q.item&&q.item.id===gone.id); if(t) await restoreTrashItem(t.id); render(); }, 6000); });
   });
 }
 function calRowHTML(e, overdue){
@@ -5110,7 +5257,7 @@ function attachCardEvents(){
       if(act==='executePlanned'||act==='deletePlanned'||act==='editPlanned'){
         const p=planned.find(x=>x.id===id); if(!p) return;
         if(act==='editPlanned'){ openAddPlannedSheet(null,p); return; }
-        if(act==='deletePlanned'){ planned=planned.filter(x=>x.id!==id); savePlanned(); render(); showToast('Planned breeding removed'); return; }
+        if(act==='deletePlanned'){ softRemoveItem('planned',id).then(ok=>{ if(ok){ render(); showToast('Planned breeding removed — kept in Recently deleted for '+TRASH_DAYS+' days'); } }); return; }
         const doe=rabbits.find(r=>r.id===p.doeId);
         if(doe) openBreedSheet(doe, p.buckName||(rabbits.find(r=>r.id===p.buckId)||{}).name, ()=>{ planned=planned.filter(x=>x.id!==id); savePlanned(); render(); });
         return;
@@ -7417,7 +7564,7 @@ function openShowsSheet(){
   document.getElementById('addShowBtn').onclick = openAddShowSheet;
   document.querySelectorAll('[data-editshow]').forEach(b=>b.onclick=()=>{ const x=shows.find(q=>q.id===b.dataset.editshow); if(x) openAddShowSheet(x); });
   document.querySelectorAll('[data-delshow]').forEach(b=>b.onclick=()=>{
-    shows = shows.filter(s=>s.id!==b.dataset.delshow); saveShows(); openShowsSheet(); render();
+    softRemoveItem('show',b.dataset.delshow).then(ok=>{ if(ok){ openShowsSheet(); render(); showToast('Show removed — kept in Recently deleted for '+TRASH_DAYS+' days'); } });
   });
 }
 function openAddShowSheet(existing){
