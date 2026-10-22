@@ -2664,7 +2664,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-22-allfix';
+const APP_VERSION = '2026-10-22-tourlive';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2713,7 +2713,7 @@ function projOf(r){ return (r.projects||[]).map(id=>projects.find(p=>p.id===id))
 function inProject(r,id){ return (r.projects||[]).includes(id); }
 function projChipsHTML(r){
   const chips = projOf(r).map(p=>`<span class="pj-chip"><i class="pj-dot" style="background:${projColor(p)}"></i>${esc(p.name)}</span>`).join('');
-  return `<div class="pj-row">${chips}<button class="pj-add" data-pjtag="${r.id}" aria-label="Add ${esc(r.name)} to a project">${chips?'Change':'+ Add to project'}</button></div>`+carryChipsHTML(r);
+  return (chips?`<div class="pj-row">${chips}</div>`:'')+carryChipsHTML(r);
 }
 function addProjectFlow(done){
   if(projects.length>=MAX_PROJECTS){ showToast('Up to '+MAX_PROJECTS+' projects'); return; }
@@ -2763,15 +2763,43 @@ function openProjectTagSheet(rid){
   };
   draw();
 }
+// Tick the rabbits that belong in a project. Unticking only takes the label off: no rabbit is changed or deleted.
+function openProjectRabbitsSheet(pid, back){
+  const pr=projects.find(x=>x.id===pid); if(!pr) return;
+  const pool=rabbits.filter(r=>r.status!=='external' && !isArchived(r)).sort((a,b)=>a.name.localeCompare(b.name));
+  let q='';
+  openSheet(`<button class="close-x" id="pra-x">&times;</button><h2>${esc(pr.name)} &mdash; add rabbits</h2>
+    <div class="card-sub" id="pra-count" style="margin-bottom:8px;"></div>
+    <div class="field"><input id="pra-q" placeholder="Search name or ear #" autocomplete="off"></div>
+    <div id="pra-list"></div>
+    <div class="sheet-actions"><button class="btn btn-primary" id="pra-done" style="width:100%;">Done</button></div>`);
+  const draw=()=>{
+    const k=nameKey(q);
+    const hits=pool.filter(r=>!k||nameKey(r.name).includes(k)||(r.earNumber&&nameKey(r.earNumber)===k)||(r.alias&&nameKey(r.alias).includes(k)));
+    document.getElementById('pra-count').textContent = pool.filter(r=>inProject(r,pid)).length+' in this project. Tap a rabbit to add or remove it.';
+    document.getElementById('pra-list').innerHTML = hits.length ? hits.map(r=>`<div class="pj-selrow ${inProject(r,pid)?'on':''}" data-pjr="${r.id}" role="button" tabindex="0"><span class="pj-box">${inProject(r,pid)?'&#10003;':''}</span><span style="flex:1"><b class="card-name" style="font-size:18px;">${esc(r.name)}</b><div class="card-sub">${subLine(r)}</div></span></div>`).join('') : '<div class="empty">No rabbits match.</div>';
+    document.querySelectorAll('#pra-list [data-pjr]').forEach(el=>el.onclick=()=>{
+      const r=rabbits.find(x=>x.id===el.dataset.pjr); if(!r) return;
+      r.projects=r.projects||[];
+      if(r.projects.includes(pid)) r.projects=r.projects.filter(x=>x!==pid); else r.projects.push(pid);
+      saveData(); draw();
+    });
+  };
+  document.getElementById('pra-q').addEventListener('input',e=>{ q=e.target.value; draw(); });
+  const finish=()=>{ closeSheet(); if(back) back(); else render(); };
+  document.getElementById('pra-done').onclick=finish; document.getElementById('pra-x').onclick=finish;
+  draw();
+}
 function openProjectsManage(after){
   const draw=()=>{
     openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Projects</h2>
       <div class="card-sub" style="margin-bottom:10px;">Removing a project only takes the label off. No rabbit is changed or deleted. Up to ${MAX_PROJECTS} projects.</div>
-      <div class="lit-card">${projects.length?projects.map(p=>`<div class="st-row" style="padding:6px 0;"><button type="button" class="pj-sw on" style="background:${projColor(p)};width:28px;height:28px;margin-right:8px;" data-pjcolor="${p.id}" aria-label="Change color for ${esc(p.name)}"></button><b>${esc(p.name)}</b> <span class="card-sub">${rabbits.filter(r=>inProject(r,p.id)).length}</span><span style="flex:1"></span><button class="btn btn-secondary btn-sm" data-pjwarn="${p.id}">Tell me about${(p.warn||[]).length?' ('+p.warn.length+')':''}</button> <button class="btn btn-secondary btn-sm" data-pjren="${p.id}">Rename</button> <button class="btn btn-secondary btn-sm" data-pjrm="${p.id}">Remove</button></div>`).join(''):'<div class="card-sub">No projects yet.</div>'}</div>
+      <div class="lit-card">${projects.length?projects.map(p=>`<div class="st-row" style="padding:6px 0;"><button type="button" class="pj-sw on" style="background:${projColor(p)};width:28px;height:28px;margin-right:8px;" data-pjcolor="${p.id}" aria-label="Change color for ${esc(p.name)}"></button><b>${esc(p.name)}</b> <span class="card-sub">${rabbits.filter(r=>inProject(r,p.id)).length}</span><span style="flex:1"></span><button class="btn btn-primary btn-sm" data-pjadd="${p.id}">Add rabbits</button> <button class="btn btn-secondary btn-sm" data-pjwarn="${p.id}">Tell me about${(p.warn||[]).length?' ('+p.warn.length+')':''}</button> <button class="btn btn-secondary btn-sm" data-pjren="${p.id}">Rename</button> <button class="btn btn-secondary btn-sm" data-pjrm="${p.id}">Remove</button></div>`).join(''):'<div class="card-sub">No projects yet.</div>'}</div>
       <div class="sheet-actions"><button class="btn btn-secondary" id="pm-done">Done</button><button class="btn btn-primary" id="pm-add">+ New project</button></div>`);
     document.getElementById('pm-done').onclick=()=>{ closeSheet(); if(after) after(); else render(); };
     document.getElementById('pm-add').onclick=()=>addProjectFlow(()=>openProjectsManage(after));
     document.querySelectorAll('[data-pjwarn]').forEach(b=>b.onclick=()=>openProjectWarnSheet(b.dataset.pjwarn));
+    document.querySelectorAll('[data-pjadd]').forEach(b=>b.onclick=()=>openProjectRabbitsSheet(b.dataset.pjadd, ()=>openProjectsManage(after)));
     document.querySelectorAll('[data-pjcolor]').forEach(b=>b.onclick=()=>{
       const p=projects.find(x=>x.id===b.dataset.pjcolor); if(!p) return;
       openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>${esc(p.name)} color</h2>${projColorPickerHTML(projColor(p),'data-pjpc')}<div class="sheet-actions"><button class="btn btn-secondary" id="pj-cc">Cancel</button></div>`);
@@ -5467,7 +5495,7 @@ function renderRabbits(main){
     : '';
   if(projectFilter!=='all' && !projects.some(p=>p.id===projectFilter)) projectFilter='all';
   projectAlso=projectAlso.filter(id=>projectFilter!=='all' && id!==projectFilter && projects.some(p=>p.id===id));
-  const pjSummary = (projects.length && (shownList.length||projectFilter!=='all'||traitFilter)) ? `<div class="pj-summary"><span style="font-weight:600">${selectMode?(projectFilter==='all'?'Tap the rabbits to include':'Tap rabbits to add to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'')):projectFilter==='all'?'':projectAlso.length?`${shownList.length} in ${esc(activeProjIds().map(id=>(projects.find(p=>p.id===id)||{}).name).filter(Boolean).join(' + '))}`:`${shownList.length} in ${esc((projects.find(p=>p.id===projectFilter)||{}).name||'')}`}</span>${selectMode?`<span><a id="pj-selall">Select all</a> &nbsp; <a id="pj-cancel-sel" href="#" style="font-weight:800;">Cancel</a></span>`:(projectAlso.length?'':`<button type="button" class="btn btn-secondary btn-sm" id="pj-select">${projectFilter==='all'?'Add several rabbits to a project':'+ Add rabbits to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'this project')}</button>`)}</div>` : '';
+  const pjSummary = (projects.length && (shownList.length||projectFilter!=='all'||traitFilter)) ? `<div class="pj-summary"><span style="font-weight:600">${selectMode?(projectFilter==='all'?'Tap the rabbits to include':'Tap rabbits to add to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'')):projectFilter==='all'?'':projectAlso.length?`${shownList.length} in ${esc(activeProjIds().map(id=>(projects.find(p=>p.id===id)||{}).name).filter(Boolean).join(' + '))}`:`${shownList.length} in ${esc((projects.find(p=>p.id===projectFilter)||{}).name||'')}`}</span>${selectMode?`<span><a id="pj-selall">Select all</a> &nbsp; <a id="pj-cancel-sel" href="#" style="font-weight:800;">Cancel</a></span>`:(projectAlso.length?'':'')}</div>` : '';
   main.innerHTML = groupTabs + (selectMode?'':quickPickBar()) + filtersBlock(scopeList) + pjSummary + (selectMode?'':actionRow) + body + (selectMode?selectBarHTML()+'<div style="height:230px"></div>':'');
   wireProjects(main, shownList); wireTraits(); wireQuickPicks();
   { const ft=document.getElementById('flt-toggle'); if(ft) ft.onclick=()=>{ herdFiltersOpen=!herdFiltersOpen; try{ localStorage.setItem('hn_flt_open', herdFiltersOpen?'1':'0'); }catch(e){} render(); }; }
@@ -9570,8 +9598,16 @@ function overviewTabHTML(r){
     ${r.flag?`<div class="flag">${esc(r.flag)}</div>`:''}
     <div class="overview-grid">${rows.map(([l,v])=>`<div class="ov-cell"><div class="ov-label">${l.toUpperCase()}</div><div class="ov-val">${esc(v)}</div></div>`).join('')}</div>
     ${weightsCardHTML(r)}
+    ${profileProjectsHTML(r)}
     ${profileRemindersHTML(r)}
     <button class="btn btn-secondary" style="width:100%;margin-top:12px;" data-pa="edit">Edit details</button>`;
+}
+function profileProjectsHTML(r){
+  const chips = projOf(r).map(p=>`<span class="pj-chip"><i class="pj-dot" style="background:${projColor(p)}"></i>${esc(p.name)}</span>`).join('');
+  return `<div class="lit-card" style="margin-top:12px;"><div class="card-name" style="font-size:16px;">Projects &amp; carries</div>
+    ${chips?`<div class="pj-row" style="margin-top:6px;">${chips}</div>`:'<div class="card-sub" style="margin-top:4px;">Not in any project yet.</div>'}
+    ${carryChipsHTML(r)}
+    <button class="btn btn-secondary btn-sm" style="margin-top:8px;" data-pjtag="${r.id}">Edit projects &amp; carries</button></div>`;
 }
 function profileRemindersHTML(r){
   const mine=customReminders.filter(x=>remActive(x)&&x.rabbitId===r.id).sort((a,b)=>remEffDate(a).localeCompare(remEffDate(b)));
@@ -11662,51 +11698,90 @@ function maybeStartTour(){
 }
 function startTour(replay){
   if(document.getElementById('tourOv')) return;
+  const E=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const dots=n=>`<div class="tr-dots">${[1,2,3,4].map(i=>`<span class="${i===n?'on':''}"></span>`).join('')}</div>`;
   const card=(n,title,text,last)=>`<div class="tr-card">${dots(n)}<h3>${title}</h3><p>${text}</p><div class="tr-acts"><button type="button" class="tr-skip" data-tr="skip">Skip tour</button><button type="button" class="tr-next" data-tr="next">${last?'Finish':'Next'}</button></div></div>`;
-  const steps=[
-    `<div class="tr-frame tr-welcome" role="dialog" aria-modal="true" aria-label="Welcome tour">
+  const BTN='border:0;cursor:pointer;font:inherit;';
+  // Everything typed or tapped here lives only in these variables and disappears when the tour closes.
+  let i=0, sub=0, pn='Practice Doe', sex='Doe', sire='', kits=6;
+  const frames=[
+    ()=>`<div class="tr-frame tr-welcome" role="dialog" aria-modal="true" aria-label="Welcome tour">
       <div class="tr-big">HerdNerd <em>Pro</em></div>
       <h2>Welcome. Let's try it with one rabbit.</h2>
       <p>It takes about a minute. We'll use a practice rabbit, so nothing is saved to your account.</p>
       <div class="tr-btns"><button type="button" class="tr-next" data-tr="next">Let's go</button><button type="button" class="tr-skip" data-tr="skip">Skip, I'll explore</button></div>
     </div>`,
-    `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: add a rabbit">
+    ()=> sub===0 ? `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: add a rabbit">
       <div class="tr-hdr"><b>HerdNerd Pro</b></div>
-      <div class="tr-row"><div class="tr-search">Name, ear #, color, breed</div><div class="tr-plus tr-spot" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div></div>
+      <div class="tr-row"><div class="tr-search">Name, ear #, color, breed</div><button type="button" class="tr-plus tr-spot" data-act="plus" aria-label="Add a rabbit" style="${BTN}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button></div>
       <div class="tr-row" style="padding-top:0"><div class="tr-pill on">Does</div><div class="tr-pill">Bucks</div><div class="tr-pill">Juniors</div></div>
       <div class="tr-banner">PRACTICE &middot; nothing here is saved to your account</div>
-      ${card(2,'Tap + to add a rabbit','Just a name and sex to start. You can fill in the rest anytime.')}
+      ${card(2,'Tap the + to add a rabbit','Go ahead, tap the green + button.')}
+    </div>` : `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: new rabbit form">
+      <div class="tr-hdr"><b>HerdNerd Pro</b></div>
+      <div class="tr-banner" style="margin-top:12px">PRACTICE &middot; nothing here is saved to your account</div>
+      <div class="tr-sheet"><h4>New rabbit</h4>
+        <div class="tr-lbl">NAME</div>
+        <input id="trName" type="text" maxlength="40" autocomplete="off" placeholder="Type any name" value="${E(pn==='Practice Doe'?'':pn)}" style="width:100%;box-sizing:border-box;height:48px;border-radius:12px;border:1.5px solid #2a1a2e;padding:0 14px;font-size:17px;margin-top:6px">
+        <div class="tr-lbl" style="margin-top:12px">SEX</div>
+        <div style="display:flex;gap:8px;margin-top:6px"><button type="button" data-act="sexDoe" class="tr-pill ${sex==='Doe'?'on':''}" style="${BTN}">Doe</button><button type="button" data-act="sexBuck" class="tr-pill ${sex==='Buck'?'on':''}" style="${BTN}">Buck</button></div>
+        <button type="button" id="trAdd" data-act="addRabbit" class="tr-save" style="${BTN}width:100%;margin-top:16px">Add rabbit</button>
+      </div>
+      ${card(2,'Name and sex','Type a name, pick Doe or Buck, then tap Add rabbit.')}
     </div>`,
-    `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: pedigree">
-      <div class="tr-hdr"><b>Practice Doe</b><small>Doe &middot; Holland Lop &middot; OPEN</small></div>
+    ()=>`<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: pedigree">
+      <div class="tr-hdr"><b>${E(pn)}</b><small>${sex} &middot; Holland Lop &middot; OPEN</small></div>
       <div class="tr-row"><div class="tr-pill">Overview</div><div class="tr-pill">Breeding</div><div class="tr-pill on">Pedigree</div></div>
       <div class="tr-banner" style="margin-bottom:12px">PRACTICE &middot; nothing here is saved</div>
-      <div class="tr-slot tr-spot"><i>SIRE</i><span>+ Add name</span></div>
+      ${ sub===1 ? `<div class="tr-slot tr-spot" style="gap:8px"><i>SIRE</i><input id="trSire" type="text" maxlength="40" autocomplete="off" placeholder="Type a name" value="${E(sire)}" style="flex:1;min-width:0;height:42px;border-radius:10px;border:1.5px solid #2a1a2e;padding:0 10px;font-size:16px"><button type="button" data-act="saveSire" class="tr-next" style="min-height:42px;padding:0 16px;font-size:14px">Add</button></div>`
+        : sire ? `<div class="tr-slot"><i>SIRE</i><span style="color:#2a1a2e">${E(sire)}</span></div>`
+        : `<button type="button" class="tr-slot tr-spot" data-act="openSire" style="${BTN}width:calc(100% - 32px);text-align:left"><i>SIRE</i><span>+ Add name</span></button>` }
       <div class="tr-slot"><i>DAM</i><span>+ Add name</span></div>
-      ${card(3,'Add a parent',"Tap the sire or dam and type a name. That's all you need for now. You can build the rest of the pedigree later.")}
+      ${card(3,'Add a parent', sire ? 'Nice. That is all it takes. You can build the rest of the pedigree later.' : 'Tap the sire row and type a name. You can build the rest of the pedigree later.')}
     </div>`,
-    `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: kindled">
-      <div class="tr-hdr"><b>Practice Doe</b><small>Doe &middot; Holland Lop &middot; BRED</small></div>
+    ()=> sub===0 ? `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: kindled">
+      <div class="tr-hdr"><b>${E(pn)}</b><small>${sex} &middot; Holland Lop &middot; BRED</small></div>
       <div class="tr-banner" style="margin-top:12px">PRACTICE &middot; nothing here is saved</div>
-      <div class="tr-sheet"><h4>Practice Doe kindled</h4><div class="tr-lbl">BABIES BORN ALIVE</div>
-        <div class="tr-step"><b>&minus;</b><span>6</span><b class="p">+</b></div>
+      <div style="margin:12px 16px;background:#fff;border:1px solid #e1d5d1;border-radius:14px;padding:14px"><div style="font:700 18px 'Cormorant Garamond',serif">Current breeding</div><div style="font-size:13px;color:#4a3b4d;margin-top:4px">Due in 2 days</div>
+        <button type="button" data-act="openKindled" class="tr-spot" style="${BTN}margin-top:12px;height:44px;border-radius:22px;background:#a7d63a;padding:0 22px;font-weight:700;font-size:14px;color:#2a1a2e">Kindled</button></div>
+      ${card(4,'When the kits arrive','Tap the green Kindled button.',true)}
+    </div>` : sub===1 ? `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: kindled">
+      <div class="tr-hdr"><b>${E(pn)}</b><small>${sex} &middot; Holland Lop &middot; BRED</small></div>
+      <div class="tr-banner" style="margin-top:12px">PRACTICE &middot; nothing here is saved</div>
+      <div class="tr-sheet"><h4>${E(pn)} kindled</h4><div class="tr-lbl">BABIES BORN ALIVE</div>
+        <div class="tr-step"><button type="button" data-act="less" aria-label="Fewer" style="${BTN}background:#fff;width:50px;height:50px;border-radius:25px;border:1.5px solid #2a1a2e;font-size:26px">&minus;</button><span id="trKits">${kits}</span><button type="button" data-act="more" aria-label="More" style="${BTN}background:#3a1d44;color:#fff;width:50px;height:50px;border-radius:25px;font-size:26px">+</button></div>
         <div style="font-size:13px;color:#4a3b4d;text-align:center;margin-top:10px">Sex and color can be filled in later.</div>
-        <div class="tr-save">Save</div></div>
-      ${card(4,'When the kits arrive','Tap Kindled, set how many are alive, and save. HerdNerd works out weaning and rebreed dates for you.',true)}
+        <button type="button" data-act="saveKits" class="tr-save" style="${BTN}width:100%">Save</button></div>
+      ${card(4,'How many kits?','Use the + and − to set how many are alive, then tap Save.',true)}
+    </div>` : `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: done">
+      <div class="tr-hdr"><b>${E(pn)}</b><small>${sex} &middot; Holland Lop &middot; KINDLED</small></div>
+      <div style="margin:16px;background:#fff;border:1px solid #e1d5d1;border-radius:14px;padding:16px;text-align:center"><div style="font:700 28px 'Cormorant Garamond',serif">${kits} kit${kits===1?'':'s'} Kindled</div><div style="font-size:14px;color:#4a3b4d;margin-top:6px">HerdNerd works out weaning and rebreed dates for you.</div></div>
+      ${card(4,"That's the whole flow","You added a rabbit, a parent, and a litter. Everything here was practice, so your herd is still empty.",true)}
     </div>`
   ];
-  let i=0;
   const ov=document.createElement('div'); ov.id='tourOv';
-  const draw=()=>{
-    ov.innerHTML=steps[i];
+  const go=(n,sb)=>{ i=n; sub=sb||0; draw(); };
+  const acts={
+    plus:()=>go(1,1),
+    sexDoe:()=>{ keep(); sex='Doe'; draw(); }, sexBuck:()=>{ keep(); sex='Buck'; draw(); },
+    addRabbit:()=>{ keep(); if(!pn||pn==='Practice Doe'){ const n=document.getElementById('trName'); if(n){ n.focus(); n.style.borderColor='#b8452d'; } return; } go(2,0); },
+    openSire:()=>{ sub=1; draw(); }, saveSire:()=>{ const v=document.getElementById('trSire'); sire=(v&&v.value.trim())||''; if(!sire){ if(v){ v.focus(); v.style.borderColor='#b8452d'; } return; } sub=0; draw(); },
+    openKindled:()=>{ sub=1; draw(); }, less:()=>{ kits=Math.max(0,kits-1); const k=document.getElementById('trKits'); if(k) k.textContent=kits; }, more:()=>{ kits=Math.min(15,kits+1); const k=document.getElementById('trKits'); if(k) k.textContent=kits; },
+    saveKits:()=>{ sub=2; draw(); }
+  };
+  function keep(){ const n=document.getElementById('trName'); if(n){ const v=n.value.trim(); pn=v||'Practice Doe'; } }
+  function draw(){
+    ov.innerHTML=frames[i]();
     ov.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{
       if(b.dataset.tr==='skip'){ closeTour(); return; }
-      if(i>=steps.length-1){ closeTour(); return; }
-      i++; draw();
+      if(i>=frames.length-1){ closeTour(); return; }
+      keep(); i++; sub=0; draw();
     });
-    const first=ov.querySelector('.tr-next'); if(first) first.focus();
-  };
+    ov.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>acts[b.dataset.act]());
+    const inp=ov.querySelector('#trName,#trSire');
+    if(inp){ inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); (inp.id==='trName'?acts.addRabbit:acts.saveSire)(); } }); inp.focus(); }
+    else { const first=ov.querySelector('.tr-spot')||ov.querySelector('.tr-next'); if(first) first.focus(); }
+  }
   document.body.appendChild(ov); draw();
   document.addEventListener('keydown',tourKey);
 }
