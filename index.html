@@ -2664,7 +2664,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-22-multigroup';
+const APP_VERSION = '2026-10-22-allfix';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -5476,6 +5476,7 @@ function renderRabbits(main){
   document.querySelectorAll('[data-rgroup]').forEach(b=>b.onclick=()=>{
     const g=b.dataset.rgroup, cur=activeGroups();
     if(g==='all'){ if(cur.length===3){ rabbitsGroup='does'; groupAlso=[]; } else { rabbitsGroup='does'; groupAlso=['bucks','juniors']; } }
+    else if(cur.length===3){ rabbitsGroup=g; groupAlso=[]; }   // from All, tapping one shows just that one
     else if(cur.includes(g)){ if(cur.length>1){ const rest=cur.filter(x=>x!==g); rabbitsGroup=rest[0]; groupAlso=rest.slice(1); } }
     else { rabbitsGroup=cur[0]; groupAlso=cur.slice(1).concat([g]); }
     selectMode=false; selectedIds=new Set(); render(); window.scrollTo(0,0);
@@ -7952,7 +7953,7 @@ function openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground){
           <button type="button" data-v="boxed" class="${draft.footerStyle==='boxed'?'on':''}">Boxed, bottom corner</button>
         </div>
       </div>`:''}
-      <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="pp-download">Save &amp; download</button></div>`);
+      <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-secondary" id="pp-download">Save &amp; download</button><button class="btn btn-primary" id="pp-share">Save &amp; share</button></div>`);
     wireEvents();
     scheduleRegen(true);
   }
@@ -8027,7 +8028,7 @@ function openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground){
       document.getElementById('pp-field-'+k).onchange = ()=>{ readDraftFromControls(); scheduleRegen(true); };
     });
 
-    document.getElementById('pp-download').onclick = async ()=>{
+    const ppRun = async (share)=>{
       readDraftFromControls();
       Object.assign(pedigreeSettings, draft);
       await savePedigreeSettings();
@@ -8036,9 +8037,15 @@ function openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground){
         if(hasCustomBackground) overrides.useBackground = useBackgroundDraft;
         const bytes = await buildDynamicGenericPedigreePdfBytes(r, myProfileForPdf, overrides);
         const blob = new Blob([bytes], { type:'application/pdf' });
+        const fname = `${(r.name||'pedigree').replace(/\s+/g,'-')}-pedigree.pdf`;
+        if(share){
+          closeSheet();
+          await sharePdfBlob(blob, fname, r.name+' — Pedigree');
+          return;
+        }
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `${(r.name||'pedigree').replace(/\s+/g,'-')}-pedigree.pdf`;
+        a.href = url; a.download = fname;
         document.body.appendChild(a); a.click(); a.remove();
         URL.revokeObjectURL(url);
         closeSheet();
@@ -8049,6 +8056,8 @@ function openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground){
         showToast('Could not generate the PDF.');
       }
     };
+    document.getElementById('pp-download').onclick = ()=>ppRun(false);
+    document.getElementById('pp-share').onclick = ()=>ppRun(true);
   }
 
   renderSheet();
@@ -8115,6 +8124,55 @@ async function previewWorstCaseBackgroundPDF(filename){
   }
 }
 
+
+// Opens the phone's own share menu with the PDF attached (Messages, Email, etc.), so nothing has to be saved first.
+// Where the browser can't share files (many computers), it downloads the PDF instead. Nothing is uploaded anywhere.
+async function sharePdfBlob(blob, fileName, title){
+  try{
+    const file = new File([blob], fileName, { type:'application/pdf' });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ files:[file], title: title||fileName });
+      return true;
+    }
+  }catch(e){
+    if(e && e.name==='AbortError') return true;   // they closed the share menu: nothing went wrong
+    if(e && e.name==='NotAllowedError'){
+      // Some phones only allow the share menu straight after a tap, and making the PDF took a moment. Ask for one more tap.
+      const file2 = new File([blob], fileName, { type:'application/pdf' });
+      openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Ready to share</h2>
+        <div class="card-sub" style="margin-bottom:12px;">Your pedigree PDF is ready. Tap Share to choose where to send it.</div>
+        <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="shareNowBtn">Share</button></div>`);
+      document.getElementById('shareNowBtn').onclick=async()=>{
+        try{ await navigator.share({ files:[file2], title: title||fileName }); closeSheet(); }
+        catch(e2){ if(e2 && e2.name==='AbortError'){ closeSheet(); return; } console.error(e2); closeSheet(); showToast('Could not open sharing on this device.'); }
+      };
+      return true;
+    }
+    console.error(e);
+  }
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=fileName; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(e){} }, 4000);
+  showToast("Sharing isn't available here, so the PDF was saved instead.");
+  return false;
+}
+async function shareOfficialPedigreePDF(r){
+  try{
+    const prof = await getMyPedigreeProfile();
+    const templateName = prof.pedigree_template || 'generic';
+    const hasCustomBackground = !!(prof.pedigree_background && templateName!=='generic');
+    const staticTemplateName = prof.pedigree_static_template || (!prof.pedigree_background && templateName!=='generic' ? templateName : null);
+    if(staticTemplateName){ openPedigreeStyleChooserSheet(r, prof, staticTemplateName, hasCustomBackground, { share:true }); return; }
+    showToast('Getting the PDF ready…');
+    const overrides = { settings: pedigreeSettings };
+    if(hasCustomBackground) overrides.useBackground = true;
+    const bytes = await buildDynamicGenericPedigreePdfBytes(r, prof, overrides);
+    await sharePdfBlob(new Blob([bytes], { type:'application/pdf' }), `${(r.name||'pedigree').replace(/\s+/g,'-')}-pedigree.pdf`, r.name+' — Pedigree');
+  }catch(err){
+    console.error(err);
+    showToast('Could not make the PDF to share.');
+  }
+}
 async function downloadOfficialPedigreePDF(r, opts){
   try{
     const myProfileForPdf = await getMyPedigreeProfile();
@@ -8169,7 +8227,8 @@ function openPdfPreviewSheet(blob, filename, title){
   openSheet(`<button class="close-x" id="pv-x">&times;</button><h2>${esc(title)}</h2>
     <div class="card-sub" style="margin-bottom:8px;">Preview — nothing is saved until you tap Save PDF.</div>
     <iframe src="${url}#toolbar=0&navpanes=0" title="Pedigree preview" style="width:100%;height:60vh;border:1px solid var(--line);border-radius:10px;background:#fff;"></iframe>
-    <div class="sheet-actions"><button class="btn btn-secondary" id="pv-close">Close</button><button class="btn btn-primary" id="pv-save">Save PDF</button></div>`);
+    <div class="sheet-actions"><button class="btn btn-secondary" id="pv-close">Close</button><button class="btn btn-secondary" id="pv-save">Save PDF</button><button class="btn btn-primary" id="pv-share">Share</button></div>`);
+  document.getElementById('pv-share').onclick=()=>{ sharePdfBlob(blob, filename, title); };
   document.getElementById('pv-x').onclick=done; document.getElementById('pv-close').onclick=done;
   document.getElementById('pv-save').onclick=()=>{
     const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
@@ -8397,6 +8456,7 @@ async function generateStaticTemplatePedigreePDF(r, myProfileForPdf, templateNam
     const blob = new Blob([pdfBytes], { type:'application/pdf' });
     const fileName = `${(r.name||'pedigree').replace(/\s+/g,'-')}-pedigree.pdf`;
     if(opts && opts.preview){ openPdfPreviewSheet(blob, fileName, r.name+' — Pedigree preview'); return; }
+    if(opts && opts.share){ await sharePdfBlob(blob, fileName, r.name+' — Pedigree'); return; }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -9489,7 +9549,7 @@ function renderProfile(){
   if(profileTab==='overview') body.innerHTML = overviewTabHTML(r);
   else if(profileTab==='breeding') body.innerHTML = breedingTabHTML(r);
   else if(profileTab==='litters') body.innerHTML = littersTabHTML(r);
-  else if(profileTab==='pedigree') body.innerHTML = `<div id="pedTreeWrap">${pedigreeTreeHTML(r)}</div>${pedPrintOptionsHTML()}<div class="sheet-actions" style="flex-wrap:wrap;"><button class="btn btn-secondary" style="flex:1;" id="profPedPreview">Preview</button><button class="btn btn-primary" style="flex:1;" id="profOfficialPdf">Print / Save PDF</button></div><div class="sheet-actions"><button class="btn btn-secondary" style="width:100%;" id="profBirthCert">Birth certificate (for a sale with no pedigree)</button></div>`;
+  else if(profileTab==='pedigree') body.innerHTML = `<div id="pedTreeWrap">${pedigreeTreeHTML(r)}</div>${pedPrintOptionsHTML()}<div class="sheet-actions" style="flex-wrap:wrap;"><button class="btn btn-secondary" style="flex:1;" id="profPedPreview">Preview</button><button class="btn btn-secondary" style="flex:1;" id="profOfficialPdf">Print / Save PDF</button><button class="btn btn-primary" style="flex:1;" id="profPedShare">Share</button></div><div class="sheet-actions"><button class="btn btn-secondary" style="width:100%;" id="profBirthCert">Birth certificate (for a sale with no pedigree)</button></div>`;
   else if(profileTab==='photos') body.innerHTML = photosTabHTML(r);
   else if(profileTab==='notes') body.innerHTML = notesTabHTML(r);
   wireProfileTab(r);
@@ -9667,6 +9727,7 @@ function wireProfileTab(r){
   if(profileTab==='pedigree'){
     wirePedigreeTaps(document.getElementById('profileBody'), r, renderProfile); wirePedPrintOptions(r);
     const pob=document.getElementById('profOfficialPdf'); if(pob) pob.onclick=()=>downloadOfficialPedigreePDF(r);
+    const psh=document.getElementById('profPedShare'); if(psh) psh.onclick=()=>shareOfficialPedigreePDF(r);
     const ppv=document.getElementById('profPedPreview'); if(ppv) ppv.onclick=()=>downloadOfficialPedigreePDF(r,{preview:true});
     const bcb=document.getElementById('profBirthCert'); if(bcb) bcb.onclick=()=>openBirthCertSheet(r);
   }
@@ -11580,7 +11641,17 @@ function tourSeenKey(){ return 'hn_tour_seen_'+((currentUser&&currentUser.id)||'
 function tourWasSeen(){ try{ return localStorage.getItem(tourSeenKey())==='1'; }catch(e){ return true; } }
 function tourMarkSeen(){ try{ localStorage.setItem(tourSeenKey(),'1'); }catch(e){} }
 function closeTour(){ const o=document.getElementById('tourOv'); if(o) o.remove(); document.removeEventListener('keydown',tourKey); tourMarkSeen(); try{ render(); }catch(e){} }
-function tourKey(e){ if(e.key==='Escape') closeTour(); }
+function tourKey(e){
+  if(e.key==='Escape'){ closeTour(); return; }
+  if(e.key==='Tab'){   // keep keyboard focus inside the tour while it is open
+    const o=document.getElementById('tourOv'); if(!o) return;
+    const f=[...o.querySelectorAll('button')]; if(!f.length) return;
+    const first=f[0], last=f[f.length-1];
+    if(!o.contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+    else if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+  }
+}
 function maybeStartTour(){
   try{
     if(!currentUser || viewingAsCustomer || localSandboxMode) return;
