@@ -80,6 +80,7 @@
   /* Keep the page the same width whether or not it is tall enough to scroll, so the search bar does not grow and shrink when you switch Herd / All. */
   html{ scrollbar-gutter:stable; }
   @supports not (scrollbar-gutter:stable){ html{ overflow-y:scroll; } }
+  #searchModeSeg{ display:none !important; }
   .search-mode{ flex:0 0 auto; flex-direction:column; gap:3px; padding:3px; width:64px; height:46px; box-sizing:border-box; border-radius:12px; border:1.5px solid var(--line,#CABB95); background:var(--card,#FFFDF8); }
   .search-mode button{ display:flex; align-items:center; justify-content:center; flex:1 1 0; width:100%; height:auto; align-self:stretch; min-height:0 !important; padding:0 !important; font-size:11px !important; font-weight:700 !important; line-height:1; letter-spacing:.01em; border-radius:8px !important; border:0 !important; background:transparent !important; color:var(--ink-soft,#475569) !important; white-space:nowrap; transition:background .15s,color .15s; }
   .search-mode button.on{ background:var(--navy) !important; color:var(--page,#F7F2E6) !important; }
@@ -441,7 +442,7 @@
   .pdn-row .pn{ font-family:'Cormorant Garamond',serif; font-weight:700; font-size:16.5px; color:var(--navy); line-height:1.15; }
   .pdn-row .pc{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
   .pdn-grow{ flex:1; min-width:0; }
-  .pdn-nest{ margin:6px 0 0 12px; padding-left:10px; border-left:2px solid var(--line-strong); display:flex; flex-direction:column; gap:6px; }
+  .pdn-nest{ margin:6px 0 0 14px; padding-left:12px; border-left:2px solid var(--line-strong); display:flex; flex-direction:column; gap:6px; }
   .pdn-tg{ display:flex; align-items:center; justify-content:space-between; width:100%; box-sizing:border-box; margin-top:6px; padding:7px 12px; background:transparent; border:1px dashed var(--line-strong); border-radius:10px; font-family:'Public Sans',sans-serif; font-size:12.5px; font-style:italic; color:var(--ink-soft); cursor:pointer; text-align:left; }
   .pdn-tg b{ font-style:normal; font-weight:600; color:var(--gold-deep); font-size:15px; }
   .pdn-more{ display:none; }
@@ -735,7 +736,7 @@
   .ov-label{ font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.04em; color:var(--ink-soft); opacity:.7; margin-bottom:3px; }
   .ov-val{ font-size:14px; color:var(--ink); font-weight:500; }
   .qa-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
-  .primary-photo{ width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:12px; border:1px solid var(--line); margin-bottom:14px; display:block; background:var(--line); }
+  .primary-photo{ width:100%; max-width:320px; max-height:240px; aspect-ratio:4/3; object-fit:cover; border-radius:12px; border:1px solid var(--line); margin-bottom:14px; display:block; background:var(--line); }
   .photo-chips{ display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:12px; }
   .photo-chip{ flex:0 0 auto; padding:8px 12px; border-radius:20px; border:1px solid var(--line-strong); background:var(--card); font-family:'Jost',sans-serif; font-size:12px; font-weight:600; color:var(--ink); cursor:pointer; white-space:nowrap; }
   .photo-chip.on{ background:var(--navy); color:var(--page); border-color:var(--navy); }
@@ -789,6 +790,52 @@
   .agreement-sig{ margin-bottom:6px; }
   #sigCanvas{ width:100%; height:180px; touch-action:none; background:#fffdf8; border:1px solid var(--line-strong); border-radius:10px; display:block; }
   #authScreen.hidden{ display:none; }
+  body.restoring #authScreen .auth-card{ visibility:hidden; }
+
+  /* ===== NEW ACCOUNT TOUR (display only: never reads or writes account data) ===== */
+  #tourOv{ position:fixed; inset:0; z-index:400; background:#1a0f1e; display:flex; justify-content:center; font-family:'Public Sans',system-ui,sans-serif; }
+  #tourOv .tr-frame{ position:relative; width:100%; max-width:430px; height:100%; background:#f7f1ee; color:#2a1a2e; overflow:hidden; display:flex; flex-direction:column; }
+  #tourOv .tr-hdr{ background:#3a1d44; color:#fff; padding:calc(16px + env(safe-area-inset-top)) 16px 14px; }
+  #tourOv .tr-hdr b{ font:700 26px/1.1 'Cormorant Garamond',Georgia,serif; display:block; }
+  #tourOv .tr-hdr small{ font-size:12px; opacity:.9; display:block; margin-top:4px; }
+  #tourOv .tr-row{ display:flex; gap:8px; padding:12px 16px; align-items:center; }
+  #tourOv .tr-pill{ flex:1; height:42px; border-radius:21px; background:#fff; border:1px solid #e1d5d1; display:flex; align-items:center; justify-content:center; font:600 13px 'Public Sans',sans-serif; }
+  #tourOv .tr-pill.on{ background:#3a1d44; color:#fff; border-color:#3a1d44; }
+  #tourOv .tr-search{ flex:1; height:48px; border-radius:24px; border:1px solid #e1d5d1; background:#fff; display:flex; align-items:center; padding:0 16px; font-size:14px; color:#8a7c8c; }
+  #tourOv .tr-plus{ width:48px; height:48px; flex:none; border-radius:24px; background:#a7d63a; color:#2a1a2e; display:flex; align-items:center; justify-content:center; }
+  #tourOv .tr-spot{ position:relative; z-index:2; box-shadow:0 0 0 100vmax rgba(42,26,46,.62), 0 0 0 5px rgba(255,255,255,.6); }
+  #tourOv .tr-banner{ margin:0 16px; background:#e9a98f; border-radius:10px; padding:8px 12px; font-size:12px; font-weight:700; text-align:center; }
+  #tourOv .tr-slot{ margin:0 16px 8px; background:#fff; border:1px solid #e1d5d1; border-radius:12px; padding:12px 14px; display:flex; gap:12px; align-items:center; }
+  #tourOv .tr-slot i{ font-style:normal; width:60px; font-size:10px; letter-spacing:.08em; font-weight:700; color:#b8452d; }
+  #tourOv .tr-slot span{ font:700 18px 'Cormorant Garamond',Georgia,serif; color:#8a7c8c; }
+  #tourOv .tr-card{ position:absolute; left:16px; right:16px; bottom:calc(20px + env(safe-area-inset-bottom)); z-index:5; background:#fff; border-radius:18px; box-shadow:0 12px 40px rgba(20,8,24,.35); padding:18px 18px 14px; }
+  #tourOv .tr-dots{ display:flex; gap:6px; margin-bottom:12px; }
+  #tourOv .tr-dots span{ height:8px; width:8px; border-radius:4px; background:#d6c9c5; }
+  #tourOv .tr-dots span.on{ width:22px; background:#3a1d44; }
+  #tourOv .tr-card h3{ margin:0; font:700 24px/1.1 'Cormorant Garamond',Georgia,serif; }
+  #tourOv .tr-card p{ margin:6px 0 0; font-size:14px; line-height:1.4; color:#4a3b4d; }
+  #tourOv .tr-acts{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; }
+  #tourOv .tr-skip{ min-height:44px; border:0; background:transparent; color:#6d5f70; font:600 14px 'Public Sans',sans-serif; padding:0 6px; cursor:pointer; }
+  #tourOv .tr-next{ min-height:48px; border:0; border-radius:24px; background:#b8452d; color:#fff; font:700 15px 'Public Sans',sans-serif; padding:0 28px; cursor:pointer; }
+  #tourOv .tr-welcome{ background:#3a1d44; color:#fff; padding:0 28px; justify-content:center; }
+  #tourOv .tr-welcome .tr-big{ font:700 44px/1.05 'Cormorant Garamond',Georgia,serif; }
+  #tourOv .tr-welcome .tr-big em{ color:#e9a98f; }
+  #tourOv .tr-welcome h2{ margin:34px 0 0; font:700 28px/1.15 'Cormorant Garamond',Georgia,serif; color:#fff; }
+  #tourOv .tr-welcome p{ margin:14px 0 0; font-size:16px; line-height:1.45; opacity:.9; }
+  #tourOv .tr-welcome .tr-btns{ display:flex; flex-direction:column; gap:10px; margin-top:34px; }
+  #tourOv .tr-welcome .tr-next{ width:100%; min-height:54px; border-radius:27px; font-size:17px; }
+  #tourOv .tr-welcome .tr-skip{ width:100%; min-height:54px; color:#fff; font-size:16px; }
+  #tourOv .tr-sheet{ position:absolute; left:16px; right:16px; top:calc(120px + env(safe-area-inset-top)); background:#fff; border-radius:18px; padding:18px 18px 16px; z-index:2; box-shadow:0 0 0 100vmax rgba(42,26,46,.62); }
+  #tourOv .tr-sheet h4{ margin:0; font:700 24px/1.1 'Cormorant Garamond',Georgia,serif; }
+  #tourOv .tr-lbl{ font-size:11px; letter-spacing:.1em; font-weight:700; color:#6d5f70; margin-top:12px; }
+  #tourOv .tr-step{ display:flex; align-items:center; justify-content:center; gap:20px; margin-top:8px; }
+  #tourOv .tr-step b{ width:50px; height:50px; border-radius:25px; border:1.5px solid #2a1a2e; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:600; }
+  #tourOv .tr-step b.p{ background:#3a1d44; color:#fff; border-color:#3a1d44; }
+  #tourOv .tr-step span{ font:700 50px/1 'Cormorant Garamond',Georgia,serif; min-width:56px; text-align:center; }
+  #tourOv .tr-save{ margin-top:14px; height:48px; border-radius:24px; background:#b8452d; color:#fff; font:700 16px 'Public Sans',sans-serif; display:flex; align-items:center; justify-content:center; }
+  .empty-home{ background:var(--card,#fff); border:1px solid var(--line,#e1d5d1); border-radius:18px; padding:22px 18px; text-align:center; margin-bottom:12px; }
+  .empty-home h3{ margin:0; font-size:26px; }
+  body.restoring #authScreen::after{ content:'Signing you in…'; position:absolute; left:0; right:0; top:46%; text-align:center; font-weight:600; color:var(--ink-soft,#6d5f70); }
   .auth-card{ width:min(430px,100%); background:var(--card); border:1px solid var(--line); border-radius:18px; padding:28px 22px 24px; box-shadow:0 12px 40px rgba(12,24,48,.10); }
   .auth-brand{ text-align:center; margin-bottom:24px; }
   .auth-eyebrow{ font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.08em; color:var(--gold-deep); margin-bottom:5px; }
@@ -973,6 +1020,12 @@
 if (window.pdfjsLib) { pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js'; }
 const SUPABASE_URL = 'https://xzsclktdryieozfvtqkv.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_pSzehmsrfUstMmwI4zjX-w_4SsNkvdI';
+// If a saved login exists on this device, show "Signing you in…" instead of flashing the login form.
+try{
+  let _saved=false;
+  for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k && /^sb-.*-auth-token$/.test(k)){ _saved=true; break; } }
+  if(_saved){ document.body.classList.add('restoring'); setTimeout(()=>document.body.classList.remove('restoring'),8000); }
+}catch(e){}
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 let currentUser = null;
 let myProfile = null, isAdminUser = false, adminSelf = null, viewingAsCustomer = null;
@@ -1019,9 +1072,10 @@ async function initCloudStorage(user, opts){
     cloudDataCache = row.data || {};
   } else {
     cloudDataCache = {};
-    // Migrate existing local data on this device when available (never when an admin
-    // is opening someone else's account: that account must only ever hold its own data).
-    const legacyKeys = (opts && opts.noLegacy) ? [] : [RABBITS_KEY, PLANNED_KEY, EVENTS_KEY, THEME_KEY];
+    // A brand-new account starts completely empty. It used to copy any old HerdNerd data found in this browser
+    // into the new account; that is switched off so nothing left on a device (old or demo data) can ever land in a
+    // new account. The old data is not touched; it simply stays where it is.
+    const legacyKeys = [];
     for(const key of legacyKeys){
       try{ cloudDataCache[key] = JSON.parse((await legacyStorage.get(key)).value); }catch(e){
         try{ cloudDataCache[key] = (await legacyStorage.get(key)).value; }catch(ignore){}
@@ -1055,6 +1109,9 @@ async function initCloudStorage(user, opts){
       let parsed;
       try{ parsed=JSON.parse(val); }catch(e){ parsed=val; }
       const oldVal = cloudDataCache[key];
+      // Nothing changed since this list was loaded or last saved: skip the database call. The database already
+      // holds exactly this, so nothing is lost, and it stops identical copies piling up in the save history.
+      try{ if((key in cloudDataCache) && JSON.stringify(oldVal)===JSON.stringify(parsed)) return {ok:true, unchanged:true}; }catch(e){}
       cloudDataCache[key]=parsed;
       const rpcArgs = { p_key:key, p_value:parsed };
       // Admin "view as customer" writes to the customer's row, not the
@@ -2119,13 +2176,15 @@ let rabbits = [], planned = [], customEvents = [], shows = [], expenses = [], cu
 let profileRabbitId = null, profileTab = 'overview', photoActiveCategory = 'Primary';
 let expandedLitters = new Set();
 let calWeekStart = null, calSelectedDate = null;
-let searchMode = 'herd';   // 'herd' or 'relatives': what the one search bar looks for
+let searchMode = 'herd';   // 'herd' (rabbits in your herd), 'anc' (ancestors of your herd), 'all' (everyone ever entered)
 
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function addDays(d,n){ const x=new Date(d+'T00:00:00'); x.setDate(x.getDate()+n); return x.toISOString().slice(0,10); }
 function daysBetween(a,b){ return Math.round((new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/86400000); }
 function fmtDate(d){ if(!d) return ''; return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
-function fmtMoney(n){ n=Number(n)||0; return (n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtMoney(n){ n=Number(n)||0; if(Math.abs(n)<0.005) n=0; return (n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+// A price was entered (including $0 for a gift or trade) — as opposed to left blank.
+function priceEntered(v){ if(v==null) return false; const t=String(v).trim(); if(t==='') return false; const n=parseFloat(t.replace(/[^0-9.\-]/g,'')); return isFinite(n) && n>=0; }
 function parsePriceNum(v){ if(v==null) return 0; const n=parseFloat(String(v).replace(/[^0-9.\-]/g,'')); return isFinite(n)?n:0; }
 const EXPENSE_CATEGORIES = ['Feed','Hay & bedding','Caging & wire','Vet & meds','Show & entry fees','ARBA & registration','Supplies','Shipping & travel','Other'];
 function moneyPeriodRange(period){
@@ -2267,7 +2326,34 @@ async function loadData(){
   let savedTheme=null; try{ savedTheme=(await window.storage.get(THEME_KEY,false)).value; }catch(e){ savedTheme=lookCopyGet('theme'); }
   if(savedTheme==='dark') document.documentElement.setAttribute('data-theme','dark'); else document.documentElement.removeAttribute('data-theme');
   let savedPalette=null; try{ savedPalette=(await window.storage.get(PALETTE_KEY,false)).value; }catch(e){ savedPalette=lookCopyGet('palette'); }
+  // Ribbon is the new standard look. Once per account (flag look_default_v1) the account is moved to it;
+  // the colors it had before are kept in palette_prev_v1 so nothing is lost and it can be switched back in Colors.
+  // An admin viewing a customer sees Ribbon but nothing is written to that customer's account.
+  { let flagSeen=false, flagMissing=false;
+    try{ await window.storage.get('look_default_v1',false); flagSeen=true; }catch(e){ flagMissing = !!(e && e.message==='not found'); }
+    if(!flagSeen && flagMissing && cloudDataReady){
+      const prev=savedPalette;
+      if(viewingAsCustomer){ savedPalette='ribbon'; }
+      else {
+        try{
+          if(prev && prev!=='ribbon') await window.storage.set('palette_prev_v1', prev, false);
+          await window.storage.set(PALETTE_KEY, 'ribbon', false);
+          await window.storage.set('look_default_v1', '1', false);
+          lookCopySet('palette','ribbon'); savedPalette='ribbon';
+        }catch(e){ console.warn('Could not switch to the new look yet', e); }
+      }
+    }
+  }
+  { let cv=null; try{ cv=(await window.storage.get(CUSTOM_PALETTE_KEY,false)).value; }catch(e){ cv=lookCopyGet('palette_custom'); } const cp=parseCustomPal(cv); if(cp) customPal=cp; }
+  { const okIds=PALETTES.filter(x=>x.look).map(x=>x.id).concat(['custom']);
+    if(!okIds.includes(savedPalette)){
+      const prev=savedPalette; savedPalette='ribbon';
+      if(!viewingAsCustomer && cloudDataReady){
+        try{ if(prev) await window.storage.set('palette_prev_v1', prev, false); await window.storage.set(PALETTE_KEY,'ribbon',false); lookCopySet('palette','ribbon'); }catch(e){ console.warn('Could not save the new look yet', e); }
+      }
+    } }
   applyPalette(savedPalette);
+  lookCopySet('palette', currentPaletteId); lookCopySet('palette_custom', customPal.main+','+customPal.accent); lookCopySet('theme', savedTheme==='dark'?'dark':'light');
   render();
   // In the background (so the app opens right away): shrink any saved photos
   // over the size budget, then move photos into their own records.
@@ -2383,13 +2469,19 @@ async function softRemoveItem(kind, id){
   const entry={ id:uid(), deletedAt:todayStr(), kind, item:JSON.parse(JSON.stringify(gone)) };
   trash.push(entry);
   if(!(await saveTrash())){ trash=trash.filter(t=>t!==entry); showToast("Couldn't remove — check your connection and try again."); return false; }
-  k.set(k.list().filter(x=>x.id!==id)); k.save();
+  const beforeList=k.list();
+  k.set(beforeList.filter(x=>x.id!==id));
+  if((await k.save())===false){ k.set(beforeList); trash=trash.filter(t=>t!==entry); await saveTrash(); showToast("Couldn't remove — it was not changed. Check your connection and try again."); return false; }
   return true;
 }
 async function restoreTrashItem(tid){
   const t=trash.find(x=>x.id===tid); if(!t||!t.kind||!t.item) return false;
   const k=TRASH_KINDS[t.kind]; if(!k) return false;
-  if(!k.list().some(x=>x.id===t.item.id)){ k.set(k.list().concat([JSON.parse(JSON.stringify(t.item))])); await k.save(); }
+  if(!k.list().some(x=>x.id===t.item.id)){
+    const before=k.list();
+    k.set(before.concat([JSON.parse(JSON.stringify(t.item))]));
+    if((await k.save())===false){ k.set(before); showToast("Couldn't restore — check your connection and try again. It is still in Recently deleted."); return false; }
+  }
   trash=trash.filter(x=>x.id!==tid); await saveTrash();
   return true;
 }
@@ -2572,7 +2664,7 @@ function addBackFromBackup(text){
 // comes back to the front) this quietly asks the website for the current version number.
 // If a newer version exists it shows a small "Refresh" bar. It never reloads by itself,
 // so nobody loses what they are typing, and it never touches anyone's data.
-const APP_VERSION = '2026-10-19-pedpanel';
+const APP_VERSION = '2026-10-22-multigroup';
 let updateBannerShown = false;
 async function checkForNewVersion(){
   if(updateBannerShown) return;
@@ -2602,6 +2694,10 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState=
 const PROJECTS_KEY='projects_v1';
 const MAX_PROJECTS=12;
 let projectFilter='all', selectMode=false, selectedIds=new Set();
+let projectAlso=[];
+let groupAlso=[];   // extra groups shown together with rabbitsGroup (Does / Bucks / Juniors can be combined)
+function activeGroups(){ const on=[rabbitsGroup].concat(groupAlso); return ['does','bucks','juniors'].filter(g=>on.includes(g)); }   // extra projects that a rabbit must ALSO be in (tap several project chips = in all of them)
+function activeProjIds(){ return projectFilter==='all'?[]:[projectFilter].concat(projectAlso); }
 async function saveProjects(){
   if(!projectsSafe){ showToast("Your projects didn't load, so they can't be changed right now. Refresh and try again."); return false; }
   try{ await window.storage.set(PROJECTS_KEY, JSON.stringify(projects), false); return true; }
@@ -2686,7 +2782,7 @@ function openProjectsManage(after){
       const i=projects.findIndex(p=>p.id===b.dataset.pjrm); if(i<0) return;
       const gone=projects.splice(i,1)[0];
       if(!(await saveProjects())){ projects.splice(i,0,gone); return; }
-      if(projectFilter===gone.id) projectFilter='all';
+      if(projectFilter===gone.id){ projectFilter=projectAlso.length?projectAlso.shift():'all'; } else projectAlso=projectAlso.filter(x=>x!==gone.id);
       draw();
     });
     document.querySelectorAll('[data-pjren]').forEach(b=>b.onclick=()=>{
@@ -2705,17 +2801,38 @@ function openProjectsManage(after){
   };
   draw();
 }
+// Projects + Carries filters can be folded away (remembered on this device only; nothing saved to the account).
+let herdFiltersOpen = (()=>{ try{ return localStorage.getItem('hn_flt_open')!=='0'; }catch(e){ return true; } })();
+function filtersBlock(list){
+  const inner = projectBar(list) + (selectMode?'':traitBar(list));
+  if(selectMode || (!projects.length && !traits.length)) return inner;
+  const pjNames = activeProjIds().map(id=>(projects.find(p=>p.id===id)||{}).name).filter(Boolean).join(' + ');
+  const tr = traitFilter ? traits.find(t=>t.id===traitFilter.id) : null;
+  const st = {yes:'Carries',no:"Doesn't carry",unknown:'Unknown'};
+  const active = [pjNames, tr?`${st[traitFilter.state]} ${tr.name}`:''].filter(Boolean).join(' · ');
+  return `<button type="button" id="flt-toggle" class="attn-viewall" aria-expanded="${herdFiltersOpen}" style="display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;"><span>Projects &amp; carries${!herdFiltersOpen&&active?' &middot; <b>'+esc(active)+'</b>':''}</span><span>${herdFiltersOpen?'&#8963;':'&#8964;'}</span></button>`
+    + (herdFiltersOpen ? inner : '');
+}
 function projectBar(list){
   if(!projects.length) return `<div class="pj-bar"><button class="pj-chip pj-ghost" id="pj-first">+ Start a project (like a bloodline or breeding goal)</button></div>`;
-  const chip=(id,l,n)=>`<button class="pj-fchip ${projectFilter===id?'on':''}" data-pjf="${id}">${esc(l)}${n==null?'':` <span>${n}</span>`}</button>`;
-  return `<div class="pj-bar">${chip('all','All')}${projects.map(p=>chip(p.id,p.name,list.filter(r=>inProject(r,p.id)).length)).join('')}<button class="pj-fchip pj-ghost" id="pj-manage-top">Manage</button></div>`;
+  const act=activeProjIds();
+  const chip=(id,l,n)=>`<button class="pj-fchip ${(id==='all'?!act.length:act.includes(id))?'on':''}" data-pjf="${id}">${esc(l)}${n==null?'':` <span>${n}</span>`}</button>`;
+  return `<div class="pj-bar">${chip('all','All')}${projects.map(p=>chip(p.id,p.name,list.filter(r=>inProject(r,p.id)&&act.every(o=>o===p.id||inProject(r,o))).length)).join('')}<button class="pj-fchip pj-ghost" id="pj-manage-top">Manage</button></div>`;
 }
 function wireProjects(main, shown){
   const f=document.getElementById('pj-first'); if(f) f.onclick=()=>openProjectsManage();
   const m=document.getElementById('pj-manage-top'); if(m) m.onclick=()=>openProjectsManage();
-  document.querySelectorAll('[data-pjf]').forEach(b=>b.onclick=()=>{ projectFilter=b.dataset.pjf; selectedIds=new Set(); render(); });
+  document.querySelectorAll('[data-pjf]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.pjf;
+    if(id==='all'){ projectFilter='all'; projectAlso=[]; }
+    else if(projectFilter==='all'){ projectFilter=id; projectAlso=[]; }
+    else if(id===projectFilter){ if(projectAlso.length) projectFilter=projectAlso.shift(); else projectFilter='all'; }
+    else if(projectAlso.includes(id)){ projectAlso=projectAlso.filter(x=>x!==id); }
+    else projectAlso.push(id);
+    selectedIds=new Set(); render();
+  });
   const sel=document.getElementById('pj-select'); if(sel) sel.onclick=()=>{ selectMode=true; selectedIds=new Set(); render(); };
-  const can=document.getElementById('pj-cancel-sel'); if(can) can.onclick=()=>{ selectMode=false; selectedIds=new Set(); render(); };
+  ['pj-cancel-sel','pj-cancel-sel2'].forEach(id=>{ const can=document.getElementById(id); if(can) can.onclick=(e)=>{ if(e) e.preventDefault(); selectMode=false; selectedIds=new Set(); render(); window.scrollTo(0,0); }; });
   const all=document.getElementById('pj-selall'); if(all) all.onclick=()=>{ shown.forEach(r=>selectedIds.add(r.id)); render(); };
   document.querySelectorAll('[data-pjsel]').forEach(el=>el.onclick=()=>{ const id=el.dataset.pjsel; if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id); render(); });
   document.querySelectorAll('[data-pjbulk]').forEach(b=>b.onclick=()=>{
@@ -2730,10 +2847,11 @@ function selectRowsHTML(list){
   return list.map(r=>`<div class="pj-selrow ${selectedIds.has(r.id)?'on':''}" data-pjsel="${r.id}"><span class="pj-box">${selectedIds.has(r.id)?'&#10003;':''}</span><span style="flex:1"><b class="card-name" style="font-size:18px;">${esc(r.name)}</b><div class="card-sub">${subLine(r)}</div></span>${projOf(r).map(p=>`<span class="pj-chip">${esc(p.name)}</span>`).join('')}</div>`).join('');
 }
 function selectBarHTML(){
-  const n=selectedIds.size, pid = (projectFilter!=='all'?projectFilter:(window.__pjTarget&&projects.find(p=>p.id===window.__pjTarget)?window.__pjTarget:''));
+  const n=selectedIds.size, pid = (projectFilter!=='all'&&!projectAlso.length?projectFilter:(window.__pjTarget&&projects.find(p=>p.id===window.__pjTarget)?window.__pjTarget:''));
   const nm=(projects.find(p=>p.id===pid)||{}).name;
   return `<div class="pj-selbar"><div class="lit-label">Add to project</div><div class="pj-pick">${projects.map(p=>`<button class="pj-opt ${p.id===pid?'on':''}" data-pjtarget="${p.id}">${esc(p.name)}</button>`).join('')}</div>
-    <div style="display:flex;gap:8px;"><button class="btn btn-primary" style="flex:1" ${n&&pid?'':'disabled'} data-pjbulk="${pid}" data-pjmode="add">${pid?`Add ${n} to ${esc(nm)}`:'Pick a project'}</button><button class="btn btn-secondary" ${n&&pid?'':'disabled'} data-pjbulk="${pid}" data-pjmode="remove">Remove</button></div></div>`;
+    <div style="display:flex;gap:8px;"><button class="btn btn-primary" style="flex:1" ${n&&pid?'':'disabled'} data-pjbulk="${pid}" data-pjmode="add">${pid?`Add ${n} to ${esc(nm)}`:'Pick a project'}</button><button class="btn btn-secondary" ${n&&pid?'':'disabled'} data-pjbulk="${pid}" data-pjmode="remove">Remove</button></div>
+    <button class="btn btn-secondary" style="width:100%;" id="pj-cancel-sel2">Cancel &mdash; leave without changing anything</button></div>`;
 }
 document.addEventListener('click',(ev)=>{ const b=ev.target.closest&&ev.target.closest('[data-pjtag]'); if(b){ ev.stopPropagation(); openProjectTagSheet(b.dataset.pjtag); } });
 // ===== PROJECTS END =====
@@ -2757,7 +2875,7 @@ function carryChipsHTML(r){
 function herdFilter(list){
   if(selectMode) return list;
   let out=list;
-  if(projectFilter!=='all') out=out.filter(r=>inProject(r,projectFilter));
+  activeProjIds().forEach(id=>{ out=out.filter(r=>inProject(r,id)); });
   if(traitFilter && traits.some(t=>t.id===traitFilter.id)) out=out.filter(r=>carryState(r,traitFilter.id)===traitFilter.state);
   return out;
 }
@@ -3102,16 +3220,16 @@ async function saveQuickPicks(){
 }
 function currentViewIsFiltered(){ return projectFilter!=='all' || !!(traitFilter && traits.some(t=>t.id===traitFilter.id)); }
 function suggestPickName(){
-  const g={does:'Does',bucks:'Bucks',juniors:'Juniors'}[rabbitsGroup]||'';
-  const pr=projects.find(x=>x.id===projectFilter), tr=traitFilter&&traits.find(t=>t.id===traitFilter.id);
+  const g=activeGroups().length===3?'Herd':activeGroups().map(x=>({does:'Does',bucks:'Bucks',juniors:'Juniors'}[x])).join(' + ');
+  const pr={name:activeProjIds().map(id=>(projects.find(x=>x.id===id)||{}).name).filter(Boolean).join(' + ')}, tr=traitFilter&&traits.find(t=>t.id===traitFilter.id);
   const st={yes:'carry',no:"don't carry",unknown:'unknown'};
-  return [pr?pr.name:'', g, tr?`${st[traitFilter.state]} ${tr.name}`:''].filter(Boolean).join(' ').slice(0,28);
+  return [pr.name, g, tr?`${st[traitFilter.state]} ${tr.name}`:''].filter(Boolean).join(' ').slice(0,28);
 }
 function applyQuickPick(q){
   const pr = q.project ? projects.find(x=>x.id===q.project) : null;
   const tr = q.trait ? traits.find(x=>x.id===q.trait.id) : null;
   if((q.project&&!pr) || (q.trait&&!tr)){ showToast('Part of this quick pick (a project or trait) was removed, so it was applied without it.'); }
-  currentTab='rabbits'; rabbitsGroup=q.group||'bucks'; projectFilter=pr?pr.id:'all';
+  currentTab='rabbits'; rabbitsGroup=q.group||'bucks'; groupAlso=(q.alsoGroups||[]).filter(x=>['does','bucks','juniors'].includes(x)&&x!==rabbitsGroup); projectFilter=pr?pr.id:'all'; projectAlso=(q.also||[]).filter(id=>projects.some(x=>x.id===id) && id!==projectFilter); if(projectFilter==='all') projectAlso=[];
   traitFilter=tr?{id:tr.id,state:q.trait.state}:null; selectMode=false; selectedIds=new Set();
   if(q.group==='does') doesFilter='all';
   render(); window.scrollTo(0,0);
@@ -3127,7 +3245,7 @@ function openSaveQuickPick(){
     const v=document.getElementById('qp-name').value.trim(); if(!v) return;
     if(quickPicks.some(q=>q.name.toLowerCase()===v.toLowerCase())){ showToast('You already have one with that name'); return; }
     const tr=traitFilter&&traits.find(t=>t.id===traitFilter.id);
-    const q={id:uid(), name:v, group:rabbitsGroup, project:projectFilter!=='all'?projectFilter:null, trait:tr?{id:tr.id,state:traitFilter.state}:null};
+    const q={id:uid(), name:v, group:rabbitsGroup, alsoGroups:groupAlso.slice(), project:projectFilter!=='all'?projectFilter:null, also:projectAlso.slice(), trait:tr?{id:tr.id,state:traitFilter.state}:null};
     quickPicks.push(q);
     if(!(await saveQuickPicks())){ quickPicks.pop(); return; }
     closeSheet(); render(); showToast('Saved');
@@ -3164,7 +3282,7 @@ function openQuickPicksManage(){
 }
 function quickPickActive(q){
   const tr = traitFilter && traits.some(t=>t.id===traitFilter.id) ? traitFilter : null;
-  return (q.group||'bucks')===rabbitsGroup && (q.project||'all')===projectFilter
+  return (q.group||'bucks')===rabbitsGroup && JSON.stringify((q.alsoGroups||[]).slice().sort())===JSON.stringify(groupAlso.slice().sort()) && (q.project||'all')===projectFilter && JSON.stringify((q.also||[]).slice().sort())===JSON.stringify(projectAlso.slice().sort())
     && ((q.trait&&q.trait.id)||null)===(tr?tr.id:null) && ((q.trait&&q.trait.state)||null)===(tr?tr.state:null);
 }
 function quickPickBar(){
@@ -3220,7 +3338,7 @@ function openProjectWarnSheet(pid){
 
 // ===== ACCOUNT SWITCH CLEAN-UP START =====
 function clearAccountMemory(){
-  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; quickPicks = []; quickPicksSafe = false; alertPrefs = {off:{},nestDays:3,palpateDays:14}; alertsSafe = false; customReminders = []; remindersSafe = false; trash = []; trashSafe = false; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
+  litterUiOn = false; nurseryTab = 'nursing'; customKitTags = DEFAULT_CUSTOM_KIT_TAGS.slice(); waitlist = []; waitlistSafe = false; kitTagsSafe = false; projects = []; projectsSafe = false; traits = []; traitsSafe = false; quickPicks = []; quickPicksSafe = false; alertPrefs = {off:{},nestDays:3,palpateDays:14}; alertsSafe = false; customReminders = []; remindersSafe = false; trash = []; trashSafe = false; kq = null; try{ nnKitsOpen.clear(); }catch(e){} attnGrpOpen = {overdue:true}; attnGrpAll = {}; traitFilter = null; projectFilter = 'all'; selectMode = false; selectedIds = new Set();
   rabbits = []; planned = []; customEvents = []; shows = []; expenses = [];
   pedigreeSettings = defaultPedigreeSettings();
   trash = [];
@@ -3358,9 +3476,9 @@ function showSaveError(message){
 function hideSaveError(){
   document.getElementById('saveErrorBanner').classList.remove('on');
 }
-async function savePlanned(){ try{ await window.storage.set(PLANNED_KEY, JSON.stringify(planned), false); }catch(e){ console.error(e); } }
-async function saveEvents(){ try{ await window.storage.set(EVENTS_KEY, JSON.stringify(customEvents), false); }catch(e){ console.error(e); } }
-async function saveShows(){ try{ await window.storage.set(SHOWS_KEY, JSON.stringify(shows), false); }catch(e){ console.error(e); } }
+async function savePlanned(){ try{ await window.storage.set(PLANNED_KEY, JSON.stringify(planned), false); return true; }catch(e){ console.error(e); return false; } }
+async function saveEvents(){ try{ await window.storage.set(EVENTS_KEY, JSON.stringify(customEvents), false); return true; }catch(e){ console.error(e); return false; } }
+async function saveShows(){ try{ await window.storage.set(SHOWS_KEY, JSON.stringify(shows), false); return true; }catch(e){ console.error(e); return false; } }
 async function saveExpenses(){
   try{ await window.storage.set(EXPENSES_KEY, JSON.stringify(expenses), false); return true; }
   catch(e){ console.error(e); showToast("Couldn't save — check your connection and try again."); return false; }
@@ -3475,8 +3593,44 @@ const PALETTES = [
    dark:{'--page':'#17101A','--cream':'#17101A','--card':'#231A27','--ivory':'#231A27','--ink':'#F3EAF4','--ink-soft':'#C9B8CD',
      '--line':'#33263A','--line-strong':'#4A3A52','--navbar':'#2A1A2E','--gold':'#FF7A63','--gold-deep':'#FF7A63',
      '--rb-coral':'#FF7A63','--rb-coral-ink':'#2A0F0A','--rb-text':'#FF8C78','--rb-outline':'#D8C6F5','--rb-hero-bg':'linear-gradient(180deg,#2A1A2E,#17101A)','--rb-hero-ink':'#ffffff','--rb-hero-dim':'#B7A3BC',
-     '--rb-track':'#3B2C42','--rb-nav':'#2E2133','--rb-nav-on':'#F3EAF4','--rb-nav-on-ink':'#2A1A2E','--rb-shadow':'rgba(0,0,0,.45)'}}
+     '--rb-track':'#3B2C42','--rb-nav':'#2E2133','--rb-nav-on':'#F3EAF4','--rb-nav-on-ink':'#2A1A2E','--rb-shadow':'rgba(0,0,0,.45)'}},
+  /* Ribbon-layout presets: only two colors are given; ribbonGen() works out every other shade (light and dark) */
+  {id:'rb-heritage', name:'Navy & gold (original colors)', main:'#142440', accent:'#c6a15b', look:true, gen:true},
+  {id:'rb-midnight', name:'Midnight & marigold', main:'#1B1F3B', accent:'#F5A524', look:true, gen:true},
+  {id:'rb-peacock',  name:'Peacock & apricot',   main:'#0B4F6C', accent:'#FF9F6E', look:true, gen:true},
+  {id:'rb-raspberry',name:'Raspberry & cream',   main:'#8A1C4A', accent:'#FF7B9C', look:true, gen:true},
+  {id:'rb-moss',     name:'Moss & rose',         main:'#33472E', accent:'#E07A8F', look:true, gen:true},
+  {id:'rb-eggplant', name:'Eggplant & lime',     main:'#3B1E54', accent:'#A8D93A', look:true, gen:true}
 ];
+/* "Make your own": two colors the account picks, saved in palette_custom_v1 as "#main,#accent" */
+const CUSTOM_PALETTE_KEY = 'palette_custom_v1';
+let customPal = {main:'#3F1B42', accent:'#E0533D'};
+function validHex(h){ return typeof h==='string' && /^#[0-9a-fA-F]{6}$/.test(h); }
+function parseCustomPal(v){ try{ const a=String(v||'').split(','); if(validHex(a[0])&&validHex(a[1])) return {main:a[0].toLowerCase(), accent:a[1].toLowerCase()}; }catch(e){} return null; }
+function customPalObj(){ return {id:'custom', name:'Your own colors', main:customPal.main, accent:customPal.accent, look:true, gen:true}; }
+function ribbonGen(main0, accent0){
+  const W='#ffffff', K='#000000';
+  const L=paletteLum, C=paletteContrast;
+  const inkOn=h=> C(h,'#1a0f0a')>C(h,W)?'#1a0f0a':W;
+  const hexA=(h,a)=>'rgba('+[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(',')+','+a+')';
+  // ---- light ----
+  const page=paletteMix(accent0,W,0.94);
+  let main=main0; for(let i=0;i<14 && C(main,W)<7;i++) main=paletteMix(main,K,0.08);   // white text on it must be easy to read
+  let accText=accent0; for(let i=0;i<14 && C(accText,W)<4.6;i++) accText=paletteMix(accText,K,0.1);
+  const light={'--page':page,'--cream':page,'--card':W,'--ivory':W,'--ink':paletteMix(main,K,0.55),'--ink-soft':paletteMix(main,K,0.2),
+    '--line':paletteMix(accent0,W,0.8),'--line-strong':paletteMix(main,W,0.78),'--navy':main,'--navy-deep':paletteMix(main,K,0.35),'--navbar':main,'--gold':accent0,'--gold-deep':accText,
+    '--rb-coral':accent0,'--rb-coral-ink':inkOn(accent0),'--rb-text':accText,'--rb-outline':main,'--rb-hero-bg':main,'--rb-hero-ink':W,'--rb-hero-dim':paletteMix(main,W,0.78),
+    '--rb-track':paletteMix(accent0,W,0.85),'--rb-nav':main,'--rb-nav-on':W,'--rb-nav-on-ink':main,'--rb-shadow':hexA(main,0.12)};
+  // ---- dark ----
+  const dpage=paletteMix(main0,K,0.72), dcard=paletteMix(dpage,W,0.09);
+  let acc=accent0; for(let i=0;i<14 && C(acc,dcard)<4.6;i++) acc=paletteMix(acc,W,0.12);
+  const dnav=paletteMix(main0,K,0.5), dhero=paletteMix(main0,K,0.45);
+  const dark={'--page':dpage,'--cream':dpage,'--card':dcard,'--ivory':dcard,'--ink':'#F3EAF4','--ink-soft':'#C9B8CD',
+    '--line':paletteMix(dpage,W,0.14),'--line-strong':paletteMix(dpage,W,0.26),'--navbar':dnav,'--gold':acc,'--gold-deep':acc,
+    '--rb-coral':acc,'--rb-coral-ink':inkOn(acc),'--rb-text':acc,'--rb-outline':paletteMix(main0,W,0.9),'--rb-hero-bg':'linear-gradient(180deg,'+dhero+','+dpage+')','--rb-hero-ink':W,'--rb-hero-dim':paletteMix(main0,W,0.6),
+    '--rb-track':paletteMix(dpage,W,0.2),'--rb-nav':dnav,'--rb-nav-on':paletteMix(main0,W,0.9),'--rb-nav-on-ink':dnav,'--rb-shadow':'rgba(0,0,0,.45)'};
+  return {light,dark};
+}
 let currentPaletteId = 'heritage';
 function paletteMix(a,b,t){
   const p=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
@@ -3528,12 +3682,13 @@ function paletteCss(p){
     '--gold':paletteMix(p.accent,K,0.25), '--gold-light':accentLight, '--gold-deep':p.accent,
     '--navbar':paletteMix(p.main,K,0.75), '--navbar-dim':paletteMix(p.main,W,0.5), '--viewer':paletteMix(p.main,K,0.85)
   };
+  if(p.gen){ const g=ribbonGen(p.main,p.accent); Object.assign(light,g.light); Object.assign(dark,g.dark); }
   Object.assign(light, p.light||{}); Object.assign(dark, p.dark||{});
   const decl=o=>Object.keys(o).map(k=>k+':'+o[k]+';').join('');
   return ':root:not([data-theme="dark"]){'+decl(light)+'}\n[data-theme="dark"]{'+decl(dark)+'}';
 }
 function applyPalette(id){
-  const p = PALETTES.find(x=>x.id===id) || PALETTES[0];
+  const p = (id==='custom') ? customPalObj() : (PALETTES.find(x=>x.id===id && x.look) || PALETTES.find(x=>x.id==='ribbon'));
   currentPaletteId = p.id;
   document.body.classList.toggle('look-ribbon', !!p.look);
   { const ab=document.getElementById('addRabbitTopBtn'); if(ab){ ab.setAttribute('aria-label', p.look?'Add':'Add a rabbit'); ab.title = p.look?'Add':'Add a rabbit'; } }
@@ -3548,27 +3703,68 @@ function applyPalette(id){
   el.textContent = paletteCss(p);
   if(meta) meta.setAttribute('content', p.main);
 }
+/* First paint: show the Ribbon layout straight away (in the original navy and gold) instead of the old layout, and, if this
+   device remembers who last signed in, use THAT account's own saved colors and light/dark setting. The remembered copy is
+   stored per account id, so one account's colors can never be picked up for another account. Once the account's data loads,
+   its saved choice is applied exactly as before. */
+(function earlyLook(){
+  try{
+    let uid=null;
+    for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i);
+      if(/^sb-.+-auth-token$/.test(k)){ try{ const j=JSON.parse(localStorage.getItem(k)); uid=(j&&j.user&&j.user.id)||(j&&j.currentSession&&j.currentSession.user&&j.currentSession.user.id)||null; }catch(e){} } }
+    const get=w=>{ try{ return uid?localStorage.getItem('herdnerd_look_'+w+'_'+uid):null; }catch(e){ return null; } };
+    const th=get('theme'); if(th==='dark') document.documentElement.setAttribute('data-theme','dark');
+    const cp=parseCustomPal(get('palette_custom')); if(cp) customPal=cp;
+    const pal=get('palette');
+    const okIds=PALETTES.filter(x=>x.look).map(x=>x.id).concat(['custom']);
+    applyPalette(okIds.includes(pal)?pal:'rb-heritage');
+  }catch(e){ try{ applyPalette('rb-heritage'); }catch(e2){} }
+})();
 function openPaletteSheet(){
   const locked = !!viewingAsCustomer;
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>Colors</h2>
     <div class="card-sub" style="margin-bottom:12px;">${locked ? 'You are viewing a customer&rsquo;s account, so their colors can&rsquo;t be changed from here.' : 'Pick a color style for your account. It only changes how <em>your</em> HerdNerd Pro looks. Every style has a dark version too &mdash; use the moon button at the top to switch.'}</div>
     <div style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;">
-      ${PALETTES.map(p=>`<button type="button" class="pal-opt${p.id===currentPaletteId?' on':''}" data-pal="${p.id}" ${locked?'disabled':''}>
+      ${PALETTES.filter(p=>p.look).concat([customPalObj()]).map(p=>`<button type="button" class="pal-opt${p.id===currentPaletteId?' on':''}" data-pal="${p.id}" ${locked?'disabled':''}>
         <span class="pal-sw"><span style="background:${p.main};"></span><span style="background:${p.accent};"></span></span>
         <span class="pal-name">${esc(p.name)}</span>
         <span class="pal-check" aria-hidden="true">${p.id===currentPaletteId?'&#10003;':''}</span>
       </button>`).join('')}
-    </div>`);
+    </div>
+    <div class="section-label" style="margin-top:16px;">MAKE YOUR OWN</div>
+    <div class="card-sub" style="margin-bottom:8px;">Pick a main color (header and menu) and an accent color (buttons). Light and dark mode are worked out for you, and text is kept readable.</div>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+      <label style="display:flex; align-items:center; gap:8px; font-weight:700;">Main <input type="color" id="cp-main" value="${customPal.main}" ${locked?'disabled':''} style="width:56px;height:44px;padding:0;border:none;background:none;"></label>
+      <label style="display:flex; align-items:center; gap:8px; font-weight:700;">Accent <input type="color" id="cp-acc" value="${customPal.accent}" ${locked?'disabled':''} style="width:56px;height:44px;padding:0;border:none;background:none;"></label>
+      <button type="button" class="btn btn-primary" id="cp-save" ${locked?'disabled':''}>Save my colors</button>
+    </div>
+    <div class="card-sub" id="cp-note" style="margin-top:6px;">You see a preview as you pick. Nothing is saved until you tap Save.</div>`);
+  const cpM=document.getElementById('cp-main'), cpA=document.getElementById('cp-acc');
+  if(cpM && cpA && !locked){
+    let orig=currentPaletteId;
+    const prev=()=>{ if(validHex(cpM.value)&&validHex(cpA.value)){ window._palRevert=()=>applyPalette(orig); const keep=customPal; customPal={main:cpM.value.toLowerCase(), accent:cpA.value.toLowerCase()}; applyPalette('custom'); customPal=keep; } };
+    cpM.oninput=prev; cpA.oninput=prev; cpM.onchange=prev; cpA.onchange=prev;
+    document.getElementById('cp-save').onclick=async ()=>{
+      if(!validHex(cpM.value)||!validHex(cpA.value)) return;
+      customPal={main:cpM.value.toLowerCase(), accent:cpA.value.toLowerCase()};
+      const val=customPal.main+','+customPal.accent;
+      orig='custom'; window._palRevert=null; applyPalette('custom'); lookCopySet('palette','custom'); lookCopySet('palette_custom',val);
+      try{ await window.storage.set(CUSTOM_PALETTE_KEY, val, false); await window.storage.set(PALETTE_KEY, 'custom', false); }catch(e){ console.error('Saving colors failed', e); showToast('Could not save your colors: '+((e&&e.message)||'check your connection')); return; }
+      try{ if(typeof sb!=='undefined' && sb && currentUser && !localSandboxMode){ const {data:chk}=await sb.from('barn_data').select('data').eq('user_id',currentUser.id).maybeSingle(); if(chk && chk.data && chk.data[CUSTOM_PALETTE_KEY]!==val){ showToast('Your colors did not reach your account — please try again'); return; } } }catch(e){}
+      document.querySelectorAll('.pal-opt').forEach(x=>{ const on=x.dataset.pal==='custom'; x.classList.toggle('on',on); x.querySelector('.pal-check').innerHTML=on?'&#10003;':''; const sw=x.querySelectorAll('.pal-sw span'); if(on&&sw.length==2){ sw[0].style.background=customPal.main; sw[1].style.background=customPal.accent; } });
+      orig='custom'; window._palRevert=null; showToast('Your colors are saved');
+    };
+  }
   document.querySelectorAll('[data-pal]').forEach(b=>b.onclick=async ()=>{
     if(viewingAsCustomer) return;
-    const id=b.dataset.pal;
+    const id=b.dataset.pal; window._palRevert=null;
     applyPalette(id); lookCopySet('palette',id);
     try{ await window.storage.set(PALETTE_KEY, id, false); }catch(e){ showToast('Could not save your colors — check your connection'); return; }
     // Read it back from your account to be sure it really reached the online copy.
     try{ if(typeof sb!=='undefined' && sb && currentUser && !localSandboxMode){ const {data:chk}=await sb.from('barn_data').select('data').eq('user_id',currentUser.id).maybeSingle(); if(chk && chk.data && chk.data[PALETTE_KEY]!==id){ showToast('Your colors are saved on this device only — they did not reach your online account. Tell Claude.'); } } }catch(e){}
     document.querySelectorAll('.pal-opt').forEach(x=>{ const on=x.dataset.pal===id; x.classList.toggle('on',on); x.querySelector('.pal-check').innerHTML=on?'&#10003;':''; });
-    showToast((PALETTES.find(x=>x.id===id)||{}).name+' colors on');
+    showToast((id==='custom'?'Your own':(PALETTES.find(x=>x.id===id)||{}).name)+' colors on');
   });
 }
 
@@ -3580,7 +3776,9 @@ function litterAgeDays(r){ return daysBetween(r.litterBornDate, todayStr()); }
 function isRebreedReady(r){ return r.status==='nursing' && !!r.rebreedDate && todayStr() >= r.rebreedDate; }
 function canRebred(r){ return r.status==='nursing' && (isRebreedReady(r) || !r.litterKits || r.litterKits.length===0); }
 function daysToDue(r){ return r.dueDate ? daysBetween(todayStr(), r.dueDate) : null; }
-function needsNestBox(r){ const d=daysToDue(r); return r.status==='pregnant' && d!==null && d<=nestDays(); }
+// Once the nest box is marked done for this breeding, it stays done (a later breeding starts fresh).
+function nestBoxDone(r){ return !!r.nestBoxAckDate && (!r.bredDate || r.nestBoxAckDate>=r.bredDate); }
+function needsNestBox(r){ const d=daysToDue(r); return r.status==='pregnant' && d!==null && d<=nestDays() && !nestBoxDone(r); }
 function isOverdue(r){ const d=daysToDue(r); return r.status==='pregnant' && d!==null && d<0; }
 function ageDays(r){ return r.dob ? daysBetween(r.dob, todayStr()) : null; }
 // Friendly age: "5 days", "6 weeks 2 days", "6 months 3 days", "1 yr 2 mo".
@@ -3937,6 +4135,8 @@ function subLine(r){
   return esc(b.join(' · '));
 }
 
+// "2 years 3 months old" line for the Does and Bucks cards (Juniors already show their age)
+function ageLineHTML(r){ const a=r&&r.dob?ageText(r.dob):''; return a?`${esc(a)} old<br>`:''; }
 function cardHTML(r, forceUrgent, origin){
   const urgent = forceUrgent || isRebreedReady(r) || needsNestBox(r);
   let detail='';
@@ -3963,12 +4163,12 @@ function cardHTML(r, forceUrgent, origin){
   const a = primary+`<button class="btn btn-secondary" data-act="pedigree" data-id="${r.id}">Pedigree</button><button class="btn btn-secondary" data-act="more" data-id="${r.id}" aria-label="More actions">More</button>`;
   return `<div class="card hc ${urgent?'urgent':''}" data-openprofile="${r.id}">${projBandHTML(r)}<div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${hcRingHTML(r)}<span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
     <div class="hc-chips">${statusBadge(r)}${projChipsHTML(r)}</div>
-    <div class="card-detail">${detail}</div>${flag}<div class="card-actions">${a}</div></div>`;
+    <div class="card-detail">${ageLineHTML(r)}${detail}</div>${flag}<div class="card-actions">${a}</div></div>`;
 }
 // The less-used actions for a rabbit, kept one tap away so the card stays clean.
 function openCardMore(r){
   const items=[];
-  if(r.status==='pregnant'){ items.push(['lost','Not bred']); }
+  if(r.status==='pregnant'){ items.push(['editbreed','Edit breeding'],['lost','Not bred']); }
   else if(r.status==='nursing'){ items.push(canRebred(r)?['wean','Wean litter']:['rebred','Rebred'],['editlitter','Edit litter']); }
   else if(isArchived(r)){ }
   else if(r.status==='growing' || r.sex==='buck'){ }
@@ -3999,7 +4199,7 @@ function buckCardHTML(r){
   const txt = cov.length?'Currently paired with: '+cov.map(d=>esc(d.name)).join(', ') : (r.sale?saleLine(r):((r.sireName||r.damName)?`Sire: ${esc(r.sireName||'?')} &middot; Dam: ${esc(r.damName||'?')}`:'Not currently paired with anyone'));
   return `<div class="card hc" data-openprofile="${r.id}">${projBandHTML(r)}<div class="hc-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div><span class="hc-chev" aria-hidden="true">&rsaquo;</span></div>
     <div class="hc-chips">${statusBadge(r)}${projChipsHTML(r)}</div>
-    <div class="card-detail">${txt}</div>
+    <div class="card-detail">${ageLineHTML(r)}${txt}</div>
     <div class="card-actions">
       <button class="btn btn-primary" data-act="pedigree" data-id="${r.id}">Pedigree</button>
       <button class="btn btn-secondary" data-act="more" data-id="${r.id}" aria-label="More actions">More</button>
@@ -4649,9 +4849,7 @@ function ancestorCardHTML(r){
 function plannedCardHTML(p){
   const doe=rabbits.find(r=>r.id===p.doeId), buck=rabbits.find(r=>r.id===p.buckId);
   const dn=doe?doe.name:p.doeName, bn=buck?buck.name:p.buckName;
-  const rel=relatednessSummary(dn,bn);
   return `<div class="card no-tap"><div class="card-top"><div><div class="card-name">${esc(dn)} &times; ${esc(bn)}</div><div class="card-sub">Target: ${fmtDate(p.targetDate)}${doe?' · doe is '+doe.status:''}</div></div></div>
-    <div class="relate-box">${relateBoxHTML(rel)}${warnBoxHTML(doe||findByName(dn)||{name:dn}, buck||findByName(bn)||{name:bn})}</div>
     ${p.notes?`<div class="card-detail">${esc(p.notes)}</div>`:''}
     <div class="card-actions"><button class="btn btn-primary" data-act="executePlanned" data-id="${p.id}">Execute now</button><button class="btn btn-secondary btn-sm" data-act="editPlanned" data-id="${p.id}">Edit</button><button class="btn btn-danger btn-sm" data-act="deletePlanned" data-id="${p.id}">Delete</button></div></div>`;
 }
@@ -4683,7 +4881,6 @@ function renderMain(){
   const gridTabs = ['rabbits','litters','planned','ancestors','archive','forsale'];
   main.classList.toggle('card-grid', !!searchQuery.trim() || gridTabs.includes(currentTab));
   main.classList.toggle('rb-home', (currentTab==='home'||currentTab==='money') && !searchQuery.trim());
-  if(searchMode==='relatives'){ renderRelativesSearch(main); return; }
   if(searchQuery.trim()){ renderSearch(main); return; }
   if(currentTab==='home'){ renderHome(main); }
   else if(currentTab==='rabbits'){ renderRabbits(main); }
@@ -4747,6 +4944,7 @@ function attnRowHTML({ urgent=false, text, sub='', buttons='', circleId=null, ci
 let doneToday = [];   // this session only; Undo for things ticked off on Home
 function shortD(d){ return d ? fmtDate(d).replace(/, \d{4}$/,'') : ''; }
 function bredDueSub(r){ return [r.bredDate?'Bred '+shortD(r.bredDate):'', r.dueDate?'due '+shortD(r.dueDate):''].filter(Boolean).join(' · '); }
+let nestGroupOpen = false;   // stays open while you tick off nest boxes one after another
 function nestGroupHTML(nest){
   return `<div class="todo-nestgroup">
     <div class="todo-row" data-nesttoggle="1" style="cursor:pointer;">
@@ -4754,11 +4952,11 @@ function nestGroupHTML(nest){
         <div class="todo-sub-text">Due to kindle within ${nestDays()} day${nestDays()===1?'':'s'}</div></div>
       <button class="todo-chevron" data-nesttoggle="1" aria-label="Expand">${CHEVRON_SVG}</button>
     </div>
-    <div class="todo-sub nestgroup-body" style="display:none;">
+    <div class="todo-sub nestgroup-body" style="display:${nestGroupOpen?'block':'none'};">
       ${nest.map(r=>{
         const d=daysToDue(r);
         const when = d===0 ? 'due today' : `due in ${d} day${d===1?'':'s'}`;
-        return attnRowHTML({ text:`<b>${esc(r.name)}</b> — ${when}`, sub:bredDueSub(r), openId:r.id, circleId:r.id, circleType:'nest', circleLabel:`${r.name}'s nest box marked done`, snoozeId:r.id, snoozeType:'nest' });
+        return attnRowHTML({ text:`<b>${esc(r.name)}</b> — ${when}`, sub:bredDueSub(r), openId:r.id, openTab:'breeding', circleId:r.id, circleType:'nest', circleLabel:`${r.name}'s nest box marked done`, snoozeId:r.id, snoozeType:'nest' });
       }).join('')}
     </div>
   </div>`;
@@ -4769,7 +4967,7 @@ function wireAttentionRows(root){
       ev.stopPropagation();
       const group = b.closest('.todo-nestgroup');
       const body = group && group.querySelector('.nestgroup-body');
-      if(body) body.style.display = body.style.display==='none' ? 'block' : 'none';
+      if(body){ body.style.display = body.style.display==='none' ? 'block' : 'none'; nestGroupOpen = body.style.display!=='none'; }
     });
   });
   root.querySelectorAll('[data-circledone]').forEach(el=>el.onclick=()=>{
@@ -4883,7 +5081,7 @@ function wireConvertButtons(root){
 }
 function comingUpRowHTML(e){
   const dt=new Date(e.date+'T00:00:00');
-  return `<div class="cu-row" ${e.remId?`data-remedit="${e.remId}" style="cursor:pointer;"`:e.id?`data-openrow="${e.id}"`:''}><div class="cu-dd"><div class="w">${dt.toLocaleDateString('en-US',{weekday:'short'})}</div><div class="n">${dt.getDate()}</div></div>
+  return `<div class="cu-row" ${e.remId?`data-remedit="${e.remId}" style="cursor:pointer;"`:e.id?`data-openrow="${e.id}"${['Due','Nest box','Palpate','Wean','Ready to go','Rebreed','Planned'].includes(e.kind)?' data-opentab="breeding"':''}`:''}><div class="cu-dd"><div class="w">${dt.toLocaleDateString('en-US',{weekday:'short'})}</div><div class="n">${dt.getDate()}</div></div>
     <div class="cu-main"><div class="cu-name">${e.kind?`<span class="cu-pill">${esc(e.kind)}</span>`:''}${esc(e.name)}</div>${e.detail?`<div class="cu-det">${esc(e.detail)}</div>`:''}</div>${(e.id||e.remId)?'<div class="cu-chev">&rsaquo;</div>':''}</div>`;
 }
 function comingDayLabel(d,t){
@@ -4974,7 +5172,7 @@ function wireRibbonAttn(main, rows){
     if(!kq) return;
     setTimeout(()=>{
       if(!kq) return;
-      if(document.getElementById('sheetBackdrop').classList.contains('on')) return;
+      if(document.getElementById('sheetBackdrop').classList.contains('on')){ kq=null; return; }
       const cur = rabbits.find(r=>r.id===kq.ids[kq.i]);
       if(cur && cur.status==='pregnant'){ kq=null; return; }
       let next=null;
@@ -5036,7 +5234,7 @@ function renderHome(main){
   });
   convert.forEach(r=>{
     rows.push({ urgent:false, sortKey:5, html: attnRowHTML({
-      openId:r.id, sub:r.litterBornDate?'Kindled '+shortD(r.litterBornDate):'', text: convertReady(r) ? `<b>${esc(r.name)}'s litter</b> is 8 weeks old — make individual pages?` : `<b>${esc(r.name)}'s litter</b> is 8 weeks old — set each kit's sex so you can make pages.`,
+      openId:r.id, openTab:'breeding', sub:r.litterBornDate?'Kindled '+shortD(r.litterBornDate):'', text: convertReady(r) ? `<b>${esc(r.name)}'s litter</b> is 8 weeks old — make individual pages?` : `<b>${esc(r.name)}'s litter</b> is 8 weeks old — set each kit's sex so you can make pages.`,
       buttons: convertReady(r) ? `<button class="btn btn-primary btn-sm" data-convertyes="${r.id}">Yes</button><button class="btn btn-secondary btn-sm" data-convertno="${r.id}">Not yet</button>` : `<button class="btn btn-primary btn-sm" data-kitsetup="${r.id}">Set sex</button><button class="btn btn-secondary btn-sm" data-convertno="${r.id}">Not yet</button>`,
       snoozeId:r.id, snoozeType:'convert'
     })});
@@ -5066,7 +5264,7 @@ function renderHome(main){
   if(litterUiOn && alertOn('weigh')) rabbits.forEach(r=>{
     const wd=litterWeighDue(r); if(!wd || snoozed(r,'weigh')) return;
     rows.push({ urgent:false, sortKey:4, html: attnRowHTML({
-      openId:r.id, sub:r.litterBornDate?'Kindled '+shortD(r.litterBornDate):'', text:`Weigh <b>${esc(r.name)}'s litter</b> — ${wd.label} old`,
+      openId:r.id, openTab:'breeding', sub:r.litterBornDate?'Kindled '+shortD(r.litterBornDate):'', text:`Weigh <b>${esc(r.name)}'s litter</b> — ${wd.label} old`,
       buttons:`<button class="btn btn-primary btn-sm" data-weighlitter="${r.id}">Weigh</button>`,
       snoozeId:r.id, snoozeType:'weigh'
     })});
@@ -5119,7 +5317,8 @@ function renderHome(main){
     + rabbits.reduce((n,d)=>n+((d.sex==='doe'&&d.litterKits)?d.litterKits.filter(k=>k.forSale&&!k.individualId).length:0),0);
   const cnt = k=>herdDoes.filter(r=>r.status===k).length;
   const tiles = [['pregnant','Bred',cnt('pregnant')],['nursing','On a litter',cnt('nursing')],['open','Open does',cnt('open')],['sale','For sale',forSaleN]];
-  let h = (lookRibbonOn()?ribbonHomeHTML(t,attnTotal):'') + `<div class="home-sum"><b>${attnTotal}</b> ${attnTotal===1?'needs':'need'} attention · <b>${thisWeekN}</b> coming up this week · <b>${nursingDoes.length}</b> litter${nursingDoes.length===1?'':'s'} nursing</div>
+  const emptyHomeHTML = (!rabbits.length && !viewingAsCustomer) ? `<div class="empty-home"><h3>You're all set</h3><div class="card-sub" style="margin:8px 0 14px;">Add your first rabbit to start your herd. Just a name and sex to begin.</div><button class="btn btn-primary" style="width:100%;" id="emptyAddRabbit">Add your first rabbit</button><button class="btn btn-secondary" style="width:100%;margin-top:8px;" id="emptyTour">Take the tour</button></div>` : '';
+  let h = emptyHomeHTML + (lookRibbonOn()?ribbonHomeHTML(t,attnTotal):'') + `<div class="home-sum"><b>${attnTotal}</b> ${attnTotal===1?'needs':'need'} attention · <b>${thisWeekN}</b> coming up this week · <b>${nursingDoes.length}</b> litter${nursingDoes.length===1?'':'s'} nursing</div>
   <div class="stats home-tiles">${tiles.map(([k,l,n])=>`<div class="stat" data-hometile="${k}" role="button" tabindex="0"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('')}</div>
   <div class="quick-actions">
     <button class="qa-btn qa-primary" id="qaAddBreeding"><span class="qa-icon">${QA_PLUS_SVG}</span><span>Record breeding</span></button>
@@ -5165,6 +5364,8 @@ function renderHome(main){
 
   main.innerHTML = h;
 
+  if(document.getElementById('emptyAddRabbit')) document.getElementById('emptyAddRabbit').onclick = openAddSheet;
+  if(document.getElementById('emptyTour')) document.getElementById('emptyTour').onclick = ()=>startTour(true);
   document.getElementById('qaAddBreeding').onclick = ()=>openQuickBreedSheet();
   document.getElementById('qaKindled').onclick = ()=>{
     const does=rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r));
@@ -5177,7 +5378,7 @@ function renderHome(main){
   main.querySelectorAll('[data-hometile]').forEach(b=>b.onclick=()=>{
     const k=b.dataset.hometile;
     if(k==='sale'){ currentTab='forsale'; }
-    else { currentTab='rabbits'; rabbitsGroup='does'; doesFilter=k; selectMode=false; }
+    else { currentTab='rabbits'; rabbitsGroup='does'; groupAlso=[]; doesFilter=k; selectMode=false; }
     render(); window.scrollTo(0,0);
   });
   if(document.getElementById('addReminderBtn')) document.getElementById('addReminderBtn').onclick=()=>openReminderSheet(null);
@@ -5192,13 +5393,29 @@ function renderHome(main){
 }
 
 function renderRabbits(main){
+  const ag=activeGroups(), allOn=ag.length===3;
   const groupTabs = `<div class="subnav-wrap"><div class="seg">
-    <button data-rgroup="does" class="${rabbitsGroup==='does'?'on':''}">Does</button>
-    <button data-rgroup="bucks" class="${rabbitsGroup==='bucks'?'on':''}">Bucks</button>
-    <button data-rgroup="juniors" class="${rabbitsGroup==='juniors'?'on':''}">Juniors</button>
-  </div></div>`;
+    <button data-rgroup="all" class="${allOn?'on':''}">All</button>
+    <button data-rgroup="does" class="${ag.includes('does')&&!allOn?'on':''}">Does</button>
+    <button data-rgroup="bucks" class="${ag.includes('bucks')&&!allOn?'on':''}">Bucks</button>
+    <button data-rgroup="juniors" class="${ag.includes('juniors')&&!allOn?'on':''}">Juniors</button>
+  </div></div><div class="card-sub" style="margin:-6px 4px 8px;">Tap more than one to see them together.</div>`;
   let body='', scopeList=[], shownList=[];
-  if(rabbitsGroup==='does'){
+  if(ag.length>1){
+    const rankC={pregnant:0, nursing:1, open:2, reserved:3};
+    const defs={
+      does:['DOES', rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r)), cardHTML, (a,b)=>{ const ra=rankC[a.status]!=null?rankC[a.status]:2, rb=rankC[b.status]!=null?rankC[b.status]:2; return ra!==rb?ra-rb:a.name.localeCompare(b.name); }],
+      bucks:['BUCKS', rabbits.filter(r=>r.sex==='buck'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r)), buckCardHTML, (a,b)=>a.name.localeCompare(b.name)],
+      juniors:['JUNIORS', rabbits.filter(r=>r.status==='growing'||(r.status==='reserved'&&inJuniors(r))), juniorCardHTML, (a,b)=>(a.dob||'9').localeCompare(b.dob||'9')]
+    };
+    let h='';
+    ag.forEach(g=>{
+      const [label,base,card,sorter]=defs[g]; scopeList=scopeList.concat(base);
+      const it=herdFilter(base).sort(sorter); shownList=shownList.concat(it);
+      if(it.length) h+=`<div class="section-label">${label} &middot; ${it.length}</div>`+(selectMode?selectRowsHTML(it):it.map(r=>card(r)).join(''));
+    });
+    body = h || `<div class="empty">Nothing matches these filters.</div>`;
+  } else if(rabbitsGroup==='does'){
     const rank = {pregnant:0, nursing:1, open:2, reserved:3};
     const labels = {pregnant:'BRED', nursing:'ON A LITTER', open:'OPEN', reserved:'RESERVED'};
     const baseDoes = rabbits.filter(r=>r.sex==='doe'&&isActive(r)&&r.status!=='growing'&&!inJuniors(r)); scopeList=baseDoes;
@@ -5243,18 +5460,26 @@ function renderRabbits(main){
       : jrRow + (it.length ? (selectMode?selectRowsHTML(it):it.map(juniorCardHTML).join('')) : `<div class="empty">No junior ${juniorsFilter==='buck'?'bucks':'does'} right now.</div>`);
   }
   // In the Ribbon look the + menu at the top already has "Breeding", so this big button is left out there only.
-  const actionRow = (rabbitsGroup==='does' && !lookRibbonOn())
+  const actionRow = (ag.length===1 && rabbitsGroup==='does' && !lookRibbonOn())
     ? `<div class="action-row" style="display:flex; gap:10px; margin:10px 0 14px;">
          <button class="btn btn-primary" style="flex:1;" id="herdRecordBreedingBtn">+ Record a breeding</button>
        </div>`
     : '';
   if(projectFilter!=='all' && !projects.some(p=>p.id===projectFilter)) projectFilter='all';
-  const pjSummary = (projects.length && (shownList.length||projectFilter!=='all'||traitFilter)) ? `<div class="pj-summary"><span style="font-weight:600">${selectMode?(projectFilter==='all'?'Tap the rabbits to include':'Tap rabbits to add to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'')):projectFilter==='all'?'':`${shownList.length} in ${esc((projects.find(p=>p.id===projectFilter)||{}).name||'')}`}</span>${selectMode?`<span><a id="pj-selall">Select all</a> &nbsp; <a id="pj-cancel-sel">Cancel</a></span>`:`<button type="button" class="btn btn-secondary btn-sm" id="pj-select">${projectFilter==='all'?'Add several rabbits to a project':'+ Add rabbits to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'this project')}</button>`}</div>` : '';
-  main.innerHTML = groupTabs + (selectMode?'':quickPickBar()) + projectBar(scopeList) + (selectMode?'':traitBar(scopeList)) + pjSummary + (selectMode?'':actionRow) + body + (selectMode?selectBarHTML()+'<div style="height:170px"></div>':'');
+  projectAlso=projectAlso.filter(id=>projectFilter!=='all' && id!==projectFilter && projects.some(p=>p.id===id));
+  const pjSummary = (projects.length && (shownList.length||projectFilter!=='all'||traitFilter)) ? `<div class="pj-summary"><span style="font-weight:600">${selectMode?(projectFilter==='all'?'Tap the rabbits to include':'Tap rabbits to add to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'')):projectFilter==='all'?'':projectAlso.length?`${shownList.length} in ${esc(activeProjIds().map(id=>(projects.find(p=>p.id===id)||{}).name).filter(Boolean).join(' + '))}`:`${shownList.length} in ${esc((projects.find(p=>p.id===projectFilter)||{}).name||'')}`}</span>${selectMode?`<span><a id="pj-selall">Select all</a> &nbsp; <a id="pj-cancel-sel" href="#" style="font-weight:800;">Cancel</a></span>`:(projectAlso.length?'':`<button type="button" class="btn btn-secondary btn-sm" id="pj-select">${projectFilter==='all'?'Add several rabbits to a project':'+ Add rabbits to '+esc((projects.find(p=>p.id===projectFilter)||{}).name||'this project')}</button>`)}</div>` : '';
+  main.innerHTML = groupTabs + (selectMode?'':quickPickBar()) + filtersBlock(scopeList) + pjSummary + (selectMode?'':actionRow) + body + (selectMode?selectBarHTML()+'<div style="height:230px"></div>':'');
   wireProjects(main, shownList); wireTraits(); wireQuickPicks();
+  { const ft=document.getElementById('flt-toggle'); if(ft) ft.onclick=()=>{ herdFiltersOpen=!herdFiltersOpen; try{ localStorage.setItem('hn_flt_open', herdFiltersOpen?'1':'0'); }catch(e){} render(); }; }
   document.querySelectorAll('[data-pjtarget]').forEach(b=>b.onclick=()=>{ window.__pjTarget=b.dataset.pjtarget; render(); });
   if(document.getElementById('herdRecordBreedingBtn')) document.getElementById('herdRecordBreedingBtn').onclick = openQuickBreedSheet;
-  document.querySelectorAll('[data-rgroup]').forEach(b=>b.onclick=()=>{ rabbitsGroup=b.dataset.rgroup; selectMode=false; selectedIds=new Set(); render(); window.scrollTo(0,0); });
+  document.querySelectorAll('[data-rgroup]').forEach(b=>b.onclick=()=>{
+    const g=b.dataset.rgroup, cur=activeGroups();
+    if(g==='all'){ if(cur.length===3){ rabbitsGroup='does'; groupAlso=[]; } else { rabbitsGroup='does'; groupAlso=['bucks','juniors']; } }
+    else if(cur.includes(g)){ if(cur.length>1){ const rest=cur.filter(x=>x!==g); rabbitsGroup=rest[0]; groupAlso=rest.slice(1); } }
+    else { rabbitsGroup=cur[0]; groupAlso=cur.slice(1).concat([g]); }
+    selectMode=false; selectedIds=new Set(); render(); window.scrollTo(0,0);
+  });
   document.querySelectorAll('[data-doesfilter]').forEach(b=>b.onclick=()=>{ doesFilter=b.dataset.doesfilter; render(); });
   document.querySelectorAll('[data-jrfilter]').forEach(b=>b.onclick=()=>{ juniorsFilter=b.dataset.jrfilter; render(); });
 }
@@ -5338,7 +5563,7 @@ function renderCalendar(main){
   document.querySelectorAll('[data-calday]').forEach(b=>b.onclick=()=>{ calSelectedDate=b.dataset.calday; render(); });
   document.getElementById('calAddBtn').onclick=()=>openAddEventSheet(calSelectedDate);
   document.querySelectorAll('[data-calopen]').forEach(b=>b.onclick=()=>{
-    const r=rabbits.find(x=>x.id===b.dataset.calopen); if(r) openRabbitProfile(r);
+    const r=rabbits.find(x=>x.id===b.dataset.calopen); if(r) openRabbitProfile(r, b.dataset.calbreed?'breeding':undefined);
   });
   document.querySelectorAll('[data-calremedit]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const x=customReminders.find(q=>q.id===b.dataset.calremedit); if(x) openReminderSheet(x); });
   document.querySelectorAll('[data-caledit]').forEach(b=>b.onclick=(ev)=>{ ev.stopPropagation(); const x=customEvents.find(q=>q.id===b.dataset.caledit); if(x) openAddEventSheet(null,x); });
@@ -5357,7 +5582,7 @@ function renderCalendar(main){
   });
 }
 function calRowHTML(e, overdue){
-  return `<div class="cal-row rb-ct-${e.type||'x'} ${overdue?'overdue':''}" ${e.id?`data-calopen="${e.id}"`:''}>
+  return `<div class="cal-row rb-ct-${e.type||'x'} ${overdue?'overdue':''}" ${e.id?`data-calopen="${e.id}"${['due','wean','sell','rebreed','weigh','planned','palpate','nest','breed'].includes(e.type)?' data-calbreed="1"':''}`:''}>
     <div class="cal-dot" style="background:${overdue?'var(--rust)':'var(--gold-deep)'};"></div>
     <div style="flex:1; min-width:0; overflow-wrap:anywhere;">
       <div class="cal-row-text"><b>${esc(e.label)}</b></div>
@@ -5405,22 +5630,93 @@ function setSearchMode(m){
 }
 document.querySelectorAll('#searchModeSeg button').forEach(b=>b.onclick=()=>setSearchMode(b.dataset.smode));
 document.getElementById('addRabbitTopBtn').onclick=()=>{ if(lookRibbonOn()) openAddMenu(); else openAddSheet(); };
-function renderSearch(main){
-  const q=nameKey(searchQuery);
-  const scored = rabbits.map(r=>{
+// Search looks in three places, all inside THIS account only:
+//  herd  = rabbits in your herd right now
+//  anc   = pedigree-only and past rabbits that sit in the pedigree of someone in your herd
+//  all   = every record you have ever entered (herd, sold/deceased/retired, and every pedigree-only ancestor)
+function searchPool(mode){
+  if(mode==='all') return rabbits;
+  if(mode==='anc'){
+    const idx=relBuildIndex(), keys=new Set();
+    rabbits.filter(isActive).forEach(h=>{ relAncestors(h.name, idx, 8).forEach((v,k)=>keys.add(k)); });
+    return rabbits.filter(r=>!isActive(r) && keys.has(relKey(r.name)));
+  }
+  return rabbits.filter(isActive);
+}
+function scoreSearch(pool,q){
+  return pool.map(r=>{
     const n=nameKey(r.name);
     let s=99;
     if(n===q) s=0; else if(n.startsWith(q)) s=1; else if(n.includes(q)) s=2;
+    else if(r.alias && nameKey(r.alias).includes(q)) s=2.2;
     else if(r.earNumber && r.earNumber.toLowerCase()===q) s=1;
     else if(r.earNumber && r.earNumber.toLowerCase().includes(q)) s=2.5;
     else if(r.color && r.color.toLowerCase().includes(q)) s=4;
     else if(r.breed && r.breed.toLowerCase().includes(q)) s=4.5;
-    else { const d=levenshtein(n,q); if(d<=3) s=3+d; }
+    else { const d=levenshtein(n,q); const lim = q.length>=8?2 : q.length>=5?1 : 0; if(d<=lim) s=3+d; }
     return {r,s};
-  }).filter(x=>x.s<99).sort((a,b)=>a.s-b.s||a.r.name.localeCompare(b.r.name)).slice(0,25);
-  if(!scored.length){ main.innerHTML=`<div class="empty">No rabbit matches "${esc(searchQuery)}".</div>`; return; }
-  main.innerHTML=`<div class="section-label">${scored.length} MATCH${scored.length===1?'':'ES'}</div>`+scored.map(({r})=>
-    `<div class="card" data-openprofile="${r.id}"><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${statusBadge(r)}</div></div>`).join('');
+  }).filter(x=>x.s<99).sort((a,b)=>a.s-b.s||a.r.name.localeCompare(b.r.name));
+}
+function renderSearch(main){
+  const q=nameKey(searchQuery);
+  const counts={herd:scoreSearch(searchPool('herd'),q).length, anc:scoreSearch(searchPool('anc'),q).length, all:scoreSearch(searchPool('all'),q).length};
+  const scored=scoreSearch(searchPool(searchMode),q).slice(0,25);
+  const chip=(m,l)=>`<button type="button" class="btn ${searchMode===m?'btn-primary':'btn-secondary'} btn-sm" data-smode2="${m}">${l} &middot; ${counts[m]}</button>`;
+  // If the search clearly names one rabbit (e.g. "Abu"), say how each other result is related to it.
+  const relMap=new Map(), relOrder=[]; let anchor=null; const anchors=[];
+  if(q.length>=2){
+    // every record whose name contains what was typed counts (a rabbit can be entered under more than one spelling), up to 3
+    scoreSearch(searchPool('all'),q).filter(x=>x.s<=2.2).slice(0,3).forEach(x=>anchors.push(x.r));
+    anchor=anchors[0]||null;
+    anchors.forEach(an=>{
+      try{ const g=relativesOf(an,'everyone'); const nm=esc(an.name);
+        ['anc','sib','kid','aunt','other'].forEach(k=>(g[k]||[]).forEach(it=>{
+          if(relMap.has(it.r.id) || anchors.some(a=>a.id===it.r.id)) return;
+          let lab=it.label||''; const ix=lab.search(/ &middot; |, /);
+          let out;
+          if(k==='other') out='Related to '+nm+' &middot; '+lab;
+          else if(ix>=0) out=lab.slice(0,ix)+' of '+nm+lab.slice(ix);
+          else out=lab+' of '+nm;
+          relMap.set(it.r.id,out); relOrder.push(it.r.id); }));
+      }catch(e){}
+    });
+  }
+  const anchorNames=anchors.map(a=>a.name).join(' / ');
+  const bar=`<div class="search-scope" style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;">${chip('herd','My herd')}${chip('anc','Ancestors of my herd')}${chip('all','Everyone I’ve entered')}</div>`;
+  const where={herd:'in your herd',anc:'in the pedigrees of your herd',all:'in everything you’ve entered'}[searchMode];
+  let body;
+  const relPool=new Set(searchPool(searchMode).map(x=>x.id));
+  const relOnly=(!scored.length && anchor) ? relOrder.filter(id=>relPool.has(id)).slice(0,60).map(id=>rabbits.find(x=>x.id===id)).filter(Boolean) : [];
+  if(!scored.length && relOnly.length){
+    const ext=r=>r.status==='external';
+    body=`<div class="section-label" style="grid-column:1/-1;">${esc(anchorNames).toUpperCase()} IS NOT IN THIS LIST &mdash; RELATED RABBITS THAT ARE &middot; ${relOnly.length}</div>`+relOnly.map(r=>`<div class="card" ${ext(r)?'':`data-openprofile="${r.id}"`}><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${ext(r)?'<span class="badge b-gone">ANCESTOR</span>':statusBadge(r)}</div>
+        <div class="rel-path"><span class="rel-arrow">&#8627;</span> ${relMap.get(r.id)}</div>
+        <div class="card-actions"><button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">${ext(r)?'Open / edit':'Edit'}</button><button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button><button class="btn btn-secondary btn-sm" data-act="relatives" data-id="${r.id}">Relatives</button></div></div>`).join('');
+  } else if(!scored.length){
+    const other=['herd','anc','all'].filter(m=>m!==searchMode&&counts[m]>0);
+    body=`<div class="empty" style="grid-column:1/-1;">No rabbit matches "${esc(searchQuery)}" ${where}.${other.length?' Try another list above — it has matches.':''}</div>`;
+  } else {
+    const cardHTML=(r)=>{
+      const ext=r.status==='external';
+      const badge=ext?'<span class="badge b-gone">ANCESTOR</span>':statusBadge(r);
+      return `<div class="card" ${ext?'':`data-openprofile="${r.id}"`}><div class="card-top"><div><div class="card-name">${esc(r.name)}</div><div class="card-sub">${subLine(r)}</div></div>${badge}</div>
+        ${relMap.get(r.id)?`<div class="rel-path"><span class="rel-arrow">&#8627;</span> ${relMap.get(r.id)}</div>`:(anchors.some(a=>a.id===r.id)?'<div class="rel-path"><span class="rel-arrow">&#8627;</span> This is a rabbit you searched for</div>':'')}
+        <div class="card-actions"><button class="btn btn-secondary btn-sm" data-act="edit" data-id="${r.id}">${ext?'Open / edit':'Edit'}</button><button class="btn btn-secondary btn-sm" data-act="pedigree" data-id="${r.id}">Pedigree</button><button class="btn btn-secondary btn-sm" data-act="relatives" data-id="${r.id}">Relatives</button></div></div>`;
+    };
+    body=`<div class="section-label" style="grid-column:1/-1;">${scored.length} MATCH${scored.length===1?'':'ES'} ${where.toUpperCase()}</div>`+scored.map(({r})=>cardHTML(r)).join('');
+    const shown=new Set(scored.map(x=>x.r.id));
+    const pool=new Set(searchPool(searchMode).map(x=>x.id));
+    const rel=relOrder.filter(id=>!shown.has(id)&&pool.has(id)).slice(0,60).map(id=>rabbits.find(x=>x.id===id)).filter(Boolean);
+    if(anchor && rel.length) body+=`<div class="section-label" style="grid-column:1/-1;">RELATED TO ${esc(anchorNames).toUpperCase()} &middot; ${rel.length}</div>`+rel.map(cardHTML).join('');
+  }
+  let relNote='';
+  if(anchors.length && relOrder.length){
+    const cnt=m=>{ const ids=new Set(searchPool(m).map(x=>x.id)); return relOrder.filter(id=>ids.has(id)).length; };
+    const parts=[['herd','in My herd'],['anc','in Ancestors'],['all','in Everyone']].map(([m,l])=>{ const n=cnt(m); return n?(m===searchMode?`<b>${n} ${l}</b>`:`<a href="#" data-smode2="${m}" style="color:var(--rb-text,var(--gold-deep));font-weight:800;">${n} ${l}</a>`):''; }).filter(Boolean);
+    relNote=`<div class="card-sub" style="grid-column:1/-1;margin:2px 4px 4px;">Rabbits related to ${esc(anchorNames)}: ${parts.join(' &middot; ')}</div>`;
+  }
+  main.innerHTML=bar+relNote+body;
+  main.querySelectorAll('[data-smode2]').forEach(b=>b.onclick=(e)=>{ e.preventDefault(); searchMode=b.dataset.smode2; renderMain(); });
   attachCardEvents();
 }
 document.getElementById('searchInput').addEventListener('input', e=>{
@@ -5513,6 +5809,7 @@ function armConfirm(btn, confirmText, onConfirm){
 function runCardAct(act,r,btn){
   if(act==='kindled') openKindledSheet(r);
       else if(act==='editlitter') openKindledSheet(r,true);
+      else if(act==='editbreed') openEditBreedingSheet(r);
       else if(act==='litterpedigree') openLitterPedigreeSheet(r);
       else if(act==='lost'){ armConfirm(btn, 'Tap again to confirm', ()=>{ markLitterLost(r); saveData(); closeSheet(); render(); showToast(r.name+' marked open'); }); }
       else if(act==='rebred'||act==='bred') openBreedSheet(r);
@@ -5576,7 +5873,7 @@ function attachCardEvents(){
 }
 
 function openSheet(html){ document.getElementById('sheet').innerHTML=html; document.getElementById('sheetBackdrop').classList.add('on'); document.getElementById('sheet').scrollTop=0; }
-function closeSheet(){ document.getElementById('sheetBackdrop').classList.remove('on'); document.body.classList.remove('ped-dock'); document.querySelectorAll('.ped-box.sel').forEach(x=>x.classList.remove('sel')); document.querySelectorAll('.ped-tree.has-sel').forEach(x=>x.classList.remove('has-sel')); }
+function closeSheet(){ if(window._palRevert){ const f=window._palRevert; window._palRevert=null; try{ f(); }catch(e){} } document.getElementById('sheetBackdrop').classList.remove('on'); document.body.classList.remove('ped-dock'); document.querySelectorAll('.ped-box.sel').forEach(x=>x.classList.remove('sel')); document.querySelectorAll('.ped-tree.has-sel').forEach(x=>x.classList.remove('has-sel')); }
 document.getElementById('sheetBackdrop').addEventListener('click',e=>{ if(e.target.id==='sheetBackdrop') closeSheet(); });
 function done(origin){ closeSheet(); if(typeof origin==='function'){ origin(); } render(); if(profileRabbitId) renderProfile(); }
 
@@ -5796,6 +6093,35 @@ function openBreedSheet(r, presetBuck, onDone){
     commitBreed(r, buck, bred, onDone);
   };
 }
+
+// Fix the buck or bred date of a breeding that's already recorded (nothing else on her record changes).
+function openEditBreedingSheet(r){
+  const bucks = rabbits.filter(x=>x.sex==='buck'&&x.status!=='external').map(x=>x.name);
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>${esc(r.name)} — edit breeding</h2>
+    <div class="field"><label>Buck</label><input id="f-buck" placeholder="Type or pick a buck" value="${esc(r.partner||'')}" autocomplete="off"></div>
+    <div class="field" style="margin-top:12px;"><label>Bred date</label><input type="date" id="f-bred" value="${esc(r.bredDate||todayStr())}"></div>
+    <div class="card-sub" id="f-dueline" style="margin-top:8px;"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>`);
+  attachSuggest(document.getElementById('f-buck'), ()=>bucks);
+  const dueLine=()=>{ const v=csvParseDate(document.getElementById('f-bred').value); document.getElementById('f-dueline').textContent = v ? 'Due about '+fmtDate(addDays(v,31)) : ''; };
+  document.getElementById('f-bred').addEventListener('input',dueLine); dueLine();
+  const commit=(buck,bred)=>{
+    r.partner=buck||null; r.bredDate=bred; r.dueDate=addDays(bred,31);
+    const e=(r.breedingHistory||[]).find(x=>x.id===r.activeBreedingId);
+    if(e){ e.bredDate=bred; e.partner=buck||''; e.dueDate=r.dueDate; }
+    if(buck && !rabbits.some(x=>nameKey(x.name)===nameKey(buck))) rabbits.push(blankRabbit({name:buck,sex:'buck',status:'available'}));
+    saveData(); closeSheet(); render(); if(profileRabbitId) renderProfile(); showToast('Breeding updated');
+  };
+  document.getElementById('f-save').onclick=()=>{
+    const buck=document.getElementById('f-buck').value.trim(), bred=csvParseDate(document.getElementById('f-bred').value)||r.bredDate||todayStr();
+    if(buck && !rabbits.some(x=>nameKey(x.name)===nameKey(buck))){
+      const dupes=fuzzyMatches(buck);
+      if(dupes.length){ openDuplicateSheet(buck, dupes, chosen=>{ commit(chosen||buck, bred); }); return; }
+    }
+    commit(buck, bred);
+  };
+}
 function commitBreed(r, buck, bred, onDone){
   // make sure the finished litter is saved in her history before anything on her record changes
   if(r.litterBornDate && (r.litterKits||[]).length){
@@ -5880,9 +6206,9 @@ function openDuplicateSheet(typedName, matches, onResolve){
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>Possible duplicate</h2>
     <div class="dupe-box">You typed <b>${esc(typedName)}</b>. These look very similar to rabbits already on file.</div>
-    <div class="section-label">IS IT ONE OF THESE?</div>
-    ${matches.map(m=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px; text-align:left;" data-usedupe="${esc(m.name)}">${esc(m.name)} — ${m.status}${m.color?' · '+esc(m.color):''}</button>`).join('')}
-    <div class="sheet-actions"><button class="btn btn-primary" id="f-new" style="width:100%;">No, "${esc(typedName)}" is a different rabbit</button></div>`);
+    <div class="sheet-actions" style="margin:4px 0 14px;"><button class="btn btn-primary" id="f-new" style="width:100%;">It's a different rabbit &mdash; add "${esc(typedName)}" as new</button></div>
+    <div class="section-label">OR IS IT ONE OF THESE? (TAP ONE TO USE THAT RABBIT INSTEAD &mdash; NOTHING NEW IS ADDED)</div>
+    ${matches.map(m=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px; text-align:left;" data-usedupe="${esc(m.name)}">Yes, it's ${esc(m.name)} &mdash; ${m.status}${m.color?' &middot; '+esc(m.color):''}</button>`).join('')}`);
   document.querySelectorAll('[data-usedupe]').forEach(b=>b.onclick=()=>{ closeSheet(); onResolve(b.dataset.usedupe); });
   document.getElementById('f-new').onclick=()=>{ closeSheet(); onResolve(null); };
 }
@@ -6198,13 +6524,13 @@ function performMerge(k, d, from){
   }, 10000);
 }
 
-function openEditSheet(r, origin){
+function openEditSheet(r, origin, opts){
+  const lean = !!(opts && opts.lean);   // opened from a pedigree: fields and Save only; sell / retire / delete live in the full profile
   const known = rabbits.filter(x=>x.id!==r.id).map(x=>x.name);
   openSheet(`<button class="close-x" id="f-cancel-x">&times;</button>
     <h2>Edit ${esc(r.name)}</h2>
     <div class="row2">
-      <div class="field" style="flex:0 0 32%;"><label>Prefix</label><input id="f-prefix" list="prefix-options" value="${esc(r.prefix||'')}" placeholder="CJM" autocomplete="off">${prefixDatalistHTML()}</div>
-      <div class="field"><label>Name</label><input id="f-name" value="${esc(baseNameOf(r))}"></div>
+      <div class="field"><label>Name</label><input id="f-name" value="${esc(r.name||'')}"></div>
     </div>
     <div class="field"><label>Nickname (optional)</label><input id="f-alias" value="${esc(r.alias||'')}" placeholder="Nickname or previous name"></div>
     <div class="field"><label>Sex</label><div class="seg" id="f-sex">
@@ -6231,13 +6557,13 @@ function openEditSheet(r, origin){
     </div>
     <div class="field"><label>General notes</label><textarea id="f-notes">${esc(r.notes||'')}</textarea></div>
     <div class="sheet-actions"><button class="btn btn-secondary" id="f-cancel">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>
-    ${r.status!=='external'?`<div class="sheet-actions">
+    ${(!lean && r.status!=='external')?`<div class="sheet-actions">
       <button class="btn btn-secondary" id="f-forsale" style="flex:1;">${r.forSale?'For sale &#10003;':'Mark for sale'}</button>
       <button class="btn btn-secondary" id="f-sell" style="flex:1;">Sell</button></div>
     <div class="sheet-actions">
       <button class="btn btn-secondary" id="f-deceased" style="flex:1;">Mark deceased</button>
       <button class="btn btn-secondary" id="f-retired" style="flex:1;">Mark retired</button></div>`:''}
-    <div class="sheet-actions"><button class="btn btn-danger" id="f-delete" style="flex:1;">Delete permanently</button></div>`);
+    ${lean?'':`<div class="sheet-actions"><button class="btn btn-danger" id="f-delete" style="flex:1;">Delete permanently</button></div>`}`);
   attachSuggest(document.getElementById('f-color'), allKnownColors);
   attachSuggest(document.getElementById('f-sire'), ()=>rabbits.filter(x=>x.sex==='buck'&&x.id!==r.id).map(x=>x.name));
   attachSuggest(document.getElementById('f-dam'), ()=>rabbits.filter(x=>x.sex==='doe'&&x.id!==r.id).map(x=>x.name));
@@ -6255,7 +6581,7 @@ function openEditSheet(r, origin){
     };
     check(sire, finalSire=>check(dam, finalDam=>{
       const oldRName=r.name;
-      { const pf=document.getElementById('f-prefix').value.trim(), nb2=document.getElementById('f-name').value.trim(); r.prefix=pf; if(nb2) r.name=fullName(pf, nb2); }
+      { const nb2=document.getElementById('f-name').value.trim(); if(nb2) r.name=nb2; }   // one name field; any old stored prefix is left untouched
       repointName(oldRName, r.name);
       r.alias=document.getElementById('f-alias').value.trim();
       r.sex=sex; r.breed=document.getElementById('f-breed').value; r.color=document.getElementById('f-color').value;
@@ -6286,7 +6612,8 @@ function openEditSheet(r, origin){
   };
   const ret=document.getElementById('f-retired');
   if(ret) ret.onclick=()=>{ r.status='retired'; saveData(); closeSheet(); render(); if(profileRabbitId) renderProfile(); showToast(r.name+' marked retired'); };
-  document.getElementById('f-delete').onclick=(e)=>{ armConfirm(e.target, 'Tap again to confirm', async ()=>{ if(!(await moveToTrash(r))){ showToast('Could not delete — check your connection and try again'); return; } rabbits=rabbits.filter(x=>x.id!==r.id); saveData(); closeSheet(); closeProfile(); render(); showToast(r.name+' deleted · kept 30 days in More › Recently deleted'); }); };
+  const delBtn=document.getElementById('f-delete');
+  if(delBtn) delBtn.onclick=(e)=>{ armConfirm(e.target, 'Tap again to confirm', async ()=>{ if(!(await moveToTrash(r))){ showToast('Could not delete — check your connection and try again'); return; } rabbits=rabbits.filter(x=>x.id!==r.id); saveData(); closeSheet(); closeProfile(); render(); showToast(r.name+' deleted · kept 30 days in More › Recently deleted'); }); };
 }
 
 const RABBIT_BREEDS = [
@@ -6309,7 +6636,6 @@ function openAddSheet(){
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>Add rabbit</h2>
     <div class="row2">
-      <div class="field" style="flex:0 0 32%;"><label>Prefix</label><input id="f-prefix" list="prefix-options" placeholder="CJM" autocomplete="off">${prefixDatalistHTML()}</div>
       <div class="field"><label>Name</label><input id="f-name" placeholder="Clover"></div>
     </div>
     <div class="field"><label>Nickname (optional)</label><input id="f-alias" placeholder="What you call her or him"></div>
@@ -6387,9 +6713,8 @@ function openAddSheet(){
   document.getElementById('f-save').onclick=()=>{
     const base=document.getElementById('f-name').value.trim();
     if(!base){ showToast('Enter a name'); return; }
-    const prefix=document.getElementById('f-prefix').value.trim();
-    const name=fullName(prefix, base);
-    const d=gather(); if(d.weightBad){ showToast(d.weightBad); return; } d.prefix=prefix; d.alias=val('f-alias').trim();
+    const name=base;
+    const d=gather(); if(d.weightBad){ showToast(d.weightBad); return; } d.alias=val('f-alias').trim();
     const m=fuzzyMatches(name);
     if(m.length){
       openDuplicateSheet(name, m, chosen=>{
@@ -6399,7 +6724,7 @@ function openAddSheet(){
             // Even if this turns out to have been the wrong call, nothing typed here is lost: any blank fields on the
             // existing record get filled in from what was just entered, and it opens straight into editing.
             const typed = { breed:d.breed, color:d.color, earNumber:d.earNumber, dob:d.dob, sireName:d.sireName, damName:d.damName,
-              registrationNumber:d.registrationNumber, gcNumber:d.gcNumber, legsWins:d.legsWins, weight:d.weightLbs?String(d.weightLbs):'', alias:d.alias||'', prefix:d.prefix||'' };
+              registrationNumber:d.registrationNumber, gcNumber:d.gcNumber, legsWins:d.legsWins, weight:d.weightLbs?String(d.weightLbs):'', alias:d.alias||'' };
             Object.keys(typed).forEach(k=>{ if(!ex[k] && typed[k]) ex[k]=typed[k]; });
             saveData();
             closeSheet();
@@ -6421,7 +6746,7 @@ function commitAdd(name, sex, d){
   const sire=d.sireName||'', dam=d.damName||'';
   const newRabbit = blankRabbit({ name, sex, status, breed:d.breed||'', color:d.color||'', earNumber:d.earNumber||'',
     weight:d.weightLbs?String(d.weightLbs):'', dob:d.dob||null, sireName:sire, damName:dam,
-    registrationNumber:d.registrationNumber||'', gcNumber:d.gcNumber||'', legsWins:d.legsWins||'', prefix:d.prefix||'', alias:d.alias||'' });
+    registrationNumber:d.registrationNumber||'', gcNumber:d.gcNumber||'', legsWins:d.legsWins||'', alias:d.alias||'' });
   newRabbit.projects=(d.projectIds||[]).filter(id=>projects.some(p=>p.id===id));
   newRabbit.carries=Object.assign({}, d.carries||{});
   if(d.weightOz) newRabbit.weightLog=[{id:uid(), date:d.weightDate||todayStr(), oz:d.weightOz, source:'manual'}];
@@ -6436,10 +6761,53 @@ function commitAdd(name, sex, d){
   if(d.photo){ addPhotoToRabbit(newRabbit, d.photo, 'Primary').then(ok=>{ if(profileRabbitId===newRabbit.id) renderProfile(); }); }
 }
 
+// On a computer the tree boxes show the same details the printed pedigree will show (the checkboxes under the tree).
+function pedPrintOptionsHTML(){
+  const wide=pedWide();
+  const f=pedigreeSettings.fields||{}, locked=!!viewingAsCustomer;
+  const rows=[['dob','Date of birth',f.dob!==false],['reg','Registration #',!!f.reg],['gc','GC #',!!f.gc],['ear','Ear #',!!f.ear],['color','Color',!!f.color],['weight','Weight',!!f.weight]];
+  const cb=(id,label,on)=>`<label style="display:flex; align-items:center; gap:8px; padding:6px 0; font-size:14px; font-weight:600;"><input type="checkbox" id="${id}" ${on?'checked':''} ${locked?'disabled':''} style="width:18px; height:18px;"> ${label}</label>`;
+  return `<div class="card no-tap" id="pedPrintOpts" style="margin:14px 0;"><details ${wide?'open':''}><summary class="section-label" style="margin:0 0 6px;cursor:pointer;">SHOWN IN THE BOXES AND ON THE PRINT</summary>
+    <div style="display:grid; grid-template-columns:repeat(${wide?3:1},minmax(0,1fr)); gap:0 18px;">${rows.map(([k,l,on])=>cb('pof-'+k,l,on)).join('')}${cb('pof-cert','Certification statement and signature line',pedigreeSettings.hasCertification!==false)}${cb('pof-wm','Diagonal watermark',!!pedigreeSettings.watermarkEnabled)}</div>
+    <div class="card-sub" style="margin-top:6px;">These are saved for your account. Logo, fonts and other customization are under More &rarr; Pedigree settings.</div></details></div>`;
+}
+function wirePedPrintOptions(r){
+  const box=document.getElementById('pedPrintOpts'); if(!box || viewingAsCustomer) return;
+  const apply=async ()=>{
+    pedigreeSettings.fields=Object.assign({}, pedigreeSettings.fields||{});
+    ['dob','reg','gc','ear','color','weight'].forEach(k=>{ pedigreeSettings.fields[k]=document.getElementById('pof-'+k).checked; });
+    pedigreeSettings.hasCertification=document.getElementById('pof-cert').checked;
+    pedigreeSettings.watermarkEnabled=document.getElementById('pof-wm').checked;
+    const wrap=document.getElementById('pedTreeWrap');
+    if(wrap){ wrap.innerHTML=pedigreeTreeHTML(r); wirePedigreeTaps(wrap, r, renderProfile); }
+    await savePedigreeSettings();
+  };
+  box.querySelectorAll('input[type=checkbox]').forEach(c=>c.onchange=apply);
+}
+function pedWide(){ return !!(window.matchMedia && window.matchMedia('(min-width:900px)').matches); }
+function pedFieldParts(n,isSelf){
+  const f=(pedigreeSettings&&pedigreeSettings.fields)||{}, out=[], extra=[];
+  if(!n || !n.id) return {facts:out, extra};   // a name with no record behind it has nothing to show; a pedigree-only ancestor record does
+  if(f.color && n.color) out.push(n.color);
+  if(f.dob!==false && n.dob) out.push('DOB '+fmtDateShort(n.dob));
+  if(f.ear && n.earNumber) out.push('Ear # '+n.earNumber);
+  if(f.reg && n.registrationNumber) out.push('Reg # '+n.registrationNumber);
+  if(f.gc && n.gcNumber) out.push('GC # '+n.gcNumber);
+  if(f.weight && n.weight) out.push(fmtWeight(n.weight));
+  // legs and winnings always print, so they always show here too (5 for this rabbit, 2 for each ancestor, like the print)
+  if(n.legsWins) extra.push('Legs: '+n.legsWins);
+  (n.wins||[]).slice(0,isSelf?5:2).forEach(w=>{ try{ extra.push(pedigreeWinLineText(w)); }catch(e){} });
+  return {facts:out, extra};
+}
+function pedFieldLines(n,isSelf){ const x=pedFieldParts(n,isSelf); return x.facts.concat(x.extra); }
 function pedBox(node,path,role){
   const label = role?`<div class="pc" style="opacity:.6; text-transform:uppercase; font-size:9px; letter-spacing:.04em;">${role}</div>`:'';
-  if(!node||!node.name) return `<div class="ped-box unknown" data-pedpath="${path}">${label}<div class="pn">+ Add name</div></div>`;
-  return `<div class="ped-box ${node.external?'unknown':''}" data-pedname="${esc(node.name)}">${label}<div class="pn">${esc(node.name)}</div>${node.color?`<div class="pc">${esc(node.color)}</div>`:''}</div>`;
+  if(!node||!node.name) return `<div class="ped-box unknown" data-pedpath="${path}" data-pedat="${path}">${label}<div class="pn">+ Add name</div></div>`;
+  if(pedWide()){
+    const ls=pedFieldLines(node);
+    return `<div class="ped-box ${node.external?'unknown':''}" data-pedname="${esc(node.name)}" data-pedat="${path}">${label}<div class="pn">${esc(node.name)}</div>${ls.map(x=>`<div class="pc">${esc(x)}</div>`).join('')}</div>`;
+  }
+  return `<div class="ped-box ${node.external?'unknown':''}" data-pedname="${esc(node.name)}" data-pedat="${path}">${label}<div class="pn">${esc(node.name)}</div>${node.color?`<div class="pc">${esc(node.color)}</div>`:''}</div>`;
 }
 function historyEntryHTML(damObj, e){
   const cls = e.outcome==='litter'?'took':e.outcome==='lost'?'lost':'pending';
@@ -6528,21 +6896,17 @@ function openAncestorSheet(anc, origin){
   };
   document.getElementById('f-adelete').onclick=(e)=>{ armConfirm(e.target, 'Tap again to confirm', async ()=>{ if(!(await moveToTrash(anc))){ showToast('Could not delete — check your connection and try again'); return; } rabbits=rabbits.filter(x=>x.id!==anc.id); saveData(); done(origin); }); };
 }
-const pedOpen = new Set();
+const pedOpen = new Set();   // great-grandparent groups the person has closed; everything else starts open
 function pedNestRow(node,path,role){
-  if(!node||!node.name) return `<div class="pdn-row unknown" data-pedpath="${path}"><div class="pdn-role">${role}</div><div class="pdn-grow"><div class="pn">+ Add name</div></div></div>`;
-  return `<div class="pdn-row ${node.external?'anc':''}" data-pedname="${esc(node.name)}"><div class="pdn-role">${role}</div><div class="pdn-grow"><div class="pn">${esc(node.name)}</div>${node.color?`<div class="pc">${esc(node.color)}</div>`:''}</div></div>`;
+  if(!node||!node.name) return `<div class="pdn-row unknown" data-pedpath="${path}" data-pedat="${path}"><div class="pdn-role">${role}</div><div class="pdn-grow"><div class="pn">+ Add name</div></div></div>`;
+  return `<div class="pdn-row ${node.external?'anc':''}" data-pedname="${esc(node.name)}" data-pedat="${path}"><div class="pdn-role">${role}</div><div class="pdn-grow"><div class="pn">${esc(node.name)}</div>${(()=>{ const x=pedFieldParts(node); return (x.facts.length?`<div class="pc">${esc(x.facts.join(' \u00b7 '))}</div>`:'')+x.extra.map(l=>`<div class="pc">${esc(l)}</div>`).join(''); })()}</div></div>`;
 }
 function pedNestHTML(r){
   const g=p=>ancestorByPath(r.name,p);
-  const more=(parentPath,caption,a,b,pa,pb)=>{
-    const key=r.id+':'+parentPath, open=pedOpen.has(key);
-    const n=(g(pa)&&g(pa).name?1:0)+(g(pb)&&g(pb).name?1:0);
-    return `<button type="button" class="pdn-tg" data-pedtg="${key}"><span>${caption}</span><span>${n}/2 <b>${open?'▾':'›'}</b></span></button>
-      <div class="pdn-nest pdn-more ${open?'on':''}">${pedNestRow(g(pa),pa,'Sire')}${pedNestRow(g(pb),pb,'Dam')}</div>`;
-  };
+  // great-grandparents sit right under their grandparent, one step further in, each labelled as what they are
+  const more=(parentPath,caption,a,b,pa,pb)=>`<div class="pdn-nest pdn-more on pdn-deep">${pedNestRow(g(pa),pa,'Great-<br>grandsire')}${pedNestRow(g(pb),pb,'Great-<br>granddam')}</div>`;
   const side=(p,pc,gs,gd,lbl)=>`${pedNestRow(g(p),p,pc)}
-    <div class="pdn-nest"><div class="ped-side-label" style="margin:2px 0 0;">GRANDPARENTS · ${lbl}</div>
+    <div class="pdn-nest">
       <div>${pedNestRow(g(p+'s'),p+'s','Grandsire')}${more(p+'s',"Grandsire's parents",0,0,p+'ss',p+'sd')}</div>
       <div>${pedNestRow(g(p+'d'),p+'d','Granddam')}${more(p+'d',"Granddam's parents",0,0,p+'ds',p+'dd')}</div></div>`;
   return `<div class="ped-gen"><div class="ped-gen-label">PARENTS</div>${side('s','Sire',0,0,"SIRE'S SIDE")}<div style="height:12px"></div>${side('d','Dam',0,0,"DAM'S SIDE")}</div>`;
@@ -6551,7 +6915,7 @@ document.addEventListener('click',e=>{
   const t=e.target.closest&&e.target.closest('[data-pedtg]'); if(!t) return;
   const key=t.dataset.pedtg, block=t.nextElementSibling; if(!block) return;
   const on=!block.classList.contains('on'); block.classList.toggle('on',on);
-  if(on) pedOpen.add(key); else pedOpen.delete(key);
+  if(on) pedOpen.delete(key); else pedOpen.add(key);
   const b=t.querySelector('b'); if(b) b.textContent=on?'▾':'›';
 });
 function pedigreeTreeHTML(r){
@@ -6564,7 +6928,7 @@ function pedigreeTreeHTML(r){
   const gens=[['', 's','d'],['ss','sd','ds','dd'],['sss','ssd','sds','sdd','dss','dsd','dds','ddd']];
   const roleOf=(path)=>path.slice(-1)==='s'?(path.length===1?'Sire':path.length===2?'Grandsire':'Sire'):(path.length===1?'Dam':path.length===2?'Granddam':'Dam');
   let tree = `<div class="pt-head" style="grid-column:1;grid-row:1;">THIS RABBIT</div><div class="pt-head" style="grid-column:3;grid-row:1;">PARENTS</div><div class="pt-head" style="grid-column:5;grid-row:1;">GRANDPARENTS</div><div class="pt-head" style="grid-column:7;grid-row:1;">GREAT-GRANDPARENTS</div>`;
-  tree += cell(`<div class="ped-box pt-self"><div class="pn">${esc(r.name)}</div><div class="pc">${esc([r.sex==='doe'?'Doe':'Buck', r.color].filter(Boolean).join(' · '))}</div></div>`,1,2,8);
+  tree += cell(`<div class="ped-box pt-self"><div class="pn">${esc(r.name)}</div><div class="pc">${esc([r.sex==='doe'?'Doe':'Buck', r.color].filter(Boolean).join(' · '))}</div>${pedFieldLines(Object.assign({},r,{color:''}),true).map(x=>`<div class="pc">${esc(x)}</div>`).join('')}</div>`,1,2,8);
   ['s','d'].forEach((pth,i)=>{ tree += cell(pedBox(g(pth),pth,roleOf(pth)),3,2+i*4,4); });
   ['ss','sd','ds','dd'].forEach((pth,i)=>{ tree += cell(pedBox(g(pth),pth,roleOf(pth)),5,2+i*2,2); });
   ['sss','ssd','sds','sdd','dss','dsd','dds','ddd'].forEach((pth,i)=>{ tree += cell(pedBox(g(pth),pth,roleOf(pth)),7,2+i,1); });
@@ -6608,17 +6972,67 @@ function pedExtraButtons(anc, back){
   document.getElementById('pedOpenProf').onclick=()=>{ closeSheet(); openRabbitProfile(anc); };
   document.getElementById('pedShowPed').onclick=()=>{ closeSheet(); openRabbitProfile(anc,'pedigree'); };
 }
+// Previous / Next inside the edit panel: saves what you typed, closes, and opens the next rabbit in the order you read the pedigree
+// (the order the boxes appear on screen: top to bottom on a phone, left to right then top to bottom on a computer)
+function pedVisibleSlots(){
+  return Array.from(document.querySelectorAll('[data-pedat]')).filter(el=>el.offsetParent!==null);
+}
+function pedSlotUsable(el){
+  if(el.hasAttribute('data-pedname')) return true;
+  const path=el.dataset.pedat, pp=path.slice(0,-1);
+  if(pp==='') return true;
+  const parentEl=document.querySelector('[data-pedat="'+pp+'"]');
+  return !!(parentEl && parentEl.hasAttribute('data-pedname'));
+}
+function pedNeighbor(path, dir){
+  const slots=pedVisibleSlots(); const i=slots.findIndex(el=>el.dataset.pedat===path);
+  if(i<0) return null;
+  for(let j=i+dir; j>=0 && j<slots.length; j+=dir){ if(pedSlotUsable(slots[j])) return slots[j]; }
+  return null;
+}
+async function pedAdvance(path, dir){
+  const nameQ=document.getElementById('f-qn');
+  if(nameQ && !nameQ.value.trim()){ const c=document.getElementById('f-cancel'); if(c) c.click(); }   // blank slot, nothing typed: just move on
+  else { const sv=document.getElementById('f-save'); if(!sv) return; sv.click(); }
+  const bd=document.getElementById('sheetBackdrop');
+  for(let t=0; t<80 && bd.classList.contains('on'); t++) await new Promise(r=>setTimeout(r,60));
+  if(bd.classList.contains('on')) return;          // a question or a failed save is still open: stay put, nothing is skipped
+  await new Promise(r=>setTimeout(r,30));
+  if(dir===0) return;      // Close: saved and closed
+  const nx=pedNeighbor(path, dir);
+  if(nx){ try{ nx.scrollIntoView({block:'nearest'}); }catch(e){} nx.click(); }
+}
+function pedNavButtons(path){
+  const sheet=document.getElementById('sheet'); const bar=sheet.querySelector('.sheet-actions'); if(!bar || !path) return;
+  const usable=pedVisibleSlots().filter(pedSlotUsable);
+  const idx=usable.findIndex(el=>el.dataset.pedat===path);
+  const hasPrev=idx>0, hasNext=idx>=0 && idx<usable.length-1;
+  // one tidy bar pinned to the bottom of the panel replaces Cancel / Save: Previous, Close, Next. Each of them saves first.
+  bar.style.display='none';
+  const h2=sheet.querySelector('h2');
+  if(h2 && idx>=0 && usable.length>1){ const pos=document.createElement('div'); pos.className='card-sub'; pos.style.cssText='margin:-8px 0 12px;'; pos.textContent='Rabbit '+(idx+1)+' of '+usable.length; h2.insertAdjacentElement('afterend',pos); }
+  const row=document.createElement('div');
+  row.style.cssText='position:sticky; bottom:0; display:flex; gap:8px; margin:16px -18px -26px; padding:10px 18px 14px; background:var(--page); border-top:1px solid var(--line); z-index:2;';
+  row.innerHTML=(hasPrev?'<button type="button" class="btn btn-secondary" style="flex:1; min-width:0;" id="pedPrev">&lsaquo; Previous</button>':'')
+    +`<button type="button" class="btn ${hasNext?'btn-secondary':'btn-primary'}" style="flex:1; min-width:0;" id="pedClose">Close</button>`
+    +(hasNext?'<button type="button" class="btn btn-primary" style="flex:1; min-width:0;" id="pedNext">Next &rsaquo;</button>':'');
+  sheet.appendChild(row);
+  const pv=document.getElementById('pedPrev'), nx=document.getElementById('pedNext'), cl=document.getElementById('pedClose');
+  if(pv) pv.onclick=()=>pedAdvance(path,-1);
+  if(nx) nx.onclick=()=>pedAdvance(path,1);
+  if(cl) cl.onclick=()=>pedAdvance(path,0);
+}
 function wirePedigreeTaps(container, r, back){
   container.querySelectorAll('[data-pedname]').forEach(b=>b.onclick=()=>{
     const anc=findByName(b.dataset.pedname); if(!anc) return;
-    if(anc.external) openAncestorSheet(anc,back); else { openEditSheet(anc,back); pedExtraButtons(anc,back); }
+    openEditSheet(anc,back,{lean:true}); pedExtraButtons(anc,back); pedNavButtons(b.dataset.pedat);
     pedDockOn(b);
   });
   container.querySelectorAll('[data-pedpath]').forEach(b=>b.onclick=()=>{
     const path=b.dataset.pedpath, rel=path.slice(-1), pp=path.slice(0,-1);
     const parent = pp===''?r:ancestorByPath(r.name,pp);
     if(!parent||!parent.name){ showToast('Fill in the closer generation first'); return; }
-    openQuickNameSheet(ensureAncestor(parent.name), rel, back);
+    openQuickNameSheet(ensureAncestor(parent.name), rel, back); pedNavButtons(b.dataset.pedat);
     pedDockOn(b);
   });
 }
@@ -6643,29 +7057,31 @@ function openQuickNameSheet(parent, rel, back){
   const label = rel==='s'?'Sire':'Dam';
   openSheet(`<button class="close-x" id="f-cancel-x">&times;</button>
     <h2>${esc(parent.name)}'s ${label.toLowerCase()}</h2>
-    <div class="field"><label>${label}'s name</label><input id="f-qn" placeholder="Type a name"></div>
+    <div class="row2">
+      <div class="field"><label>Name &mdash; type to search your herd</label><input id="f-qn" placeholder="Type a name" autocomplete="off"></div>
+    </div>
+    <div class="field"><label>Nickname (optional)</label><input id="f-qalias" placeholder="Nickname or previous name" autocomplete="off"></div>
+    <div class="field"><label>Sex</label><div class="card-detail" style="padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);opacity:.85;">${rel==='s'?'Buck':'Doe'} &#128274;</div></div>
+    <div class="row2">
+      <div class="field"><label>Breed</label><input id="f-qbreed" list="breed-options" placeholder="Start typing…" autocomplete="off">${breedDatalistHTML()}</div>
+      <div class="field"><label>Color / Variety</label><input id="f-qcolor"></div>
+    </div>
     <div class="row2">
       <div class="field"><label>Ear #</label><input id="f-qear"></div>
       <div class="field"><label>Weight (lbs)</label><input id="f-qweight"></div>
     </div>
     <div class="row2">
       <div class="field"><label>Date of birth</label><input type="date" id="f-qdob"></div>
-      <div class="field"><label>GC #</label><input id="f-qgc"></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Breed</label><input id="f-qbreed" list="breed-options" placeholder="Start typing…" autocomplete="off">${breedDatalistHTML()}</div>
-      <div class="field"><label>Color / Variety</label><input id="f-qcolor"></div>
-    </div>
-    <div class="row2">
-      <div class="field"><label>Legs</label><input id="f-qlegs"></div>
       <div class="field"><label>Registration #</label><input id="f-qreg"></div>
     </div>
-    <div class="field"><label>Nickname (optional)</label><input id="f-qalias" placeholder="Nickname or previous name" autocomplete="off"></div>
+    <div class="row2">
+      <div class="field"><label>GC #</label><input id="f-qgc"></div>
+      <div class="field"><label>Legs</label><input id="f-qlegs"></div>
+    </div>
     <div class="row2">
       <div class="field"><label>Sire</label><input id="f-qsire" autocomplete="off"></div>
       <div class="field"><label>Dam</label><input id="f-qdam" autocomplete="off"></div>
     </div>
-    <div class="field"><label>Sex</label><div class="card-detail" style="padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);opacity:.85;">${rel==='s'?'Buck':'Doe'} &#128274;</div></div>
     <div class="field"><label>General notes</label><textarea id="f-qnotes" rows="2"></textarea></div>
     <div class="card-sub" id="f-qnote" style="display:none;"></div>
     <div class="sheet-actions"><button class="btn btn-secondary" id="f-cancel">Cancel</button><button class="btn btn-primary" id="f-save">Save</button></div>`);
@@ -6685,8 +7101,9 @@ function openQuickNameSheet(parent, rel, back){
     }
   });
   document.getElementById('f-save').onclick=()=>{
-    const name=document.getElementById('f-qn').value.trim();
-    if(!name){ showToast('Enter a name'); return; }
+    const qbase=document.getElementById('f-qn').value.trim();
+    if(!qbase){ showToast('Enter a name'); return; }
+    const name=qbase;
     const fields = {
       earNumber: document.getElementById('f-qear').value,
       weight: document.getElementById('f-qweight').value,
@@ -6917,7 +7334,9 @@ function sanitizeForPdf(str){
   // hand icon) can't be rendered and will crash the PDF export
   // entirely if left in, so they're stripped out here rather
   // than left to fail at save time.
-  return String(str).replace(/[^\x00-\xFF]/g, '').replace(/\s+/g, ' ').trim();
+  // Curly quotes, dashes and similar (what a phone keyboard types) become their plain look-alikes so a name like
+  // Willow Tree’s keeps its apostrophe instead of losing it.
+  return String(str).replace(/[\u2018\u2019\u02BC\u02BB\u2032]/g,"'").replace(/[\u201C\u201D\u2033]/g,'"').replace(/[\u2010-\u2015\u2212]/g,'-').replace(/\u2026/g,'...').replace(/[\u00A0\u2000-\u200A\u202F]/g,' ').replace(/[^\x00-\xFF]/g, '').replace(/\s+/g, ' ').trim();
 }
 function buildOfficialPedigreeValues(r){
   const g = p => ancestorByPath(r.name, p);
@@ -7067,7 +7486,7 @@ async function buildDynamicGenericPedigreePdfBytes(r, myProfileForPdf, overrides
   pdfDoc.registerFontkit(fontkit);
   const [b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15,b16,b17] = await loadPedigreeFontBytes();
   const [serifBold, serifItalic, sans, sansBold, mono, monoBold, playfair, cinzel, script, libre, dmserif, montserrat, jost, allura, alexbrush, blackletter, handwritten] = await Promise.all(
-    [b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15,b16,b17].map(b=>pdfDoc.embedFont(b))
+    [b1,b2,b3,b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15,b16,b17].map(b=>pdfDoc.embedFont(b,{features:{liga:false,clig:false,calt:false}}))
   );
   const fonts = { serifBold, serifItalic, sans, sansBold, mono, monoBold, playfair, cinzel, script, libre, dmserif, montserrat, jost, allura, alexbrush, blackletter, handwritten };
   const TITLE_FONTS = {
@@ -7146,13 +7565,14 @@ async function buildDynamicGenericPedigreePdfBytes(r, myProfileForPdf, overrides
   // header
   let hx = M;
   const titleH = 24;
-  drawCenteredText('PEDIGREE', W/2, H-M, titleFontFor(pedigreeSettings2.titleFont), titleSizeFor(pedigreeSettings2.titleFont, 18), accent);
+  drawCenteredText(['script','allura','alexbrush','blackletter','handwritten'].indexOf(pedigreeSettings2.titleFont)>=0?'Pedigree':'PEDIGREE', W/2, H-M, titleFontFor(pedigreeSettings2.titleFont), titleSizeFor(pedigreeSettings2.titleFont, 18), accent);
   const headerTopY = H-M-titleH;
   const rabbitryName = myProfileForPdf.rabbitry_name || '';
   const rightLines = [['Breed', r.breed||'']];
   if(fields.dob!==false) rightLines.push(['Date of Birth', r.dob?fmtDate(r.dob):'']);
   rightLines.push(['Sex', r.sex==='doe'?'Doe':'Buck']);
-  const headerBottomY = headerTopY - 44;
+  const showHeaderEar = fields.ear!==false && !!(r.earNumber && String(r.earNumber).trim());
+  const headerBottomY = headerTopY - (showHeaderEar ? 58 : 44);
 
   let logoImg = null;
   if(pedigreeSettings2.logoDataUrl){
@@ -7169,6 +7589,10 @@ async function buildDynamicGenericPedigreePdfBytes(r, myProfileForPdf, overrides
   if(pedigreeSettings2.tagline) drawText(pedigreeSettings2.tagline, hx, headerTopY-22, fonts.mono, 7, accent);
 
   const rightX = W-M; let ry = headerTopY;
+  if(showHeaderEar){   // the main rabbit's ear number, bold, above the breed (so it isn't repeated inside the main card)
+    const et = `Ear #: ${sanitizeForPdf(String(r.earNumber).trim())}`, ew = textWidth(et, fonts.sansBold, 11);
+    drawText(et, rightX-ew, ry, fonts.sansBold, 11, black); ry -= 17;
+  }
   rightLines.forEach(([label,val])=>{
     const t = `${label}: ${val}`, w=textWidth(t,fonts.sans,8.5);
     drawText(t, rightX-w, ry, fonts.sans, 8.5, gray); ry -= 13;
@@ -7237,111 +7661,144 @@ async function buildDynamicGenericPedigreePdfBytes(r, myProfileForPdf, overrides
     }
   }
 
-  // tree
+  // tree: rounded cards with serif names and bracket connectors (same look as the on-screen preview).
+  // Every column shrinks its text together until all of its cards fit on the page, so nothing is cut off.
   const treeTop = headerBottomY-12, treeBottom = footerTopY+16, treeH = treeTop-treeBottom;
-  const colGap=12, colW=(W-2*M-3*colGap)/4;
-  const col1X=M, col2X=col1X+colW+colGap, col3X=col2X+colW+colGap, col4X=col3X+colW+colGap;
-
+  const colGap=16, colW=(W-2*M-3*colGap)/4;
+  const colXs=[M, M+(colW+colGap), M+2*(colW+colGap), M+3*(colW+colGap)];
+  const accLum = (()=>{ const n=parseInt(accentHex.replace('#',''),16); return (0.299*((n>>16)&255)+0.587*((n>>8)&255)+0.114*(n&255))/255; })();
+  const onAccent = accLum>0.62 ? rgb(0.08,0.08,0.08) : white;
+  const connGray = rgb(0.62,0.62,0.62), cardBorder = rgb(0.82,0.82,0.82), ink = rgb(0.09,0.09,0.09), inkSoft = rgb(0.3,0.3,0.3), labelGray = rgb(0.48,0.48,0.5);
   const TIER = {
-    self:  { pre:14, ribbonH:15, postRibbon:10, lineH:12.5, bodySize:9,   ribbonSize:8,   ribbonPadX:8, borderW:1,    winGapA:7, winGapB:10, labelGap:11, winLineH:11,  winSize:8   },
-    parent:{ pre:10, ribbonH:12, postRibbon:8,  lineH:10.5, bodySize:8,   ribbonSize:6.5, ribbonPadX:7, borderW:0.75, winGapA:6, winGapB:9,  labelGap:9,  winLineH:9.5, winSize:7   },
-    grand: { pre:8,  ribbonH:10, postRibbon:6,  lineH:9,    bodySize:7,   ribbonSize:5.5, ribbonPadX:6, borderW:0.75, winGapA:5, winGapB:8,  labelGap:8,  winLineH:8,   winSize:6.5 },
-    great: { pre:6,  ribbonH:9,  postRibbon:5,  lineH:7.5,  bodySize:6.2, ribbonSize:4.8, ribbonPadX:5, borderW:0.6,  winGapA:0, winGapB:0,  labelGap:0,  winLineH:0,   winSize:0   }
+    self:  { pad:10, labelSize:5.8, nameSize:13.5, bodySize:9,   lineH:12,  winSize:8,   winLineH:10.5, radius:9, gapA:5, gapB:6 },
+    parent:{ pad:9,  labelSize:5.5, nameSize:11.5, bodySize:8,   lineH:10.4,winSize:7,   winLineH:9.2,  radius:7, gapA:4, gapB:5 },
+    grand: { pad:7,  labelSize:5,   nameSize:9.2,  bodySize:7,   lineH:8.6, winSize:6.2, winLineH:7.8,  radius:6, gapA:3, gapB:4 },
+    great: { pad:6,  labelSize:4.6, nameSize:7.8,  bodySize:6.2, lineH:7.3, winSize:5.6, winLineH:7,    radius:5, gapA:0, gapB:0 }
   };
-  const BOTTOM_PAD=9;
-  function computeBoxHeight(tier, linesCount, winLinesCount, hasLabel){
-    const t=TIER[tier];
-    let h = t.pre+t.ribbonH+t.postRibbon+linesCount*t.lineH;
-    if(winLinesCount>0){ h += t.winGapA+t.winGapB; if(hasLabel) h+=t.labelGap; h += winLinesCount*t.winLineH; }
-    return h+BOTTOM_PAD;
+  const scaledTier = (key, s)=>{ const t=TIER[key], o={}; Object.keys(t).forEach(k=>{ o[k]=t[k]*s; }); return o; };
+  const MIN_GAP = 3;
+  function roundRectPath(w,h,r){ r=Math.min(r,w/2,h/2); return `M ${r} 0 H ${w-r} Q ${w} 0 ${w} ${r} V ${h-r} Q ${w} ${h} ${w-r} ${h} H ${r} Q 0 ${h} 0 ${h-r} V ${r} Q 0 0 ${r} 0 Z`; }
+  // word wrap that also breaks a single over-long word, so no line ever runs past the card
+  function wrapToWidth(text, font, size, maxW){
+    text = String(text==null?'':text); if(!text) return [''];
+    const out=[]; let cur='';
+    const pushWord = (word)=>{
+      while(textWidth(word,font,size)>maxW && word.length>1){
+        let n=word.length; while(n>1 && textWidth(word.slice(0,n),font,size)>maxW) n--;
+        if(cur){ out.push(cur); cur=''; }
+        out.push(word.slice(0,n)); word=word.slice(n);
+      }
+      const tryL = cur ? cur+' '+word : word;
+      if(!cur || textWidth(tryL,font,size)<=maxW) cur=tryL; else { out.push(cur); cur=word; }
+    };
+    text.split(' ').filter(x=>x!=='').forEach(pushWord);
+    if(cur) out.push(cur);
+    return out.length?out:[''];
   }
-  function drawBox(tier, x, yTop, w, ribbonText, lines, winsLabel, winLines){
-    const t=TIER[tier];
-    const h = computeBoxHeight(tier, lines.length, winLines?winLines.length:0, !!winsLabel);
-    page.drawRectangle({ x, y:yTop-h, width:w, height:h, borderColor:accent, borderWidth:t.borderW, color:white, opacity: usingBackground?0.86:1 });
-    let cy = yTop - t.pre;
-    const rw = textWidth(ribbonText, fonts.monoBold, t.ribbonSize) + t.ribbonPadX*2;
-    const rx = x + (w-rw)/2;
-    page.drawRectangle({ x:rx, y:cy-t.ribbonH, width:rw, height:t.ribbonH, color:accent });
-    const txtW = textWidth(ribbonText, fonts.monoBold, t.ribbonSize);
-    page.drawText(ribbonText, { x: rx+(rw-txtW)/2, y: cy-t.ribbonH/2-t.ribbonSize*0.33, size:t.ribbonSize, font:fonts.monoBold, color:white });
-    cy -= t.ribbonH + t.postRibbon;
-    lines.forEach(line=>{ drawText(truncateToWidth(line,fonts.sans,t.bodySize,w-16), x+8, cy, fonts.sans, t.bodySize, black); cy -= t.lineH; });
-    if(winLines && winLines.length){
-      cy -= t.winGapA;
-      page.drawLine({start:{x:x+8,y:cy},end:{x:x+w-8,y:cy},thickness:0.5,color:accent});
-      cy -= t.winGapB;
-      if(winsLabel){ drawText(winsLabel, x+8, cy, fonts.monoBold, tier==='self'?7:6, accent); cy -= t.labelGap; }
-      winLines.forEach(wl=>{ drawText(truncateToWidth(wl,fonts.sans,t.winSize,w-16), x+8, cy, fonts.sans, t.winSize, black); cy -= t.winLineH; });
+  // fields -> one short item each ("Ear # X"), color kept separate; wins as text lines
+  function specFor(anc, label, tier, winCount, forSelf){
+    const spec = { label, tier, name:'—', color:'', ear:'', items:[], wins:[], winLabel: forSelf };
+    if(!anc || !anc.name) return spec;
+    spec.name = anc.name;
+    if(fields.color && anc.color) spec.color = anc.color;
+    const dateFn = tier==='great' ? fmtDateShort : fmtDate;
+    if(fields.ear && anc.earNumber && !forSelf) spec.items.push('Ear # '+anc.earNumber);   // the main rabbit's ear # is in the page header instead
+    if(fields.weight && anc.weight) spec.items.push('Weight '+fmtWeight(anc.weight));
+    if(fields.dob!==false && anc.dob) spec.items.push('DOB '+dateFn(anc.dob));
+    if(fields.reg && anc.registrationNumber) spec.items.push('Reg # '+anc.registrationNumber);
+    if(fields.gc && anc.gcNumber) spec.items.push('GC # '+anc.gcNumber);
+    if(anc.legsWins) spec.items.push('Legs: '+anc.legsWins);
+    spec.wins = (anc.wins||[]).slice(0,winCount).map(pedigreeWinLineText);
+    return spec;
+  }
+  function layoutCard(spec, s){
+    const t=scaledTier(spec.tier, s), maxW=colW-2*t.pad;
+    // ear number sits in the top-right corner on the label row; if it can't fit there, it drops to its own "Ear # x" line
+    let earSize=0, earW=0, earOnLine=false;
+    if(spec.ear){
+      earSize = t.labelSize*1.7;
+      const lblW = textWidth(spec.label, fonts.sans, t.labelSize);
+      const calc = sz => textWidth('EAR ', fonts.sans, t.labelSize) + textWidth(spec.ear, fonts.sansBold, sz);
+      earW = calc(earSize);
+      if(lblW + 8 + earW > maxW){ earSize = t.labelSize*1.15; earW = calc(earSize); }
+      if(lblW + 8 + earW > maxW){ earOnLine = true; earSize = 0; earW = 0; }
     }
-    return h;
+    const nameLines = wrapToWidth(spec.name, fonts.serifBold, t.nameSize, maxW);
+    const lines=[];
+    if(spec.color) wrapToWidth(spec.color, fonts.sans, t.bodySize, maxW).forEach(x=>lines.push(x));
+    if(true){
+      // pack short items side by side on one line ("Ear # X  ·  DOB 7/1/2025") to save height
+      let cur='';
+      spec.items.forEach(item=>{
+        const tryL = cur ? cur+'  ·  '+item : item;
+        if(!cur || textWidth(tryL,fonts.sans,t.bodySize)<=maxW) cur=tryL;
+        else { wrapToWidth(cur,fonts.sans,t.bodySize,maxW).forEach(x=>lines.push(x)); cur=item; }
+      });
+      if(cur) wrapToWidth(cur,fonts.sans,t.bodySize,maxW).forEach(x=>lines.push(x));
+    } else {
+      spec.items.forEach(item=>wrapToWidth(item,fonts.sans,t.bodySize,maxW).forEach(x=>lines.push(x)));
+    }
+    const winLines=[]; spec.wins.forEach(w=>wrapToWidth(w,fonts.sans,t.winSize,maxW).forEach(x=>winLines.push(x)));
+    if(earOnLine) lines.unshift('Ear # '+spec.ear);
+    const labelBlock = spec.label ? Math.max(t.labelSize, earSize)*1.25+2 : 0, nameLH = t.nameSize*1.08;
+    let h = t.pad + labelBlock + nameLines.length*nameLH + 1.5 + lines.length*t.lineH + t.pad*0.8;
+    if(winLines.length){ h += t.gapA + 0.5 + t.gapB + (spec.winLabel ? t.winSize*1.2+1.5 : 0) + winLines.length*t.winLineH; }
+    return { spec, t, nameLines, lines, winLines, labelBlock, nameLH, earSize, earW, earOnLine, h };
   }
-
-  function ancestorFields(anc, includeGC){
-    if(!anc || !anc.name) return null;
-    const l=[`Name: ${anc.name}`];
-    if(fields.ear && anc.earNumber) l.push(`Ear #: ${anc.earNumber}`);
-    if(fields.weight && anc.weight) l.push(`Weight: ${fmtWeight(anc.weight)}`);
-    if(fields.color && anc.color) l.push(`Color: ${anc.color}`);
-    if(fields.dob!==false && anc.dob) l.push(`DOB: ${fmtDate(anc.dob)}`);
-    if(fields.reg && anc.registrationNumber) l.push(`Reg #: ${anc.registrationNumber}`);
-    if(includeGC && fields.gc && anc.gcNumber) l.push(`GC #: ${anc.gcNumber}`);
-    if(anc.legsWins) l.push(`Legs: ${anc.legsWins}`);
-    return l;
+  function layoutColumn(specs, sMax){
+    let s=sMax, cards=null;
+    for(; s>=0.5; s-=0.04){
+      cards = specs.map(sp=>layoutCard(sp,s));
+      const total = cards.reduce((a,c)=>a+c.h,0);
+      if(total + (cards.length+1)*MIN_GAP <= treeH) break;
+    }
+    return { cards, ys: pedigreeSpaceEvenly(cards.map(c=>c.h), treeH) };
   }
-
-  // self
-  const selfLinesArr = ancestorFields(r, true) || [`Name: ${r.name}`];
-  const selfWinLines = (r.wins||[]).slice(0,5).map(pedigreeWinLineText);
-  const selfBoxH = computeBoxHeight('self', selfLinesArr.length, selfWinLines.length, true);
-  const selfY = treeBottom + (treeH-selfBoxH)/2;
-  drawBox('self', col1X, selfY+selfBoxH, colW, 'GENERATION 1', selfLinesArr, selfWinLines.length?'SHOW WINS':null, selfWinLines);
-
-  // parents
+  function drawCard(col, card, yTop, isSelf){
+    const x=colXs[col], w=colW, t=card.t, h=card.h;
+    const fill = isSelf ? hexToRgb(accentHex) : white;
+    page.drawSvgPath(roundRectPath(w,h,t.radius), { x, y:yTop, color:fill, borderColor: isSelf?hexToRgb(accentHex):cardBorder, borderWidth: isSelf?0.5:0.6, opacity: (usingBackground&&!isSelf)?0.9:1 });
+    const nameC = isSelf?onAccent:ink, softC = isSelf?onAccent:inkSoft, lblC = isSelf?onAccent:labelGray;
+    let cy = yTop - t.pad;
+    const rowH = Math.max(t.labelSize, card.earSize), baseY = cy-rowH*0.82;
+    if(card.spec.label) page.drawText(card.spec.label, { x:x+t.pad, y:baseY, size:t.labelSize, font:fonts.sans, color:lblC, opacity: isSelf?0.75:1 });
+    if(card.spec.ear && !card.earOnLine){
+      const ex = x+w-t.pad-card.earW, preW = textWidth('EAR ', fonts.sans, t.labelSize);
+      page.drawText('EAR', { x:ex, y:baseY, size:t.labelSize, font:fonts.sans, color:lblC, opacity: isSelf?0.75:1 });
+      page.drawText(card.spec.ear, { x:ex+preW, y:baseY, size:card.earSize, font:fonts.sansBold, color:nameC });
+    }
+    cy -= card.labelBlock;
+    card.nameLines.forEach(l=>{ drawText(l, x+t.pad, cy, fonts.serifBold, t.nameSize, nameC); cy -= card.nameLH; });
+    cy -= 1.5;
+    card.lines.forEach(l=>{ drawText(l, x+t.pad, cy, fonts.sans, t.bodySize, isSelf?onAccent:ink); cy -= t.lineH; });
+    if(card.winLines.length){
+      cy -= t.gapA;
+      page.drawLine({ start:{x:x+t.pad,y:cy}, end:{x:x+w-t.pad,y:cy}, thickness:0.5, color: isSelf?onAccent:accent, opacity: isSelf?0.6:1 });
+      cy -= t.gapB;
+      if(card.spec.winLabel){ drawText('SHOW WINS', x+t.pad, cy, fonts.monoBold, t.winSize*0.86, isSelf?onAccent:accent); cy -= t.winSize*1.2+1.5; }
+      card.winLines.forEach(l=>{ drawText(l, x+t.pad, cy, fonts.sans, t.winSize, softC); cy -= t.winLineH; });
+    }
+  }
   const g = p => ancestorByPath(r.name, p);
-  const parentDefs = [ {label:'SIRE (FATHER)', anc:g('s')}, {label:'DAM (MOTHER)', anc:g('d')} ];
-  const parentBoxes = parentDefs.map(({label,anc})=>{
-    const lines = ancestorFields(anc, true) || ['Name: \u2014'];
-    const winLines = anc ? (anc.wins||[]).slice(0,2).map(pedigreeWinLineText) : [];
-    return { label, lines, winLines, h: computeBoxHeight('parent', lines.length, winLines.length, false) };
-  });
-  const pYs = pedigreeSpaceEvenly(parentBoxes.map(b=>b.h), treeH);
-  parentBoxes.forEach((b,i)=>drawBox('parent', col2X, treeTop-pYs[i], colW, b.label, b.lines, null, b.winLines));
-
-  // grandparents
-  const gpDefs = [
-    {label:'PATERNAL GRANDSIRE', anc:g('ss')}, {label:'PATERNAL GRANDDAM', anc:g('sd')},
-    {label:'MATERNAL GRANDSIRE', anc:g('ds')}, {label:'MATERNAL GRANDDAM', anc:g('dd')}
+  const colSpecs = [
+    [ specFor(r, '', 'self', 5, true) ],
+    [ specFor(g('s'), 'SIRE (FATHER)', 'parent', 2), specFor(g('d'), 'DAM (MOTHER)', 'parent', 2) ],
+    [ specFor(g('ss'),'PATERNAL GRANDSIRE','grand',1), specFor(g('sd'),'PATERNAL GRANDDAM','grand',1), specFor(g('ds'),'MATERNAL GRANDSIRE','grand',1), specFor(g('dd'),'MATERNAL GRANDDAM','grand',1) ],
+    ['sss','ssd','sds','sdd','dss','dsd','dds','ddd'].map((p,i)=>specFor(g(p), (i%2?'GG DAM ':'GG SIRE ')+(Math.floor(i/2)+1), 'great', 0))
   ];
-  const gpBoxes = gpDefs.map(({label,anc})=>{
-    const line1 = anc ? pedigreeFieldLine(anc, fields, true) : '';
-    const lines = anc ? [anc.name, line1, anc.legsWins?`Legs: ${anc.legsWins}`:''].filter(Boolean) : ['\u2014'];
-    const winLines = anc && anc.wins && anc.wins.length ? [pedigreeWinLineText(anc.wins[0])] : [];
-    return { label, lines, winLines, h: computeBoxHeight('grand', lines.length, winLines.length, false) };
-  });
-  const gpYs = pedigreeSpaceEvenly(gpBoxes.map(b=>b.h), treeH);
-  gpBoxes.forEach((b,i)=>drawBox('grand', col3X, treeTop-gpYs[i], colW, b.label, b.lines, null, b.winLines));
-
-  // great-grandparents
-  const ggPaths = ['sss','ssd','sds','sdd','dss','dsd','dds','ddd'];
-  const ggLabels = ['GG SIRE 1','GG DAM 1','GG SIRE 2','GG DAM 2','GG SIRE 3','GG DAM 3','GG SIRE 4','GG DAM 4'];
-  const ggBoxes = ggPaths.map((p,i)=>{
-    const anc = g(p);
-    const parts=[];
-    if(anc){
-      if(fields.ear && anc.earNumber) parts.push(anc.earNumber);
-      if(fields.weight && anc.weight) parts.push(fmtWeight(anc.weight));
-      if(fields.color && anc.color) parts.push(anc.color);
-      if(fields.dob!==false && anc.dob) parts.push(fmtDateShort(anc.dob));
-      if(fields.reg && anc.registrationNumber) parts.push('Reg '+anc.registrationNumber);
-      if(fields.gc && anc.gcNumber) parts.push('GC '+anc.gcNumber);
-      if(anc.legsWins) parts.push('Legs: '+anc.legsWins);
-    }
-    const lines = anc ? [anc.name, parts.join('  \u00b7  ')].filter(Boolean) : ['\u2014'];
-    return { label:ggLabels[i], lines, h: computeBoxHeight('great', lines.length, 0, false) };
-  });
-  const ggYs = pedigreeSpaceEvenly(ggBoxes.map(b=>b.h), treeH);
-  ggBoxes.forEach((b,i)=>drawBox('great', col4X, treeTop-ggYs[i], colW, b.label, b.lines, null, null));
+  // text grows a little when a column has spare room, and shrinks when it doesn't
+  const cols = colSpecs.map((c,i)=>layoutColumn(c,[1,1.15,1.3,1.3][i]));
+  const rects = cols.map((c,ci)=>c.cards.map((card,i)=>({ x:colXs[ci], w:colW, yTop:treeTop-c.ys[i], h:card.h })));
+  // bracket connectors from each card to its two parents, drawn first so the cards sit on top
+  const bracket = (from, a, b)=>{
+    const x1=from.x+from.w, x2=a.x, mx=x1+(x2-x1)/2, yc=from.yTop-from.h/2, ya=a.yTop-a.h/2, yb=b.yTop-b.h/2;
+    const L=(sx,sy,ex,ey)=>page.drawLine({ start:{x:sx,y:sy}, end:{x:ex,y:ey}, thickness:0.8, color:connGray });
+    L(x1,yc,mx,yc); L(mx,ya,mx,yb); L(mx,ya,x2,ya); L(mx,yb,x2,yb);
+  };
+  bracket(rects[0][0], rects[1][0], rects[1][1]);
+  bracket(rects[1][0], rects[2][0], rects[2][1]); bracket(rects[1][1], rects[2][2], rects[2][3]);
+  for(let i=0;i<4;i++) bracket(rects[2][i], rects[3][i*2], rects[3][i*2+1]);
+  cols.forEach((c,ci)=>c.cards.forEach((card,i)=>drawCard(ci, card, rects[ci][i].yTop, ci===0)));
 
   return pdfDoc.save();
 }
@@ -7396,6 +7853,53 @@ async function renderPedigreePreviewCanvas(bytes){
   const drawW = full.width*scale, drawH = full.height*scale;
   const dx = (visible.width-drawW)/2, dy = (visible.height-drawH)/2;
   ctx.drawImage(full, 0, 0, full.width, full.height, dx, dy, drawW, drawH);
+  window._pedPreviewFull = full;            // kept so a tap can open it big
+  visible.style.cursor = 'zoom-in';
+  visible.onclick = openPedigreeZoom;
+}
+// Tap the small preview to look at the page up close. Its own - / Fit / + buttons and two-finger pinch zoom in and out,
+// and Close is always on screen, so you can't get stuck zoomed in.
+function openPedigreeZoom(){
+  const full = window._pedPreviewFull; if(!full) return;
+  const old = document.getElementById('pedZoomOv'); if(old) old.remove();
+  const ov = document.createElement('div'); ov.id='pedZoomOv';
+  ov.style.cssText = 'position:fixed; inset:0; z-index:100000; background:#6b6e70; display:flex; flex-direction:column;';
+  const bar = document.createElement('div');
+  bar.style.cssText = 'flex:none; display:flex; gap:8px; align-items:center; padding:8px 10px; background:#3a1d44;';
+  const mk = (txt, fn, flex)=>{ const b=document.createElement('button'); b.type='button'; b.textContent=txt; b.onclick=fn;
+    b.style.cssText = 'height:44px; min-width:44px; padding:0 14px; border-radius:22px; border:0; background:#fff; color:#2a1a2e; font:700 15px "Public Sans",sans-serif;'+(flex?'flex:1;':''); return b; };
+  const area = document.createElement('div');
+  area.style.cssText = 'flex:1; overflow:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x pan-y;';
+  const c = document.createElement('canvas'); c.width=full.width; c.height=full.height;
+  c.getContext('2d').drawImage(full,0,0);
+  c.style.cssText = 'display:block; height:auto; background:#fff; margin:0;';
+  area.appendChild(c);
+  let z = 1;
+  const fitW = ()=>Math.max(200, area.clientWidth);
+  const apply = (nz, cx, cy)=>{
+    nz = Math.min(5, Math.max(1, nz));
+    const oldW = c.offsetWidth || fitW(), r = area.getBoundingClientRect();
+    const px = (area.scrollLeft + (cx==null ? area.clientWidth/2 : cx - r.left)) / oldW;
+    const py = (area.scrollTop + (cy==null ? area.clientHeight/2 : cy - r.top)) / (c.offsetHeight || 1);
+    z = nz; c.style.width = Math.round(fitW()*z)+'px';
+    area.scrollLeft = px*c.offsetWidth - (cx==null ? area.clientWidth/2 : cx - r.left);
+    area.scrollTop  = py*c.offsetHeight - (cy==null ? area.clientHeight/2 : cy - r.top);
+  };
+  bar.appendChild(mk('Close', ()=>ov.remove()));
+  const sp = document.createElement('div'); sp.style.flex='1'; bar.appendChild(sp);
+  bar.appendChild(mk('\u2212', ()=>apply(z/1.5)));
+  bar.appendChild(mk('Fit', ()=>apply(1)));
+  bar.appendChild(mk('+', ()=>apply(z*1.5)));
+  // two-finger pinch
+  let pinch = null;
+  const dist = t=>Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY);
+  area.addEventListener('touchstart', e=>{ if(e.touches.length===2) pinch = { d:dist(e.touches), z }; }, {passive:true});
+  area.addEventListener('touchmove', e=>{ if(pinch && e.touches.length===2){ e.preventDefault();
+    apply(pinch.z*dist(e.touches)/pinch.d, (e.touches[0].clientX+e.touches[1].clientX)/2, (e.touches[0].clientY+e.touches[1].clientY)/2); } }, {passive:false});
+  area.addEventListener('touchend', e=>{ if(e.touches.length<2) pinch=null; }, {passive:true});
+  area.addEventListener('dblclick', ()=>apply(z>1.2?1:2.5));
+  ov.appendChild(bar); ov.appendChild(area); document.body.appendChild(ov);
+  c.style.width = fitW()+'px';
 }
 /* ---------------- LIVE PEDIGREE PREVIEW ----------------
    Shown whenever "Download Official Pedigree PDF" is tapped for an
@@ -7421,29 +7925,15 @@ function openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground){
       <div style="border:1px solid var(--line-strong); border-radius:10px; overflow:hidden; margin-bottom:6px; background:#6b6e70;">
         <canvas id="ped-preview-canvas" style="width:100%; height:320px; display:block; background:#fff;"></canvas>
       </div>
-      <div id="ped-preview-status" class="card-sub" style="margin-bottom:12px; min-height:16px;">Loading preview&hellip;</div>
+      <div id="ped-preview-status" class="card-sub" style="margin-bottom:4px; min-height:16px;">Loading preview&hellip;</div>
+      <div class="card-sub" style="margin-bottom:12px;">Tap the preview to zoom in and out.</div>
+      <div class="card-sub" style="margin:-6px 0 12px;">Pedigree customization settings are under More &rarr; Pedigree settings.</div>
       ${hasCustomBackground?`<div class="field"><label>Background</label>
         <div class="seg" id="pp-bg-choice">
           <button type="button" data-v="custom" class="${useBackgroundDraft?'on':''}">Use custom background</button>
           <button type="button" data-v="plain" class="${useBackgroundDraft?'':'on'}">Plain white</button>
         </div>
       </div>`:''}
-      <div class="field"><label>Logo</label>
-        <div style="display:flex; align-items:center; gap:10px;">
-          ${draft.logoDataUrl?`<img src="${draft.logoDataUrl}" style="width:40px; height:40px; object-fit:contain; border:1px solid var(--line-strong); border-radius:8px;">`:''}
-          <button type="button" class="btn btn-secondary btn-sm" id="pp-logo-btn">${draft.logoDataUrl?'Replace logo':'Upload logo'}</button>
-          ${draft.logoDataUrl?'<button type="button" class="btn btn-secondary btn-sm" id="pp-logo-remove">Remove</button>':''}
-        </div>
-        <input type="file" id="pp-logo-file" accept="image/*" style="display:none;">
-      </div>
-      <div class="field"><label>Tagline (optional)</label><input id="pp-tagline" value="${esc(draft.tagline||'')}"></div>
-      <div class="field"><label>"Pedigree" title font</label>
-        ${fontSegHTML('pp-titlefont', draft.titleFont, 'libre')}
-      </div>
-      <div class="field"><label>Rabbitry name font</label>
-        ${fontSegHTML('pp-namefont', draft.nameFont, 'libre')}
-      </div>
-      <div class="field"><label>Instagram / Facebook</label><input id="pp-social" value="${esc(draft.social||'')}"></div>
       <div class="field"><label>Print colors</label><div class="seg" id="pp-theme">${themeButtonsHTML()}</div></div>
       <div class="field" id="pp-customwrap" style="${draft.printTheme==='custom'?'':'display:none;'}"><label>Custom accent color</label><input type="color" id="pp-customcolor" value="${esc(draft.customAccent||'#c6a15b')}" style="height:44px; padding:4px;"></div>
       <div class="field"><label>Fields to print</label>
@@ -7455,8 +7945,6 @@ function openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground){
       <label style="display:flex; align-items:center; gap:8px; padding:10px 0 4px; font-size:13px;"><input type="checkbox" id="pp-watermark" ${draft.watermarkEnabled?'checked':''} style="width:18px; height:18px;"> Show diagonal watermark</label>
       <div class="field" id="pp-watermarkwrap" style="${draft.watermarkEnabled?'':'display:none;'}">
         <label>Watermark text</label><input id="pp-watermarktext" value="${esc(draft.watermarkText||'')}" placeholder="Defaults to your rabbitry name">
-        <label style="margin-top:8px;">Watermark font</label>
-        ${fontSegHTML('pp-watermarkfont', draft.watermarkFont, 'libre')}
       </div>
       ${(hasCustomBackground && useBackgroundDraft)?`<div class="field"><label>Footer layout</label>
         <div class="seg" id="pp-footerstyle">
@@ -7470,18 +7958,13 @@ function openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground){
   }
 
   function readDraftFromControls(){
-    draft.tagline = document.getElementById('pp-tagline').value.trim();
-    draft.social = document.getElementById('pp-social').value.trim();
     draft.printTheme = document.querySelector('#pp-theme button.on').dataset.v;
     draft.customAccent = document.getElementById('pp-customcolor').value;
     draft.hasCertification = document.getElementById('pp-cert').checked;
     draft.watermarkEnabled = document.getElementById('pp-watermark').checked;
     draft.watermarkText = document.getElementById('pp-watermarktext').value.trim();
-    draft.watermarkFont = document.getElementById('pp-watermarkfont').value;
     const footerStyleBtn = document.querySelector('#pp-footerstyle button.on');
     if(footerStyleBtn) draft.footerStyle = footerStyleBtn.dataset.v;
-    draft.titleFont = document.getElementById('pp-titlefont').value;
-    draft.nameFont = document.getElementById('pp-namefont').value;
     draft.fields = {
       dob: document.getElementById('pp-field-dob').checked,
       reg: document.getElementById('pp-field-reg').checked,
@@ -7522,16 +8005,6 @@ function openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground){
       useBackgroundDraft = b.dataset.v==='custom';
       renderSheet();
     });
-    document.getElementById('pp-logo-btn').onclick = ()=> document.getElementById('pp-logo-file').click();
-    document.getElementById('pp-logo-file').onchange = ()=>{
-      const file = document.getElementById('pp-logo-file').files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = ()=>{ draft.logoDataUrl = reader.result; renderSheet(); };
-      reader.readAsDataURL(file);
-    };
-    const rmBtn = document.getElementById('pp-logo-remove');
-    if(rmBtn) rmBtn.onclick = ()=>{ draft.logoDataUrl=null; renderSheet(); };
 
     document.querySelectorAll('#pp-theme button').forEach(b=>b.onclick=()=>{
       document.querySelectorAll('#pp-theme button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
@@ -7539,9 +8012,6 @@ function openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground){
       readDraftFromControls(); scheduleRegen(true);
     });
     document.getElementById('pp-customcolor').oninput = ()=>{ readDraftFromControls(); scheduleRegen(false); };
-    ['pp-tagline','pp-social'].forEach(id=>{
-      document.getElementById(id).oninput = ()=>{ readDraftFromControls(); scheduleRegen(false); };
-    });
     document.getElementById('pp-cert').onchange = ()=>{ readDraftFromControls(); scheduleRegen(true); };
     document.getElementById('pp-watermark').onchange = (e)=>{
       document.getElementById('pp-watermarkwrap').style.display = e.target.checked ? '' : 'none';
@@ -7552,10 +8022,6 @@ function openPedigreeLivePreviewSheet(r, myProfileForPdf, hasCustomBackground){
     if(ppFooterStyleSeg) ppFooterStyleSeg.querySelectorAll('button').forEach(b=>b.onclick=()=>{
       ppFooterStyleSeg.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
       readDraftFromControls(); scheduleRegen(true);
-    });
-    ['pp-titlefont','pp-namefont','pp-watermarkfont'].forEach(selId=>{
-      const el = document.getElementById(selId);
-      if(el) el.onchange = ()=>{ readDraftFromControls(); scheduleRegen(true); };
     });
     fieldRows.forEach(([k])=>{
       document.getElementById('pp-field-'+k).onchange = ()=>{ readDraftFromControls(); scheduleRegen(true); };
@@ -7710,6 +8176,145 @@ function openPdfPreviewSheet(blob, filename, title){
     showToast('Saved');
   };
 }
+/* ---------------- BIRTH CERTIFICATE (one-off, for a rabbit sold without a pedigree) ----------------
+   Opens a short form pre-filled from the rabbit. Every box can be changed, and nothing typed here is saved to the rabbit.
+   "Make certificate" draws a one-page PDF with your logo, fonts, tagline and contact details from Pedigree settings.
+   Buyer and Date adopted can be left blank to write in by hand. */
+function birthCertDefaults(r){
+  const look=(nm)=>{ const x=nm?findByName(nm):null; return x?{name:x.name, ear:x.earNumber||'', reg:x.registrationNumber||''}:{name:nm||'', ear:'', reg:''}; };
+  const sire=look(r.sireName), dam=look(r.damName), sl=r.sale||{};
+  return { name:r.name||'', sex:r.sex==='buck'?'Buck':'Doe', breed:r.breed||'', color:r.color||'', ear:r.earNumber||'', reg:r.registrationNumber||'', dob:r.dob||'',
+    buyer:sl.buyer||'', adopted:sl.pickupDate||sl.soldDate||'', sire, dam, issued:todayStr() };
+}
+function openBirthCertSheet(r){
+  const d=birthCertDefaults(r);
+  const f=(id,label,val,extra)=>`<div class="field"><label>${label}</label><input id="${id}" value="${esc(val||'')}" ${extra||''}></div>`;
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
+    <h2>Birth certificate &mdash; ${esc(r.name)}</h2>
+    <div class="card-sub" style="margin-bottom:10px;">Filled in from this rabbit. Change anything you like; nothing here is saved to the rabbit. Leave Buyer or Date adopted empty to write them in by hand.</div>
+    ${f('bc-name','Rabbit’s name',d.name)}
+    <div class="row2">${f('bc-buyer','Buyer',d.buyer)}${f('bc-adopted','Date adopted',d.adopted,'type="date"')}</div>
+    <div class="row2"><div class="field"><label>Sex</label><select id="bc-sex"><option ${d.sex==='Doe'?'selected':''}>Doe</option><option ${d.sex==='Buck'?'selected':''}>Buck</option></select></div>${f('bc-dob','Date of birth',d.dob,'type="date"')}</div>
+    <div class="row2">${f('bc-breed','Breed',d.breed)}${f('bc-color','Color',d.color)}</div>
+    <div class="row2">${f('bc-ear','Ear number',d.ear)}${f('bc-reg','Registration #',d.reg)}</div>
+    <div class="row2">${f('bc-sire','Sire (father)',d.sire.name)}${f('bc-sire-reg','Sire reg # / ear #',[d.sire.reg,d.sire.ear].filter(Boolean).join(' / '))}</div>
+    <div class="row2">${f('bc-dam','Dam (mother)',d.dam.name)}${f('bc-dam-reg','Dam reg # / ear #',[d.dam.reg,d.dam.ear].filter(Boolean).join(' / '))}</div>
+    ${f('bc-issued','Date issued',d.issued,'type="date"')}
+    <div class="field"><label>Colors</label><select id="bc-colors"><option value="app">My app colors</option><option value="bw">Black &amp; white</option></select></div>
+    <label style="display:flex; align-items:center; gap:8px; padding:8px 0; font-size:13px;"><input type="checkbox" id="bc-stmt" checked style="width:18px; height:18px;"> Include the statement and signature lines</label>
+    <div class="card-sub" id="bc-status" style="min-height:16px;"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="bc-make">Make certificate</button></div>`);
+  document.getElementById('bc-make').onclick=async ()=>{
+    const v=id=>document.getElementById(id).value.trim();
+    if(!v('bc-name')){ showToast('Add a name first'); return; }
+    const data={ name:v('bc-name'), buyer:v('bc-buyer'), adopted:v('bc-adopted'), sex:v('bc-sex'), dob:v('bc-dob'), breed:v('bc-breed'), color:v('bc-color'), ear:v('bc-ear'), reg:v('bc-reg'),
+      sire:v('bc-sire'), sireReg:v('bc-sire-reg'), dam:v('bc-dam'), damReg:v('bc-dam-reg'), issued:v('bc-issued'), statement:document.getElementById('bc-stmt').checked, colors:v('bc-colors') };
+    const st=document.getElementById('bc-status'), btn=document.getElementById('bc-make'); btn.disabled=true; st.textContent='Making the certificate…';
+    try{
+      const prof=await getMyPedigreeProfile();
+      const bytes=await buildBirthCertPdfBytes(data, prof);
+      const blob=new Blob([bytes],{type:'application/pdf'});
+      openPdfPreviewSheet(blob, (data.name||'rabbit').replace(/\s+/g,'-')+'-birth-certificate.pdf', 'Birth certificate — '+data.name);
+    }catch(err){ console.error(err); btn.disabled=false; st.textContent='Could not make the certificate: '+((err&&err.message)||err); }
+  };
+}
+async function buildBirthCertPdfBytes(d, prof){
+  prof=prof||{};
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+  const S = pedigreeSettings || {};
+  const hexToRgb=(hex)=>{ hex=hex.replace('#',''); const n=parseInt(hex,16); return rgb(((n>>16)&255)/255,((n>>8)&255)/255,(n&255)/255); };
+  const W=792, H=612;
+  const pdfDoc=await PDFDocument.create(); const page=pdfDoc.addPage([W,H]);
+  // the same fonts as the pedigree; if they can't be loaded, plain built-in fonts keep the certificate working
+  let F;
+  try{
+    pdfDoc.registerFontkit(fontkit);
+    const bytes=await loadPedigreeFontBytes();
+    const e=await Promise.all(bytes.map(b=>pdfDoc.embedFont(b,{features:{liga:false,clig:false,calt:false}})));
+    const [serifBold, serifItalic, sans, sansBold, mono, monoBold, playfair, cinzel, script, libre, dmserif, montserrat, jost, allura, alexbrush, blackletter, handwritten]=e;
+    F={ serifBold, serifItalic, sans, sansBold, mono, title:{cormorant:serifBold, cinzel, playfair, libre, dmserif, montserrat, jost, script, allura, alexbrush, blackletter, handwritten}, adj:{script:1.3,allura:1.35,alexbrush:1.35,dmserif:0.95,blackletter:1.15,handwritten:1.2} };
+  }catch(err){
+    console.warn('Certificate fonts not available, using built-in fonts', err);
+    const tb=await pdfDoc.embedFont(StandardFonts.TimesRomanBold), ti=await pdfDoc.embedFont(StandardFonts.TimesRomanItalic), h=await pdfDoc.embedFont(StandardFonts.Helvetica), hb=await pdfDoc.embedFont(StandardFonts.HelveticaBold), c=await pdfDoc.embedFont(StandardFonts.Courier);
+    F={ serifBold:tb, serifItalic:ti, sans:h, sansBold:hb, mono:c, title:{}, adj:{} };
+  }
+  const tf=key=>F.title[key]||F.serifBold, ts=(key,base)=>base*(F.adj[key]||1);
+  const T=v=>sanitizeForPdf(String(v==null?'':v));
+  // colors: the account's own app colors (main for the title and frame, accent for the fine lines), or plain black and white
+  let mainHex='#141414', accHex='#6b6b6b';
+  if(d.colors!=='bw'){ const p=(currentPaletteId==='custom')?customPalObj():(PALETTES.find(x=>x.id===currentPaletteId)||PALETTES.find(x=>x.id==='ribbon')); if(p){ mainHex=p.main; accHex=p.accent; } }
+  const main=hexToRgb(mainHex), accent=hexToRgb(accHex), ink=rgb(0.08,0.08,0.1), gray=rgb(0.33,0.33,0.36);
+  const wid=(t,f,s)=>f.widthOfTextAtSize(t,s);
+  const text=(t,x,top,f,s,c)=>{ if(t) page.drawText(t,{x,y:H-top,size:s,font:f,color:c||ink}); };
+  const centered=(t,cx,top,f,s,c)=>{ if(t) text(t,cx-wid(t,f,s)/2,top,f,s,c); };
+  const fit=(t,f,s,maxW)=>{ let z=s; while(z>8 && wid(t,f,z)>maxW) z-=1; return z; };
+  const longDate=iso=>{ if(!iso) return ''; const x=new Date(iso+'T00:00:00'); return isNaN(x)?'':x.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}); };
+
+  // frame: a heavy band in the main color with a fine line inside it in the accent color
+  page.drawRectangle({x:10,y:10,width:W-20,height:H-20,borderColor:main,borderWidth:9});
+  page.drawRectangle({x:22,y:22,width:W-44,height:H-44,borderColor:accent,borderWidth:1.6});
+
+  // header: logo (or the rabbitry name) and tagline
+  const rabbitry=T(prof.rabbitry_name||'');
+  let top=50;
+  if(S.logoDataUrl){
+    try{
+      const lb=dataUrlToBytes(S.logoDataUrl);
+      const img=S.logoDataUrl.includes('image/png')?await pdfDoc.embedPng(lb):await pdfDoc.embedJpg(lb);
+      const dims=img.scale(1), ratio=Math.min(90/dims.width,68/dims.height), w=dims.width*ratio, h=dims.height*ratio;
+      page.drawImage(img,{x:W/2-w/2,y:H-top-h,width:w,height:h}); top+=h+4;
+    }catch(e){ console.warn('logo skipped',e); }
+  }
+  if(rabbitry){ const nf=tf(S.nameFont); const sz=fit(rabbitry,nf,ts(S.nameFont,20),W-160); centered(rabbitry,W/2,top+16,nf,sz,main); top+=26; }
+  if(S.tagline){ const tg=T(S.tagline); centered(tg,W/2,top+12,F.serifItalic,fit(tg,F.serifItalic,13,W-160),accent); top+=20; }
+
+  // title with a fine rule on each side
+  top=Math.max(top+30,136);
+  const scriptTitle=['script','allura','alexbrush','blackletter','handwritten'].indexOf(S.titleFont)>=0;   // fancy fonts read better in normal capitals
+  const title=scriptTitle?'Birth Certificate':'BIRTH CERTIFICATE', tfnt=tf(S.titleFont), tsz=fit(title,tfnt,ts(S.titleFont,scriptTitle?31:40),W-300), tw=wid(title,tfnt,tsz);
+  centered(title,W/2,top,tfnt,tsz,main);
+  page.drawLine({start:{x:34,y:H-top+tsz*0.3},end:{x:W/2-tw/2-14,y:H-top+tsz*0.3},thickness:1.2,color:accent});
+  page.drawLine({start:{x:W/2+tw/2+14,y:H-top+tsz*0.3},end:{x:W-34,y:H-top+tsz*0.3},thickness:1.2,color:accent});
+  top+=24;
+  const sub=('THIS CERTIFIES THE FOLLOWING RABBIT WAS BORN'+(rabbitry?' AT '+rabbitry.toUpperCase():'')).replace(/\s+/g,' ');
+  centered(sub,W/2,top,F.sansBold,fit(sub,F.sansBold,11,W-120),accent);
+
+  // fields: label, then the answer written on a line (left blank when there is no answer, to write in by hand)
+  const L=62, R=W/2+16, colW=W/2-78;
+  const row=(label,val,x,y,w)=>{
+    const lw=wid(label,F.serifBold,12.5); text(label,x,y,F.serifBold,12.5,main);
+    page.drawLine({start:{x:x+lw+8,y:H-y-3},end:{x:x+w,y:H-y-3},thickness:0.8,color:main});
+    const v=T(val); if(v){ const room=w-lw-14; text(v,x+lw+12,y-1,F.sans,fit(v,F.sans,11,room),ink); }
+  };
+  let fy=top+46; const step=36;
+  const reg=(n,r)=>n?(r?n+'  ('+r+')':n):'';
+  const rows=[
+    ['BUYER:',d.buyer,'RABBIT’S EAR NUMBER:',d.ear],
+    ['SEX:',d.sex,'COLOR:',d.color],
+    ['BREED:',d.breed,'DATE OF BIRTH:',longDate(d.dob)],
+    ['SIRE (FATHER):',reg(d.sire,d.sireReg),'DAM (MOTHER):',reg(d.dam,d.damReg)],
+    ['DATE ADOPTED:',longDate(d.adopted),'REGISTRATION #:',d.reg]
+  ];
+  rows.forEach(([l1,v1,l2,v2],i)=>{ row(l1,v1,L,fy+i*step,colW); row(l2,v2,R,fy+i*step,colW); });
+  fy+=rows.length*step;
+
+  // statement and signature lines
+  if(d.statement){
+    const st='I hereby certify that the above information is true and correct to the best of my knowledge.';
+    centered(st,W/2,fy+8,F.serifBold,fit(st,F.serifBold,12.5,W-110),ink);
+    const sy=88, issued=longDate(d.issued);
+    page.drawLine({start:{x:92,y:sy},end:{x:342,y:sy},thickness:0.8,color:main});
+    page.drawLine({start:{x:452,y:sy},end:{x:702,y:sy},thickness:0.8,color:main});
+    const breeder=T([prof.first_name,prof.last_name].filter(Boolean).join(' '));
+    centered('BREEDER'+(breeder?'  —  '+breeder:''),217,H-sy+16,F.serifBold,10.5,main);
+    centered('DATE',577,H-sy+16,F.serifBold,10.5,main);
+    if(issued) centered(issued,577,H-sy-4,F.sans,10.5,ink);
+  }
+  const contact=[prof.website,prof.phone,S.social].map(x=>T(x||'')).filter(Boolean).join('   ·   ');
+  if(contact) centered(contact,W/2,H-34,F.sans,9,gray);
+  return await pdfDoc.save();
+}
+
 async function generateStaticTemplatePedigreePDF(r, myProfileForPdf, templateNameArg, opts){
   try{
     const templateName = templateNameArg || myProfileForPdf.pedigree_static_template || myProfileForPdf.pedigree_template || 'generic';
@@ -7860,17 +8465,8 @@ function openAddPlannedSheet(presetDoeId, existing){
     <div class="field"><label>Doe</label><select id="f-doe"><option value="">Select a doe</option>${does.map(x=>`<option value="${x.id}" ${x.id===presetDoeId?'selected':''}>${esc(x.name)} — ${x.status}</option>`).join('')}</select></div>
     <div class="field"><label>Buck</label><select id="f-buck"><option value="">Select a buck</option>${bucks.map(x=>`<option value="${x.id}" ${existing&&x.id===existing.buckId?'selected':''}>${esc(x.name)} — ${x.status}</option>`).join('')}</select></div>
     <div class="field"><label>Target date</label><input type="date" id="f-date" value="${esc(existing?existing.targetDate:todayStr())}"></div>
-    <div id="f-relate" class="relate-box">Select both a doe and a buck to check relatedness.</div>
     <div class="field" style="margin-top:12px;"><label>Notes</label><textarea id="f-notes" placeholder="Pairing goal, line you're working">${esc(existing?existing.notes||'':'')}</textarea></div>
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-save">Save plan</button></div>`);
-  function upd(){
-    const d=does.find(x=>x.id===document.getElementById('f-doe').value), b=bucks.find(x=>x.id===document.getElementById('f-buck').value);
-    const box=document.getElementById('f-relate');
-    if(!d||!b){ box.className='relate-box'; box.textContent='Select both a doe and a buck to check relatedness.'; return; }
-    const rel=relatednessSummary(d.name,b.name); box.className='relate-box'; box.innerHTML=relateBoxHTML(rel)+warnBoxHTML(d,b);
-  }
-  document.getElementById('f-doe').onchange=upd; document.getElementById('f-buck').onchange=upd;
-  if(presetDoeId||existing) upd();
   document.getElementById('f-save').onclick=()=>{
     const di=document.getElementById('f-doe').value, bi=document.getElementById('f-buck').value;
     if(!di||!bi){ showToast('Pick a doe and a buck'); return; }
@@ -8121,37 +8717,97 @@ function openAncestorCleanupSheet(){
     showToast(ids.size+' moved to Ancestors');
   };
 }
+
+// ---- Start over: clears this account's herd data after copying it all to a safe place (30 days to undo). Own account only. ----
+async function openStartOverSheet(){
+  if(viewingAsCustomer || localSandboxMode){ showToast('Start over is only available in your own account.'); return; }
+  let info=null;
+  try{ const {data}=await sb.rpc('reset_archive_info'); info=data||null; }catch(e){ info=null; }
+  const n=(a)=>Array.isArray(a)?a.length:0;
+  const counts=[[n(rabbits),'rabbits'],[n(planned),'planned breedings'],[n(projects),'projects'],[n(shows),'shows'],[n(expenses),'expenses'],[n(customReminders),'reminders'],[n(waitlist),'waitlist entries']].filter(x=>x[0]>0);
+  const cs=counts.length?counts.map(x=>x[0]+' '+x[1]).join(', '):'nothing yet';
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>Start over</h2>
+    <div class="card-sub" style="margin-bottom:10px;">This clears this account&rsquo;s herd data and sets it up like new: <b>${esc(cs)}</b>.<br><br>
+    Your colors, pedigree settings and logo, and My info stay. Nothing is deleted right away: everything is first copied to a safe place, and you can put it back for 30 days.</div>
+    ${info?`<div class="lit-card" style="margin-bottom:12px;"><b>You can undo your last start over</b><div class="card-sub">Saved ${esc(shortD(String(info.archived_at).slice(0,10)))} &middot; ${esc(String(info.rabbits))} rabbits &middot; available until ${esc(shortD(String(info.expires_at).slice(0,10)))}</div>
+      <button class="btn btn-secondary" style="width:100%;margin-top:8px;" id="so-restore">Restore my data</button></div>`:''}
+    <button class="btn btn-secondary" style="width:100%;margin-bottom:12px;" id="so-backup">1. Download a backup file first</button>
+    <div class="field"><label>2. Type CLEAR to confirm</label><input id="so-word" autocomplete="off" autocapitalize="characters" placeholder="CLEAR"></div>
+    <div class="card-sub" id="so-status" style="min-height:16px;"></div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-danger" id="so-go" disabled>Clear and start over</button></div>`);
+  const st=document.getElementById('so-status'), go=document.getElementById('so-go'), w=document.getElementById('so-word');
+  w.oninput=()=>{ go.disabled = w.value.trim().toUpperCase()!=='CLEAR'; };
+  document.getElementById('so-backup').onclick=()=>{ try{ downloadFullBackup(); st.textContent='Backup downloaded.'; }catch(e){ st.textContent='Could not download a backup: '+((e&&e.message)||e); } };
+  go.onclick=async ()=>{
+    if(w.value.trim().toUpperCase()!=='CLEAR') return;
+    go.disabled=true; st.textContent='Saving a safe copy and clearing…';
+    try{
+      await saveChain.catch(()=>{});
+      const {data,error}=await sb.rpc('reset_my_barn_data'); if(error) throw error;
+      if(!data||data.ok!==true) throw new Error('The account was not cleared.');
+      st.textContent='Done. Reloading…'; setTimeout(()=>window.location.reload(),600);
+    }catch(e){ console.error(e); go.disabled=false; st.textContent='Nothing was cleared: '+((e&&e.message)||e); }
+  };
+  const rb=document.getElementById('so-restore');
+  if(rb) rb.onclick=async ()=>{
+    rb.disabled=true; st.textContent='Restoring…';
+    try{
+      await saveChain.catch(()=>{});
+      const {data,error}=await sb.rpc('restore_my_barn_data'); if(error) throw error;
+      st.textContent='Restored. Reloading…'; setTimeout(()=>window.location.reload(),600);
+    }catch(e){ console.error(e); rb.disabled=false; st.textContent=((e&&e.message)||String(e)).replace(/^RESTORE_BLOCKED:\s*/,''); }
+  };
+}
+// Runs one More-menu action (also used by the grouped sub-menus below).
+function moreAction(k){
+  if(k==='add') openAddSheet();
+  else if(k==='kittags') openKitTagsSettings();
+  else if(k==='waitlist') openWaitlistSheet();
+  else if(k==='colors') openPaletteSheet();
+  else if(k==='myreminders') openMyRemindersSheet();
+  else if(k==='reminders') openRemindersSheet();
+  else if(k==='pedigreesettings') openPedigreeSettingsSheet();
+  else if(k==='merge') openMergeSheet();
+  else if(k==='import') openImportCsvSheet();
+  else if(k==='importpdf') openImportPedigreePdfSheet();
+  else if(k==='shows') openShowsSheet();
+  else if(k==='cleanup') openAncestorCleanupSheet();
+  else if(k==='myinfo') openMyInfoSheet();
+  else if(k==='startover') openStartOverSheet();
+  else { currentTab=k; closeSheet(); render(); window.scrollTo(0,0); }
+}
+// A small second menu for a group of related items, with a Back button to More.
+function openMoreGroup(title, items){
+  openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>${esc(title)}</h2>
+    ${items.map(([k,l])=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" data-moreg="${k}">${l}</button>`).join('')}
+    <div class="sheet-actions"><button class="btn btn-secondary" style="width:100%;" id="moreBack">&larr; Back to More</button></div>`);
+  document.getElementById('moreBack').onclick=()=>openMoreSheet();
+  document.querySelectorAll('[data-moreg]').forEach(b=>b.onclick=()=>moreAction(b.dataset.moreg));
+}
 async function openMoreSheet(){
-  const items=[...(litterUiOn?[['kittags','Kit tags'],['waitlist','Waitlist']]:[]),['add','Add rabbit'],['import','Import from CSV'],['importpdf','Import from Pedigree PDF'],['planned','Planned breedings'],['forsale','For sale'],['shows','Upcoming shows'],['myreminders','My reminders'],['reminders','Reminders'],['colors','Colors'],['pedigreesettings','Pedigree settings'],['ancestors','Ancestors'],['cleanup','Move herd rabbits to Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['trash','Recently deleted'],['backup','Backup and restore']];
+  const groups={
+    import:['Import',[['import','Import from CSV'],['importpdf','Import from Pedigree PDF']]],
+    records:['Records',[['ancestors','Ancestors'],['cleanup','Move herd rabbits to Ancestors'],['archive','Archive'],['merge','Merge duplicates'],['trash','Recently deleted']]],
+    settings:['Settings',[['reminders','Reminders'],['colors','Colors'],['pedigreesettings','Pedigree settings'],...(litterUiOn?[['kittags','Kit tags']]:[]),...(!localSandboxMode?[['myinfo','My info']]:[]),['backup','Backup and restore'],...((!localSandboxMode&&!viewingAsCustomer)?[['startover','Start over (clear this account)']]:[])]]
+  };
+  const items=[['add','Add rabbit'],['planned','Planned breedings'],['forsale','For sale'],['shows','Upcoming shows'],...(litterUiOn?[['waitlist','Waitlist']]:[])];
+  const gitems=[['import','Import'],['records','Records'],['settings','Settings']];
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button><h2>More</h2>
     <div style="background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:12px;">
       <div class="section-label" style="margin:0 0 3px;">SIGNED IN AS</div>
       <div style="font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(currentUser?.email||'')}</div>
     </div>
     ${isAdminUser ? `<button class="btn btn-primary" style="width:100%; margin-bottom:8px;" id="openAdminBtn">Admin — all accounts</button>` : ''}
-    ${!localSandboxMode ? `<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" id="myInfoBtn">My info</button>` : ''}
-    ${(!localSandboxMode && !viewingAsCustomer) ? `<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" id="practiceModeBtn">Try practice mode (local only)</button>` : ''}
     ${items.map(([k,l])=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" data-more="${k}">${l}</button>`).join('')}
+    ${gitems.map(([k,l])=>`<button class="btn btn-secondary" style="width:100%; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;" data-moregroup="${k}"><span>${l}</span><span aria-hidden="true">&rsaquo;</span></button>`).join('')}
+    <button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" id="tourBtn">Take the tour</button>
+    ${(!localSandboxMode && !viewingAsCustomer) ? `<button class="btn btn-secondary" style="width:100%; margin-bottom:8px;" id="practiceModeBtn">Try practice mode (local only)</button>` : ''}
     <button class="btn btn-danger" style="width:100%; margin-top:4px;" id="signOutBtn">Sign out</button>`);
   if(document.getElementById('openAdminBtn')) document.getElementById('openAdminBtn').onclick = openAdminSheet;
-  if(document.getElementById('myInfoBtn')) document.getElementById('myInfoBtn').onclick = openMyInfoSheet;
   if(document.getElementById('practiceModeBtn')) document.getElementById('practiceModeBtn').onclick = enterPracticeMode;
-  document.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>{
-    const k=b.dataset.more;
-    if(k==='add') openAddSheet();
-    else if(k==='kittags') openKitTagsSettings();
-    else if(k==='waitlist') openWaitlistSheet();
-    else if(k==='colors') openPaletteSheet();
-    else if(k==='myreminders') openMyRemindersSheet();
-    else if(k==='reminders') openRemindersSheet();
-    else if(k==='pedigreesettings') openPedigreeSettingsSheet();
-    else if(k==='merge') openMergeSheet();
-    else if(k==='import') openImportCsvSheet();
-    else if(k==='importpdf') openImportPedigreePdfSheet();
-    else if(k==='shows') openShowsSheet();
-    else if(k==='cleanup') openAncestorCleanupSheet();
-    else { currentTab=k; closeSheet(); render(); window.scrollTo(0,0); }
-  });
+  if(document.getElementById('tourBtn')) document.getElementById('tourBtn').onclick = ()=>{ closeSheet(); startTour(true); };
+  document.querySelectorAll('[data-more]').forEach(b=>b.onclick=()=>moreAction(b.dataset.more));
+  document.querySelectorAll('[data-moregroup]').forEach(b=>b.onclick=()=>{ const g=groups[b.dataset.moregroup]; openMoreGroup(g[0], g[1]); });
   document.getElementById('signOutBtn').onclick = async ()=>{
     closeSheet();
     if(localSandboxMode){ window.location.reload(); return; }
@@ -8219,8 +8875,8 @@ const MONEY_PERIOD_LABELS = {thismonth:'This month', lastmonth:'Last month', thi
 function moneyActivityForPeriod(period){
   const soldInPeriod = rabbits.filter(r=>r.status==='sold' && r.sale && r.sale.soldDate && inMoneyPeriod(r.sale.soldDate, period))
     .concat(soldKitPseudoRabbits().filter(r=>r.sale.soldDate && inMoneyPeriod(r.sale.soldDate, period)));
-  const soldWithPrice = soldInPeriod.filter(r=>parsePriceNum(r.sale.price) > 0);
-  const soldNoPrice = soldInPeriod.filter(r=>!(parsePriceNum(r.sale.price) > 0));
+  const soldWithPrice = soldInPeriod.filter(r=>priceEntered(r.sale.price));
+  const soldNoPrice = soldInPeriod.filter(r=>!priceEntered(r.sale.price));
   const expensesInPeriod = expenses.filter(e=>inMoneyPeriod(e.date, period));
   return {soldWithPrice, soldNoPrice, expensesInPeriod};
 }
@@ -8289,7 +8945,7 @@ function renderMoney(main){
       return `<div class="card" data-editexpense="${a.id}" style="padding:12px 14px;">
         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
           <div><div class="card-name" style="font-size:14px;">${esc(a.category)}</div><div class="card-sub">${a.note?esc(a.note)+' &middot; ':''}${fmtDate(a.date)}</div></div>
-          <div style="color:var(--rust-text); font-weight:600; white-space:nowrap;">-${fmtMoney(a.amount)}</div>
+          <div style="color:var(--rust-text); font-weight:600; white-space:nowrap;">${fmtMoney(-Math.abs(Number(a.amount)||0))}</div>
         </div></div>`;
     }).join('');
   }
@@ -8357,11 +9013,11 @@ function openAddPriceSheet(r){
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>Add sale price — ${esc(r.name)}</h2>
     <div class="card-sub" style="margin-bottom:12px;">Sold ${fmtDate(r.sale.soldDate)}${r.sale.buyer?' &middot; Sold to '+esc(r.sale.buyer):''}</div>
-    <div class="field"><label>Sale price ($)</label><input type="number" id="f-price-add" value="${esc(r.sale.price||'')}" placeholder="150"></div>
+    <div class="field"><label>Sale price ($)</label><input type="number" id="f-price-add" value="${esc(r.sale.price||'')}" placeholder="150"><div class="card-sub" style="margin-top:4px;">Enter 0 for a gift or trade.</div></div>
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="f-price-save">Save</button></div>`);
   document.getElementById('f-price-save').onclick = async ()=>{
     const v = document.getElementById('f-price-add').value.trim();
-    if(!v || parsePriceNum(v)<=0){ showToast('Enter a price greater than 0'); return; }
+    if(!priceEntered(v)){ showToast('Enter a price (0 is fine for a gift or trade)'); return; }
     r.sale.price = v;
     await saveData(); closeSheet(); render(); showToast(r.name+' price added');
   };
@@ -8826,14 +9482,14 @@ function renderProfile(){
       </div>
     </div>
     <div class="profile-body" id="profileBody"></div>
-    ${(r.sex==='doe'&&r.status==='pregnant')?`<div class="rb-thumbbar"><button class="btn btn-primary" data-pa="kindled">Kindled</button></div>`:''}`;
+    ${(r.sex==='doe'&&r.status==='pregnant'&&profileTab==='breeding')?`<div class="rb-thumbbar"><button class="btn btn-primary" data-pa="kindled">Kindled</button></div>`:''}`;
   document.getElementById('profBack').onclick=closeProfile;
   document.querySelectorAll('[data-ptab]').forEach(b=>b.onclick=()=>{ profileTab=b.dataset.ptab; renderProfile(); });
   const body = document.getElementById('profileBody');
   if(profileTab==='overview') body.innerHTML = overviewTabHTML(r);
   else if(profileTab==='breeding') body.innerHTML = breedingTabHTML(r);
   else if(profileTab==='litters') body.innerHTML = littersTabHTML(r);
-  else if(profileTab==='pedigree') body.innerHTML = `${pedigreeTreeHTML(r)}<div class="sheet-actions" style="flex-wrap:wrap;"><button class="btn btn-secondary" style="flex:1;" id="profPedPreview">Preview</button><button class="btn btn-primary" style="flex:1;" id="profOfficialPdf">Print / Save PDF</button></div>`;
+  else if(profileTab==='pedigree') body.innerHTML = `<div id="pedTreeWrap">${pedigreeTreeHTML(r)}</div>${pedPrintOptionsHTML()}<div class="sheet-actions" style="flex-wrap:wrap;"><button class="btn btn-secondary" style="flex:1;" id="profPedPreview">Preview</button><button class="btn btn-primary" style="flex:1;" id="profOfficialPdf">Print / Save PDF</button></div><div class="sheet-actions"><button class="btn btn-secondary" style="width:100%;" id="profBirthCert">Birth certificate (for a sale with no pedigree)</button></div>`;
   else if(profileTab==='photos') body.innerHTML = photosTabHTML(r);
   else if(profileTab==='notes') body.innerHTML = notesTabHTML(r);
   wireProfileTab(r);
@@ -8883,13 +9539,12 @@ function breedingNowHTML(r){
     const d=daysToDue(r);
     const when = d===null?'':(d===0?'due today':d>0?`due in ${d} day${d===1?'':'s'}`:`${-d} day${-d===1?'':'s'} overdue`);
     const pal=palpateLineHTML(r);
-    let relHTML='';
-    try{ const rel=relatednessSummary(r.name,r.partner); if(rel && rel.any) relHTML=`<div class="relate-box" style="margin-top:8px;">${relateBoxHTML(rel)}</div>`; }catch(e){}
+    let relHTML='';   // relatedness is only checked when marking a doe bred
     const stops=[{label:'Bred',date:r.bredDate},{label:(r.palpate&&r.palpate.key===palpateKey(r)&&r.palpate.state==='positive')?'Palpated ✓':'Palpate',date:(r.palpate&&r.palpate.key===palpateKey(r)&&r.palpate.state==='positive'&&r.palpate.date)?r.palpate.date:addDays(r.bredDate,palpateDays())},{label:'Nest box',date:r.dueDate?addDays(r.dueDate,-nestDays()):null},{label:'Due',date:r.dueDate}];
     return `<div class="card no-tap"><div class="card-name" style="font-size:16px;">Current breeding</div>
       <div class="card-detail">Bred to <b>${esc(r.partner||'?')}</b> on ${fmtDate(r.bredDate)}${when?' &middot; <b>'+when+'</b>':''}${pal?'<br>'+pal:''}</div>
       ${timelineHTML(stops)}${relHTML}
-      <div class="card-actions"><button class="btn btn-primary btn-sm" data-pa="kindled">Kindled</button><button class="btn btn-danger btn-sm" data-pa="lost">Not bred</button></div></div>`;
+      <div class="card-actions"><button class="btn btn-primary btn-sm" data-pa="kindled">Kindled</button><button class="btn btn-secondary btn-sm" data-pa="editbreed">Edit breeding</button><button class="btn btn-danger btn-sm" data-pa="lost">Not bred</button></div></div>`;
   }
   if(r.status==='nursing'){
     const stops=[{label:'Born',date:r.litterBornDate},{label:'Wean',date:r.weanDate},{label:'Ready',date:r.sellDate},{label:'Rebreed',date:r.rebreedDate}];
@@ -8927,7 +9582,7 @@ function oldBreedingTabHTML(r){
     const d=daysToDue(r);
     cur = `<div class="card no-tap"><div class="card-name" style="font-size:16px;">Current breeding</div>
       <div class="card-detail">Bred to <b>${esc(r.partner||'?')}</b> on ${fmtDate(r.bredDate)}<br>Estimated kindling: <b>${fmtDate(r.dueDate)}</b> (${d<0?-d+' days overdue':d===0?'today':'in '+d+' days'})</div>
-      <div class="card-actions"><button class="btn btn-primary btn-sm" data-pa="kindled">Record litter</button><button class="btn btn-danger btn-sm" data-pa="lost">Not bred</button></div></div>`;
+      <div class="card-actions"><button class="btn btn-primary btn-sm" data-pa="kindled">Record litter</button><button class="btn btn-secondary btn-sm" data-pa="editbreed">Edit breeding</button><button class="btn btn-danger btn-sm" data-pa="lost">Not bred</button></div></div>`;
   } else if(r.status==='nursing'){
     cur = `<div class="card no-tap"><div class="card-name" style="font-size:16px;">Currently on a litter</div>
       <div class="card-detail">${r.litterKits?r.litterKits.length:0} kits, born ${fmtDate(r.litterBornDate)}</div>
@@ -8982,6 +9637,7 @@ function wireProfileTab(r){
       const a=b.dataset.pa;
       if(a==='kindled') openKindledSheet(r);
       else if(a==='editlitter') openKindledSheet(r,true);
+      else if(a==='editbreed') openEditBreedingSheet(r);
       else if(a==='lost') armConfirm(b,'Tap again to confirm',()=>{ markLitterLost(r); saveData(); renderProfile(); render(); showToast(r.name+' marked open'); });
       else if(a==='rebred'||a==='bred') openBreedSheet(r);
       else if(a==='plan'){ openAddPlannedSheet(r.id); }
@@ -9009,9 +9665,10 @@ function wireProfileTab(r){
     });
   }
   if(profileTab==='pedigree'){
-    wirePedigreeTaps(document.getElementById('profileBody'), r, renderProfile);
+    wirePedigreeTaps(document.getElementById('profileBody'), r, renderProfile); wirePedPrintOptions(r);
     const pob=document.getElementById('profOfficialPdf'); if(pob) pob.onclick=()=>downloadOfficialPedigreePDF(r);
     const ppv=document.getElementById('profPedPreview'); if(ppv) ppv.onclick=()=>downloadOfficialPedigreePDF(r,{preview:true});
+    const bcb=document.getElementById('profBirthCert'); if(bcb) bcb.onclick=()=>openBirthCertSheet(r);
   }
   if(profileTab==='litters'){ attachCardEvents(); }
   if(profileTab==='photos'){
@@ -9436,6 +10093,8 @@ async function commitCsvImport(){
         if(!row.data[k]) return;
         // Pedigree imports guess a herd status for every row; never let that overwrite an existing rabbit's real status.
         if(k==='status' && row.isSelf!==undefined) return;
+        // An assumed breed (PDF left it blank) never replaces a breed the rabbit already has.
+        if(k==='breed' && row.breedAssumed && ex.breed) return;
         if(k==='notes'){
           // Import "notes" is really just an auto-generated tag (e.g.
           // "GC #: 12345"), not free text the person wrote themselves
@@ -9537,6 +10196,19 @@ function pdfLinesFromItems(items){
   lines.sort((a,b)=>a.top-b.top);
   return lines.map(l=>l.parts.sort((a,b)=>a.x-b.x).map(p=>p.str).join(' ').replace(/\s+/g,' ').trim());
 }
+// like pdfLinesFromItems, but each line also carries its text size (h) so a name can be told apart from the details under it
+function pdfLinesWithSize(items){
+  const lines = [];
+  const sorted = items.slice().sort((a,b)=>a.top-b.top||a.x-b.x);
+  for(const it of sorted){
+    if(!it.str.trim()) continue;
+    let line = lines.find(l=>Math.abs(l.top-it.top)<3);
+    if(!line){ line={top:it.top, parts:[], h:0}; lines.push(line); }
+    line.parts.push(it); line.h = Math.max(line.h, it.h||0);
+  }
+  lines.sort((a,b)=>a.top-b.top);
+  return lines.map(l=>({ t:l.parts.sort((a,b)=>a.x-b.x).map(p=>p.str).join(' ').replace(/\s+/g,' ').trim(), h:l.h }));
+}
 function pdfParseWeight(s){
   if(!s) return '';
   const m = s.match(/(\d+)\s*#(?:\s*(\d+)\s*oz)?/);
@@ -9606,7 +10278,7 @@ function pdfParseBoxLines(lines, role){
 // Letter (792x612pt) — measured directly from a real Everbreed
 // pedigree export's page geometry.
 const EVERBREED_PDF_BOXES = [
-  ['SELF', 38.6, 268.9, 184.9, 358.9],
+  ['SELF', 38.6, 240.0, 184.9, 380.0],   // taller: some exports add an ACQ (date acquired) line, which pushes GC # and REG # lower
   ['SIRE', 196.1, 176.6, 375.4, 235.1],
   ['DAM', 196.1, 392.6, 375.4, 450.4],
   ['PGS', 385.9, 124.1, 565.1, 181.9],
@@ -9666,7 +10338,7 @@ function pdfFuzzyLabel(label){
 // value is sliced out from right after that label up to wherever the
 // next known label starts — so it works the same either way.
 function pdfEverbreedExtractFields(text){
-  const labels = ['ID','DOB','COLOR','BREED','WEIGHT','GC #','GEN'];
+  const labels = ['ID','DOB','ACQ','COLOR','BREED','WEIGHT','LEGS','GC #','REG #','GEN'];
   const positions=[];
   labels.forEach(label=>{
     const re = new RegExp('\\b'+pdfFuzzyLabel(label)+'\\s*:','i');
@@ -9755,7 +10427,7 @@ function buildPedigreeRowsFromSlots(slots, roleOrder){
 }
 function pdfParseEverbreedBoxLines(lines, role){
   if(!lines.length) return null;
-  const EVERBREED_FIELD_LABELS = ['ID','DOB','COLOR','BREED','WEIGHT','GC #','GEN'];
+  const EVERBREED_FIELD_LABELS = ['ID','DOB','ACQ','COLOR','BREED','WEIGHT','LEGS','GC #','REG #','GEN'];   // ACQ (date acquired) is recognised so it never ends up inside a name; it is not imported
   const buckPat = pdfFuzzyLabel('BUCK'), doePat = pdfFuzzyLabel('DOE');
   const buckInlineRe = new RegExp('(^|\\s)'+buckPat+'($|\\s)','i');
   const doeInlineRe = new RegExp('(^|\\s)'+doePat+'($|\\s)','i');
@@ -9774,6 +10446,7 @@ function pdfParseEverbreedBoxLines(lines, role){
     }
     if(!t) return;
     if(fieldLineRe.test(t)) fieldLines.push(t);
+    else if(fieldLines.length) fieldLines.push(t);   // a value that wrapped onto its own line after the labels (long colors make the box wrap); never part of the name
     else nameParts.push(t); // cattery prefix and/or given name, in reading order
   });
   const f = pdfEverbreedExtractFields(fieldLines.join(' '));
@@ -9790,9 +10463,9 @@ function pdfParseEverbreedBoxLines(lines, role){
     color: pdfDashClean(f['COLOR']),
     breed: canonicalizeBreed(pdfDashClean(f['BREED'])), // read per-box (mixed-breed pedigrees are possible)
     earNumber: pdfDefragmentText(pdfDashClean(f['ID'])),
-    registrationNumber: '', // Everbreed's layout has no separate reg # field
+    registrationNumber: pdfDashClean(f['REG #']),
     weight: weightMatch ? weightMatch[0] : '',
-    legsWins: '', // no leg-count field in this layout
+    legsWins: pdfDashClean(f['LEGS']),
     dob: csvParseDate(pdfDashClean(f['DOB'])),
     gc: pdfDashClean(f['GC #']), // Grand Champion # — carried into notes, same as Rabbit Register's GC #
     sex,
@@ -10094,6 +10767,154 @@ async function pdfGlyphItems(page){
   return items;
 }
 
+// HerdNerd's own pedigree PDF (what the pedigree maker here produces): lets a rabbit that was sold with a HerdNerd pedigree
+// be imported into another HerdNerd account. The layout is our own, so each box is found from its ribbon label.
+// Anything the breeder left out of the pedigree stays blank; lines the pedigree itself cut off with "..." lose the cut-off end.
+function parseHerdNerdPedigreePdf(items, viewport){
+  const T = s => String(s||'').replace(/\s+/g,' ').trim();
+  const all = items.filter(it=>it.str && it.str.trim());
+  // ribbon labels -> roles
+  const anchors = [];
+  const byTop = all.slice().sort((a,b)=>a.top-b.top||a.x-b.x);
+  byTop.forEach((it,i)=>{
+    const s=T(it.str); let role=null;
+    if(/^GENERATION(\s*1)?$/i.test(s)) role='SELF';
+    else if(/^SIRE\s*\(FATHER\)$/i.test(s)) role='SIRE';
+    else if(/^DAM\s*\(MOTHER\)$/i.test(s)) role='DAM';
+    else if(/^(PATERNAL|MATERNAL)$/i.test(s)){
+      const nx = all.find(o=>o!==it && Math.abs(o.top-it.top)<2 && o.x>it.x && o.x-it.x<60 && /^GRAND(SIRE|DAM)$/i.test(T(o.str)));
+      if(nx) role = (/^PAT/i.test(s)?'P':'M')+'G'+(/SIRE/i.test(nx.str)?'S':'D');
+    } else if(/^(PATERNAL|MATERNAL)\s+GRAND(SIRE|DAM)$/i.test(s)){
+      const m2=s.match(/^(PATERNAL|MATERNAL)\s+GRAND(SIRE|DAM)$/i); role = (/^PAT/i.test(m2[1])?'P':'M')+'G'+(/SIRE/i.test(m2[2])?'S':'D');
+    } else { const m=s.match(/^GG\s*(SIRE|DAM)\s*(\d)$/i); if(m) role='GG'+m[1].toUpperCase()+m[2]; }
+    if(role) anchors.push({role, x:it.x, top:it.top});
+  });
+  // lowest point a card can reach: higher when the signature footer is on the page, lower when it isn't
+  const capTop = all.some(it=>/hereby certify/i.test(it.str)) ? 515 : 565;
+  // the main rabbit's card has no label any more: its first line of text (below the page header) marks where it starts
+  if(!anchors.some(a=>a.role==='SELF')){
+    const firstSelf = all.filter(it=>it.x<200 && it.top>100 && it.top<capTop).sort((a,b)=>a.top-b.top||a.x-b.x)[0];
+    if(firstSelf) anchors.push({role:'SELF', x:firstSelf.x, top:firstSelf.top-8});
+  }
+  const colOf = r => r==='SELF'?0 : (r==='SIRE'||r==='DAM')?1 : /^[PM]G[SD]$/.test(r)?2 : 3;
+  const colX = x => x<200?0 : x<400?1 : x<590?2 : 3;
+  const slots = {};
+  anchors.forEach(a=>{
+    const col=colOf(a.role);
+    const below = anchors.filter(b=>colOf(b.role)===col && b.top>a.top+4).map(b=>b.top);
+    // boxes in the grandparent column have a two-word ribbon, so the next ribbon in the column ends this box
+    const limit = Math.min(below.length?Math.min.apply(null,below)-2:capTop, capTop);
+    const boxItems = all.filter(it=>colX(it.x)===col && it.top>a.top+4 && it.top<limit);
+    slots[a.role] = hnParseBox(pdfLinesWithSize(boxItems), a.role);
+    // newer pedigrees print "EAR <number>" in the card's top-right corner, on the same row as the label
+    if(slots[a.role] && !slots[a.role].earNumber){
+      const row = all.filter(it=>colX(it.x)===col && Math.abs(it.top-a.top)<3 && it.x>a.x+2).sort((p,q)=>p.x-q.x);
+      const mi = row.findIndex(it=>/^EAR(\s|$)/.test(T(it.str)));
+      if(mi>=0){
+        const first = T(row[mi].str).replace(/^EAR\s*/,'');
+        const ear = [first].concat(row.slice(mi+1).map(it=>T(it.str))).join(' ').trim();
+        if(ear && ear!=='-' ) slots[a.role].earNumber = ear;
+      }
+    }
+  });
+  if(!slots.SELF || !slots.SELF.name) return { ok:false, error:"Couldn't find the main rabbit's details on this HerdNerd pedigree." };
+  // header: sex, birth date, breed
+  const head = all.filter(it=>it.top<110).map(it=>T(it.str));
+  const sexH = head.map(h=>h.match(/^Sex:\s*(Buck|Doe)/i)).find(Boolean);
+  slots.SELF.sex = sexH ? sexH[1].toLowerCase() : (slots.SELF.sex||'doe');
+  const earH = head.map(h=>h.match(/^Ear\s*#:\s*(.+)$/i)).find(Boolean);
+  if(earH && !slots.SELF.earNumber) slots.SELF.earNumber = earH[1].trim();
+  const dobH = head.map(h=>h.match(/^Date of Birth:\s*(.+)$/i)).find(Boolean);
+  if(dobH && !slots.SELF.dob) slots.SELF.dob = csvParseDate(dobH[1]) || pdfParseDob(dobH[1]);
+  const brH = head.map(h=>h.match(/^Breed:\s*(.+)$/i)).find(Boolean);
+  if(brH && !slots.SELF.breed) slots.SELF.breed = canonicalizeBreed(brH[1]);
+  const ORDER = ['SELF','SIRE','DAM','PGS','PGD','MGS','MGD','GGSIRE1','GGDAM1','GGSIRE2','GGDAM2','GGSIRE3','GGDAM3','GGSIRE4','GGDAM4'];
+  const rows=[]; const seen=new Set();
+  for(const role of ORDER){
+    const data=slots[role]; if(!data || !data.name) continue;
+    const key=nameKey(data.name); if(seen.has(key)) continue; seen.add(key);
+    const [sr,dr]=PEDIGREE_PARENT_OF[role]||[];
+    const sd=sr?slots[sr]:null, dd=dr?slots[dr]:null;
+    const sex = role==='SELF' ? data.sex : (PEDIGREE_MALE_ROLES.has(role)||/SIRE|^PGS$|^MGS$/.test(role) ? 'buck' : 'doe');
+    rows.push({ data:{ name:data.name, sex, breed:data.breed||'', color:data.color, earNumber:data.earNumber, dob:data.dob, weight:data.weight,
+      legsWins:data.legsWins, registrationNumber:data.registrationNumber, sireName:sd?sd.name:'', damName:dd?dd.name:'', notes:'', gcNumber:data.gc||'',
+      status: sex==='doe'?'open':'available' }, existing:findByName(data.name), action: findByName(data.name)?'skip':'new' });
+  }
+  return { ok:true, rows };
+}
+function hnParseBox(lines, role){
+  const L = lines.map(l=> typeof l==='string' ? {t:l,h:0} : l);
+  lines = L.map(l=>l.t);
+  if(!lines.length) return null;
+  const d = { name:'', color:'', earNumber:'', registrationNumber:'', weight:'', legsWins:'', dob:null, gc:'', breed:'' };
+  const date = s => csvParseDate(s) || pdfParseDob(s);
+  const wt = s => { const m=String(s||'').match(/[\d.]+/); return m?m[0]:''; };
+  const dash = s => { s=String(s||'').trim(); return (s==='-'||s==='—')?'':s; };
+  // newer pedigrees: the name is set in larger type, then the color, then "Ear # x", "DOB x" ... (smaller lines under show wins are skipped)
+  const nameH = L[0].h;
+  if(nameH>0 && !/^Name:/i.test(lines[0]) && L.some(l=>l.h>0 && l.h < nameH-0.9)){
+    let i=0; const nameParts=[];
+    while(i<L.length && L[i].h >= nameH-0.3){ nameParts.push(L[i].t); i++; }
+    d.name = nameParts.join(' ').replace(/…$/,'').trim();
+    if(/^[\u2014-]+$/.test(d.name)) return null;
+    const rest = L.slice(i);
+    const bodyH = rest.length ? rest[0].h : 0;
+    const raw = {}; let last='color';
+    const fieldRe = /^(Ear\s*#|Weight|DOB|Reg\s*#|GC\s*#|Legs)\s*:?\s*(.*)$/i;
+    rest.forEach(l=>{
+      if(l.h < bodyH-0.25) return;
+      l.t.split(/\s+\u00b7\s+/).forEach(seg=>{
+        const m = seg.match(fieldRe);
+        if(m){ last=m[1].toLowerCase().replace(/[\s#]/g,''); raw[last]=(raw[last]?raw[last]+' ':'')+m[2]; }
+        else raw[last]=(raw[last]?raw[last]+' ':'')+seg;
+      });
+    });
+    d.color=dash(raw.color); d.earNumber=dash(raw.ear); d.weight=wt(dash(raw.weight)); d.dob=raw.dob?date(raw.dob):null;
+    d.registrationNumber=dash(raw.reg); d.gc=dash(raw.gc); d.legsWins=dash(raw.legs);
+    return d;
+  }
+  if(/^Name:/i.test(lines[0])){
+    // parents and the main rabbit: one labelled field per line; a long name or color can wrap onto the next line
+    let last=null;
+    for(const line of lines){
+      const m=line.match(/^(Name|Ear\s*#|Weight|Color|DOB|Reg\s*#|GC\s*#|Legs|Breed):\s*(.*)$/i);
+      if(m){
+        last=m[1].toLowerCase().replace(/\s|#/g,''); const v=m[2];
+        if(last==='name') d.name=v; else if(last==='ear') d.earNumber=dash(v); else if(last==='weight') d.weight=wt(dash(v));
+        else if(last==='color') d.color=dash(v); else if(last==='dob') d.dob=date(v); else if(last==='reg') d.registrationNumber=dash(v);
+        else if(last==='gc') d.gc=dash(v); else if(last==='legs') d.legsWins=dash(v); else if(last==='breed') d.breed=canonicalizeBreed(dash(v));
+      } else if((last==='name'||last==='color') && !/·|SHOW WINS/i.test(line)){
+        if(last==='name') d.name=(d.name+' '+line).trim(); else d.color=(d.color+' '+line).trim();
+      } else if(/SHOW WINS/i.test(line)) last=null;
+    }
+    d.name=d.name.replace(/…$/,'').trim();
+    if(/^[\u2014-]+$/.test(d.name)) return null;
+    return d;
+  }
+  // grandparents and great-grandparents: a name line, then "EAR · weight · color · date · Reg x · GC x · Legs: x"
+  d.name = lines[0].replace(/…$/,'').trim();
+  if(/^[—-]+$/.test(d.name)) return null;
+  const rest = lines.slice(1);
+  const parts = [];
+  rest.forEach(l=>{ const m=l.match(/^Legs:\s*(.*)$/i); if(m && !/·/.test(l)) d.legsWins=dash(m[1].replace(/…$/,'')); else l.split(/\s*·\s*/).forEach(p=>parts.push(p.trim())); });
+  const left=[]; let wi=-1;
+  parts.forEach(p=>{
+    if(!p || p==='…') return;
+    let m;
+    if((m=p.match(/^Legs:\s*(.+)$/i))){ d.legsWins=m[1].replace(/…$/,'').trim(); }
+    else if((m=p.match(/^Reg\s+(.+)$/i))){ if(!/…$/.test(p)) d.registrationNumber=m[1].trim(); }
+    else if((m=p.match(/^GC\s+(.+)$/i))){ if(!/…$/.test(p)) d.gc=m[1].trim(); }
+    else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(p)) d.dob=csvParseDate(p);
+    else if(/^[\d.]+\s*(lbs?|oz|kg|#)\b/i.test(p)){ d.weight=wt(p); wi=left.length; }
+    else if(!/…$/.test(p)) left.push(p);
+  });
+  // what is left is the ear number (before the weight) and the color (after it); with no weight, a short all-capitals word is the ear number
+  if(wi>=0){ if(wi>0) d.earNumber=left[0]; const c=left.slice(wi); if(c.length) d.color=c[0]; }
+  else if(left.length>=2){ d.earNumber=left[0]; d.color=left[1]; }
+  else if(left.length===1){ if(/^[A-Z0-9&\-.]{1,14}$/.test(left[0]) && !/^[A-Za-z]+$/.test(left[0]) ) d.earNumber=left[0]; else if(/^[A-Z0-9]{1,6}$/.test(left[0])) d.earNumber=left[0]; else d.color=left[0]; }
+  return d;
+}
+
 async function parsePedigreePdf(arrayBuffer){
   if(!window.pdfjsLib) return { ok:false, error:"The PDF reader didn't load — refresh the page and try again." };
   const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
@@ -10101,7 +10922,7 @@ async function parsePedigreePdf(arrayBuffer){
   const viewport = page.getViewport({ scale: 1 });
   const textContent = await page.getTextContent();
   const items = textContent.items
-    .map(it => ({ str: it.str, x: it.transform[4], top: viewport.height - it.transform[5] }))
+    .map(it => ({ str: it.str, x: it.transform[4], top: viewport.height - it.transform[5], h: Math.abs(it.transform[3]) || it.height || 0 }))
     .filter(it => it.str.trim());
 
   const fullText = items.map(i=>i.str).join(' ');
@@ -10121,8 +10942,9 @@ async function parsePedigreePdf(arrayBuffer){
     if(Math.abs(viewport.width-612)<15 && Math.abs(viewport.height-792)<15) return parseWhosDueVariant2PedigreePdf(items, viewport);
     return parseWhosDuePedigreePdf(items, viewport);
   }
+  if(/GG\s*SIRE\s*1/.test(fullText) && /SIRE\s*\(FATHER\)/.test(fullText) && /PEDIGREE/i.test(fullText)) return parseHerdNerdPedigreePdf(items, viewport);
   if(!/Rabbit Register/i.test(fullText)){
-    return { ok:false, error:"This doesn't look like a supported pedigree PDF — this importer currently understands Rabbit Register (Evans Software), Everbreed, and Who's Due pedigree exports." };
+    return { ok:false, error:"This doesn't look like a supported pedigree PDF — this importer currently understands Rabbit Register (Evans Software), Everbreed, Who's Due and HerdNerd pedigree exports." };
   }
   if(Math.abs(viewport.width-792)>15 || Math.abs(viewport.height-612)>15){
     return { ok:false, error:"This PDF's page size doesn't match the expected Rabbit Register layout, so the positions couldn't be read reliably." };
@@ -10229,7 +11051,7 @@ function wirePedigreeAiGate(){
 function openImportPedigreePdfSheet(){
   openSheet(`<button class="close-x" onclick="closeSheet()">&times;</button>
     <h2>Import from Pedigree PDF</h2>
-    <div class="card-sub" style="margin-bottom:12px;">Upload one or more 4-generation pedigree PDFs exported from Rabbit Register (Evans Software), Everbreed, or Who's Due — the formats many breeders share when a rabbit changes hands. Select as many at once as you like; the rabbit, its parents, grandparents, and great-grandparents in each one are read automatically and matched up by name — including across the files themselves, so the same ancestor shared by several pedigrees only shows up once — with everything shown to you for review before anything is added.</div>
+    <div class="card-sub" style="margin-bottom:12px;">Upload one or more 4-generation pedigree PDFs exported from Rabbit Register (Evans Software), Everbreed, Who's Due, or HerdNerd — the formats many breeders share when a rabbit changes hands. Select as many at once as you like; the rabbit, its parents, grandparents, and great-grandparents in each one are read automatically and matched up by name — including across the files themselves, so the same ancestor shared by several pedigrees only shows up once — with everything shown to you for review before anything is added.</div>
     <button class="btn btn-primary" style="width:100%;" id="pdfPickBtn">Choose pedigree PDF(s)</button>
     <div class="card-sub" style="margin:14px 0 8px;">Or, for a scanned/photographed pedigree, or a PDF that doesn't read cleanly above — have AI read it visually instead:</div>
     <div id="pedAiGateArea">${pedigreeAiGateHTML()}</div>
@@ -10256,7 +11078,7 @@ function openImportPedigreePdfSheet(){
         allRows = allRows.concat(markSelfRow(result.rows));
       }catch(err){
         console.error(err);
-        fileReports.push({name:file.name, ok:false, error:"Couldn't read this PDF — make sure it's a Rabbit Register, Everbreed, or Who's Due pedigree export."});
+        fileReports.push({name:file.name, ok:false, error:"Couldn't read this PDF — make sure it's a Rabbit Register, Everbreed, Who's Due, or HerdNerd pedigree export."});
       }
     }
     if(!allRows.length){
@@ -10444,6 +11266,13 @@ function mergePedigreeBatchRows(allRows){
 }
 function renderPedigreeBatchPreview(fileReports){
   const area = document.getElementById('csvPreviewArea');
+  // Any rabbit the PDF gave no breed for is assumed to be the main rabbit's breed (editable per rabbit, or all at once)
+  if(!csvImportRows._breedInit){
+    csvImportRows._breedInit = true;
+    const selfRow = csvImportRows.find(r=>r.isSelf && r.data.breed) || csvImportRows.find(r=>r.data.breed);
+    csvImportRows._defaultBreed = selfRow ? selfRow.data.breed : '';
+    csvImportRows.forEach(r=>{ if(!r.data.breed && csvImportRows._defaultBreed){ r.data.breed = csvImportRows._defaultBreed; r.breedAssumed = true; } });
+  }
   const total = csvImportRows.length;
   const matches = csvImportRows.filter(r=>r.existing);
   const newCount = total - matches.length;
@@ -10454,6 +11283,7 @@ function renderPedigreeBatchPreview(fileReports){
       <div class="card-top"><div>
         <div class="card-name" style="font-size:14px;">${esc(d.name)}${row.seenIn>1?` <span style="font-weight:400; opacity:.6; font-size:11px;">(in ${row.seenIn} pedigrees)</span>`:''}</div>
         <div class="card-sub">${detailBits||'<span style="opacity:.6;">No details on this one besides its name</span>'}</div>
+        <div style="display:flex; align-items:center; gap:6px; margin-top:6px;"><span style="font-size:12px; opacity:.7;">Breed${row.breedAssumed?' (assumed)':''}</span><input type="text" data-pedbreed="${i}" value="${esc(d.breed||'')}" placeholder="Breed" style="flex:1; min-width:0; height:34px;"></div>
         ${row.existing?`<div class="card-sub" style="margin-top:2px;">Matches existing rabbit · ${esc(row.existing.status)}</div>`:''}
       </div></div>
       <div class="seg" style="margin-top:8px;" data-pedbatchrow="${i}">
@@ -10472,6 +11302,7 @@ function renderPedigreeBatchPreview(fileReports){
       <button class="btn btn-secondary btn-sm" id="pedBatchSkipAll">Skip all matches</button>
       <button class="btn btn-secondary btn-sm" id="pedBatchUpdateAll">Update all matches</button>
     </div>
+    <div class="field"><label>Breed for every rabbit the PDF left blank (you can change any one below)</label><input type="text" id="pedBatchBreed" value="${esc(csvImportRows._defaultBreed||'')}" placeholder="e.g. Holland Lop"></div>
     <div class="field"><input type="text" id="pedBatchFilter" placeholder="Filter by name…"></div>
     <div id="pedBatchRows" style="max-height:50vh; overflow-y:auto; margin-top:8px;">${csvImportRows.map(rowHTML).join('')}</div>
     <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeSheet()">Cancel</button><button class="btn btn-primary" id="pedBatchImportBtn">Import ${total}</button></div>`;
@@ -10483,6 +11314,13 @@ function renderPedigreeBatchPreview(fileReports){
     });
   });
   document.querySelectorAll('[data-pedherd]').forEach(cb=>cb.onchange=()=>{ csvImportRows[+cb.dataset.pedherd].isSelf = cb.checked; });
+  document.querySelectorAll('[data-pedbreed]').forEach(inp=>inp.onchange=()=>{ const r=csvImportRows[+inp.dataset.pedbreed]; r.data.breed = canonicalizeBreed(inp.value.trim()); r.breedAssumed = false; inp.value = r.data.breed; });
+  document.getElementById('pedBatchBreed').onchange = (e)=>{
+    const nb = canonicalizeBreed(e.target.value.trim());
+    csvImportRows._defaultBreed = nb;
+    csvImportRows.forEach(r=>{ if(r.breedAssumed || !r.data.breed){ r.data.breed = nb; r.breedAssumed = !!nb; } });
+    renderPedigreeBatchPreview(fileReports);
+  };
   document.getElementById('pedBatchSkipAll').onclick = ()=>{ csvImportRows.forEach(r=>{ if(r.existing) r.action='skip'; }); renderPedigreeBatchPreview(fileReports); };
   document.getElementById('pedBatchUpdateAll').onclick = ()=>{ csvImportRows.forEach(r=>{ if(r.existing) r.action='update'; }); renderPedigreeBatchPreview(fileReports); };
   document.getElementById('pedBatchFilter').oninput = (e)=>{
@@ -10731,7 +11569,77 @@ async function finishAgreementFlow(){
   document.getElementById('agreementScreen').classList.add('hidden');
   document.body.classList.remove('auth-locked');
   await loadData();
+  maybeStartTour();
 }
+
+
+// ===== NEW ACCOUNT TOUR START =====
+// Display only: a few made-up "practice" screens. It never reads, creates or changes any rabbit or account data.
+// The only thing stored is a "seen" flag in this browser (localStorage), so it cannot affect or mix accounts.
+function tourSeenKey(){ return 'hn_tour_seen_'+((currentUser&&currentUser.id)||'anon'); }
+function tourWasSeen(){ try{ return localStorage.getItem(tourSeenKey())==='1'; }catch(e){ return true; } }
+function tourMarkSeen(){ try{ localStorage.setItem(tourSeenKey(),'1'); }catch(e){} }
+function closeTour(){ const o=document.getElementById('tourOv'); if(o) o.remove(); document.removeEventListener('keydown',tourKey); tourMarkSeen(); try{ render(); }catch(e){} }
+function tourKey(e){ if(e.key==='Escape') closeTour(); }
+function maybeStartTour(){
+  try{
+    if(!currentUser || viewingAsCustomer || localSandboxMode) return;
+    if(!Array.isArray(rabbits) || rabbits.length>0) return;
+    if(tourWasSeen()) return;
+    startTour(false);
+  }catch(e){ console.error(e); }
+}
+function startTour(replay){
+  if(document.getElementById('tourOv')) return;
+  const dots=n=>`<div class="tr-dots">${[1,2,3,4].map(i=>`<span class="${i===n?'on':''}"></span>`).join('')}</div>`;
+  const card=(n,title,text,last)=>`<div class="tr-card">${dots(n)}<h3>${title}</h3><p>${text}</p><div class="tr-acts"><button type="button" class="tr-skip" data-tr="skip">Skip tour</button><button type="button" class="tr-next" data-tr="next">${last?'Finish':'Next'}</button></div></div>`;
+  const steps=[
+    `<div class="tr-frame tr-welcome" role="dialog" aria-modal="true" aria-label="Welcome tour">
+      <div class="tr-big">HerdNerd <em>Pro</em></div>
+      <h2>Welcome. Let's try it with one rabbit.</h2>
+      <p>It takes about a minute. We'll use a practice rabbit, so nothing is saved to your account.</p>
+      <div class="tr-btns"><button type="button" class="tr-next" data-tr="next">Let's go</button><button type="button" class="tr-skip" data-tr="skip">Skip, I'll explore</button></div>
+    </div>`,
+    `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: add a rabbit">
+      <div class="tr-hdr"><b>HerdNerd Pro</b></div>
+      <div class="tr-row"><div class="tr-search">Name, ear #, color, breed</div><div class="tr-plus tr-spot" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div></div>
+      <div class="tr-row" style="padding-top:0"><div class="tr-pill on">Does</div><div class="tr-pill">Bucks</div><div class="tr-pill">Juniors</div></div>
+      <div class="tr-banner">PRACTICE &middot; nothing here is saved to your account</div>
+      ${card(2,'Tap + to add a rabbit','Just a name and sex to start. You can fill in the rest anytime.')}
+    </div>`,
+    `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: pedigree">
+      <div class="tr-hdr"><b>Practice Doe</b><small>Doe &middot; Holland Lop &middot; OPEN</small></div>
+      <div class="tr-row"><div class="tr-pill">Overview</div><div class="tr-pill">Breeding</div><div class="tr-pill on">Pedigree</div></div>
+      <div class="tr-banner" style="margin-bottom:12px">PRACTICE &middot; nothing here is saved</div>
+      <div class="tr-slot tr-spot"><i>SIRE</i><span>+ Add name</span></div>
+      <div class="tr-slot"><i>DAM</i><span>+ Add name</span></div>
+      ${card(3,'Add a parent',"Tap the sire or dam and type a name. That's all you need for now. You can build the rest of the pedigree later.")}
+    </div>`,
+    `<div class="tr-frame" role="dialog" aria-modal="true" aria-label="Tour: kindled">
+      <div class="tr-hdr"><b>Practice Doe</b><small>Doe &middot; Holland Lop &middot; BRED</small></div>
+      <div class="tr-banner" style="margin-top:12px">PRACTICE &middot; nothing here is saved</div>
+      <div class="tr-sheet"><h4>Practice Doe kindled</h4><div class="tr-lbl">BABIES BORN ALIVE</div>
+        <div class="tr-step"><b>&minus;</b><span>6</span><b class="p">+</b></div>
+        <div style="font-size:13px;color:#4a3b4d;text-align:center;margin-top:10px">Sex and color can be filled in later.</div>
+        <div class="tr-save">Save</div></div>
+      ${card(4,'When the kits arrive','Tap Kindled, set how many are alive, and save. HerdNerd works out weaning and rebreed dates for you.',true)}
+    </div>`
+  ];
+  let i=0;
+  const ov=document.createElement('div'); ov.id='tourOv';
+  const draw=()=>{
+    ov.innerHTML=steps[i];
+    ov.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{
+      if(b.dataset.tr==='skip'){ closeTour(); return; }
+      if(i>=steps.length-1){ closeTour(); return; }
+      i++; draw();
+    });
+    const first=ov.querySelector('.tr-next'); if(first) first.focus();
+  };
+  document.body.appendChild(ov); draw();
+  document.addEventListener('keydown',tourKey);
+}
+// ===== NEW ACCOUNT TOUR END =====
 
 let enterAppForUserId = null;
 async function enterApp(user){
@@ -10745,11 +11653,11 @@ async function enterApp(user){
       await sb.auth.signOut();
       currentUser=null; cloudDataReady=false; cloudDataCache={}; myProfile=null; isAdminUser=false; adminSelf=null;
       enterAppForUserId = null;
-      authScreen.classList.remove('hidden');
+      authScreen.classList.remove('hidden'); document.body.classList.remove('restoring');
       setAuthMessage("Your account doesn't have access yet. Contact CJM Legacy Rabbitry to get set up.");
       return;
     }
-    authScreen.classList.add('hidden');
+    authScreen.classList.add('hidden'); document.body.classList.remove('restoring');
     if(!isAdminUser){
       const status = await checkAgreementStatus();
       if(!status || !status.nda_signed_at){ agreementStep='nda'; showAgreementScreen(); return; }
@@ -10757,9 +11665,10 @@ async function enterApp(user){
     }
     document.body.classList.remove('auth-locked');
     await loadData();
+    maybeStartTour();
   }catch(err){
     console.error(err);
-    authScreen.classList.remove('hidden');
+    authScreen.classList.remove('hidden'); document.body.classList.remove('restoring');
     document.body.classList.add('auth-locked');
     setAuthMessage('Could not connect to HerdNerd Pro data. '+(err.message||''));
     enterAppForUserId = null;
@@ -10775,7 +11684,7 @@ sb.auth.onAuthStateChange((event,session)=>{
     clearAccountMemory(); try{ closeSheet(); document.getElementById('profileView').classList.remove('on'); render(); }catch(e){}
     applyPalette(null);
     enterAppForUserId = null;
-    authScreen.classList.remove('hidden');
+    authScreen.classList.remove('hidden'); document.body.classList.remove('restoring');
     document.body.classList.add('auth-locked');
     setAuthMode('login');
     authPassword.value=''; authConfirm.value='';
